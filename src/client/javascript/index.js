@@ -46,6 +46,18 @@ var VideoGrid = React.createClass({
   }
 });
 
+var req = new XMLHttpRequest();
+
+req.onreadystatechange = function () {
+  if (req.readyState == 4) {
+    console.log(req.response);
+  }
+}
+
+req.open('GET', 'http://localhost:9000/plus');
+// req.responseType = 'json';
+req.send();
+
 ReactDOM.render(
   <VideoGrid />,
   document.getElementById('main')
