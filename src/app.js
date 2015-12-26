@@ -4,11 +4,20 @@ const BrowserWindow = require('browser-window');
 const YoutubeApi = require('./youtubeapi');
 const Hapi = require('hapi');
 
-// Launch an Hapi Web Server
+// Create the Hapi Web Server
 const server = new Hapi.Server();
 server.connection({
   host: 'localhost',
   port: 9000
+});
+
+// Start the server
+server.start((err) => {
+  if (err) {
+    throw err;
+  }
+
+  console.log('Server running at:', server.info.uri);
 });
 
 const AUTH_WINDOW = 'auth';
@@ -70,26 +79,11 @@ app.on('ready', () => {
   windows[MAIN_WINDOW] = createMainWindow();
 
   io.on('connection', function (socket) {
-    console.log('connection');
-    socket.emit('Oh hii!');
-
     socket.on('youtube/auth', function () {
+      socket.emit('youtube/waiting');
       YoutubeApi.getAuthUrl((url) => {
+        socket.emit('youtube/waitingforuser')
         windows[AUTH_WINDOW] = createLogInWindow(url);
-        socket.emit('youtube/asked');
-      });
-    });
-
-    socket.on('youtube/subscriptions', function () {
-      YoutubeApi.getSubscriptions((err, response) => {
-        if (err) {
-          return socket.emit('youtube/subscriptions', { error: true });
-        }
-
-        console.log(response);
-        console.log(response.items[0].snippet);
-        
-        socket.emit('youtube/subscriptions', { data: response });
       });
     });
   });
@@ -98,20 +92,12 @@ app.on('ready', () => {
     method: 'GET',
     path:'/youtube/callback',
     handler: function (request, reply) {
-      YoutubeApi.getToken(request.query.code, function () {
-        io.emit('youtube/callback');
+      io.emit('youtube/waiting');
+      YoutubeApi.getToken(request.query.code, function (token) {
+        io.emit('youtube/callback', token);
 
         windows[AUTH_WINDOW].close();
       });
     }
-  });
-
-  // Start the server
-  server.start((err) => {
-    if (err) {
-      throw err;
-    }
-
-    console.log('Server running at:', server.info.uri);
   });
 });
