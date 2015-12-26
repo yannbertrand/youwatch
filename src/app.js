@@ -6,11 +6,15 @@ const Hapi = require('hapi');
 
 // Launch an Hapi Web Server
 const server = new Hapi.Server();
-
-server.connection({ 
-  host: 'localhost', 
-  port: 9000 
+server.connection({
+  host: 'localhost',
+  port: 9000
 });
+
+const AUTH_WINDOW = 'auth';
+const MAIN_WINDOW = 'main';
+
+const io = require('socket.io')(server.listener);
 
 // report crashes to the Electron project
 require('crash-reporter').start();
@@ -19,12 +23,11 @@ require('crash-reporter').start();
 require('electron-debug')();
 
 // prevent window being garbage collected
-let mainWindow;
+let windows = {};
 
-function onClosed() {
+function onClosed(windowName) {
   // dereference the window
-  // for multiple windows store them in an array
-  mainWindow = null;
+  windows[windowName] = null;
 }
 
 function createMainWindow() {
@@ -34,7 +37,7 @@ function createMainWindow() {
   });
 
   win.loadUrl('file://' + __dirname + '/client/index.html');
-  win.on('closed', onClosed);
+  win.on('closed', onClosed.bind(MAIN_WINDOW));
 
   return win;
 }
@@ -43,10 +46,10 @@ function createLogInWindow(url) {
   const win = new BrowserWindow({
     width: 500,
     height: 600
-  })
+  });
 
   win.loadUrl(url);
-  win.on('closed', onClosed);
+  win.on('closed', onClosed.bind('auth'));
 
   return win;
 }
@@ -58,40 +61,47 @@ app.on('window-all-closed', () => {
 });
 
 app.on('activate-with-no-open-windows', () => {
-  if (!mainWindow) {
-    mainWindow = createMainWindow();
+  if (!windows[MAIN_WINDOW]) {
+    windows[MAIN_WINDOW] = createMainWindow();
   }
 });
 
 app.on('ready', () => {
-  YoutubeApi.getAuthUrl((url) => {
-    mainWindow = createLogInWindow(url);
-  });
+  windows[MAIN_WINDOW] = createMainWindow();
 
-  server.route({
-    method: 'GET',
-    path:'/hello',
-    handler: function (request, reply) {
-      reply('Redirecting you to the app!');
+  io.on('connection', function (socket) {
+    console.log('connection');
+    socket.emit('Oh hii!');
 
-      mainWindow.close();
-
-      YoutubeApi.getToken(request.query.code, function () {
-        mainWindow = createMainWindow();
+    socket.on('youtube/auth', function () {
+      YoutubeApi.getAuthUrl((url) => {
+        windows[AUTH_WINDOW] = createLogInWindow(url);
+        socket.emit('youtube/asked');
       });
-    }
+    });
+
+    socket.on('youtube/subscriptions', function () {
+      YoutubeApi.getSubscriptions((err, response) => {
+        if (err) {
+          return socket.emit('youtube/subscriptions', { error: true });
+        }
+
+        console.log(response);
+        console.log(response.items[0].snippet);
+        
+        socket.emit('youtube/subscriptions', { data: response });
+      });
+    });
   });
 
   server.route({
     method: 'GET',
-    path: '/plus',
+    path:'/youtube/callback',
     handler: function (request, reply) {
-      YoutubeApi.getPlusPeople(function(err, profile) {
-        if (err) {
-          console.log('An error occured', err);
-          return;
-        }
-        reply(profile.displayName, ':', profile.tagline)
+      YoutubeApi.getToken(request.query.code, function () {
+        io.emit('youtube/callback');
+
+        windows[AUTH_WINDOW].close();
       });
     }
   });
