@@ -79,12 +79,21 @@ app.on('ready', () => {
   windows[MAIN_WINDOW] = createMainWindow();
 
   io.on('connection', function (socket) {
-    socket.on('youtube/auth', function () {
-      socket.emit('youtube/waiting');
-      YoutubeApi.getAuthUrl((url) => {
-        socket.emit('youtube/waitingforuser')
-        windows[AUTH_WINDOW] = createLogInWindow(url);
-      });
+    YoutubeApi.tryStoredAccessToken(function (noValidAccessToken, token) {
+      if (noValidAccessToken) {
+        socket.emit('youtube/notauthenticated');
+
+        socket.on('youtube/auth', function () {
+          socket.emit('youtube/waiting');
+
+          YoutubeApi.getAuthUrl((url) => {
+            socket.emit('youtube/waitingforuser')
+            windows[AUTH_WINDOW] = createLogInWindow(url);
+          });
+        });
+      } else {
+        io.emit('youtube/callback', token);
+      }
     });
   });
 

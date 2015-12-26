@@ -1,10 +1,32 @@
-var credentials = require('./credentials');
+const credentials = require('./credentials');
+const Configstore = require('configstore');
 
-var google = require('googleapis');
-var OAuth2Client = google.auth.OAuth2;
+const google = require('googleapis');
+const OAuth2Client = google.auth.OAuth2;
 
 const REDIRECT_URL = 'http://localhost:9000/youtube/callback';
 const oauth2Client = new OAuth2Client(credentials.CLIENT_ID, credentials.CLIENT_SECRET, REDIRECT_URL);
+
+const conf = new Configstore('Youtube');
+
+// Check if the stored access token (if existing) is still working
+module.exports.tryStoredAccessToken = function (cb) {
+  if(!conf.get('token')) {
+    return cb(true);
+  }
+
+  oauth2Client.setCredentials(conf.get('token'));
+
+  google.youtube('v3').subscriptions.list({
+    part: 'id',
+    mine: true,
+    auth: oauth2Client
+  }, function (err, response) {
+    if (err) return cb(true);
+
+    return cb(false, conf.get('token'));
+  });
+};
 
 // retrieve the auth page url
 module.exports.getAuthUrl = function (cb) {
@@ -21,6 +43,7 @@ module.exports.getAuthUrl = function (cb) {
 module.exports.getToken = function (code, cb) {
   // request access token
   oauth2Client.getToken(code, function(err, token) {
+    conf.set('token', token);
     cb(token);
   });
 };
