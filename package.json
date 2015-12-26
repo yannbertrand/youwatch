@@ -29,6 +29,7 @@
     "electron-app"
   ],
   "dependencies": {
+    "configstore": "^1.4.0",
     "electron-debug": "^0.2.1",
     "googleapis": "^2.1.7",
     "hapi": "^11.1.3",

@@ -1,7 +1,5 @@
 var socket = io('http://localhost:9000');
 
-var btn = document.getElementById('open-auth-window');
-var status = document.getElementById('status');
 
 var getASubscriptionsPage = function (pageToken, cb) {
   var params = {
@@ -46,17 +44,24 @@ var constructSubscriptionsList = function (elem) {
 var openAuthWindow = function (_btn) {
   _btn.toElement.disabled = true;
 
-  status.innerHTML = 'Loading...';
+  document.getElementById('status').innerHTML = 'Loading...';
 
   socket.emit('youtube/auth');
 }
 
+socket.on('youtube/notauthenticated', function () {
+  main.innerHTML = '<button id="open-auth-window" class="btn btn-primary btn-lg">Connect</button><br>';
+  main.innerHTML += '<span id="status"></span>';
+
+  document.getElementById('open-auth-window').onclick = openAuthWindow;
+});
+
 socket.on('youtube/asked', function () {
-  status.innerHTML = 'Waiting for YouTube response...';
+  document.getElementById('status').innerHTML = 'Waiting for YouTube response...';
 });
 
 socket.on('youtube/waitingforuser', function () {
-  status.innerHTML = 'Please fill in the required informations in the other window';
+  document.getElementById('status').innerHTML = 'Please fill in the required informations in the other window';
 });
 
 socket.on('youtube/callback', function (token) {
@@ -71,4 +76,4 @@ socket.on('youtube/callback', function (token) {
   });
 });
 
-btn.onclick = openAuthWindow;
+
