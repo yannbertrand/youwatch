@@ -3,26 +3,27 @@ var credentials = require('./credentials');
 
 var google = require('googleapis');
 var OAuth2Client = google.auth.OAuth2;
-var plus = google.plus('v1');
+var Youtube = google.youtube('v3');
 
-var oauth2Client = new OAuth2Client(credentials.CLIENT_ID, credentials.CLIENT_SECRET, credentials.REDIRECT_URL);
+const REDIRECT_URL = 'http://localhost:9000/youtube/callback';
+const oauth2Client = new OAuth2Client(credentials.CLIENT_ID, credentials.CLIENT_SECRET, REDIRECT_URL);
 
 var rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout
 });
 
-function getAuthUrl(oauth2Client, cb) {
+function getAuthUrl(cb) {
   // generate consent page url
   var url = oauth2Client.generateAuthUrl({
     access_type: 'offline', // will return a refresh token
-    scope: 'https://www.googleapis.com/auth/plus.me' // can be a space-delimited string or an array of scopes
+    scope: 'https://www.googleapis.com/auth/youtube.readonly' // can be a space-delimited string or an array of scopes
   });
 
   return cb(url);
 }
 
-function getToken(oauth2Client, code, cb) {
+function getToken(code, cb) {
   // request access token
   oauth2Client.getToken(code, function(err, tokens) {
     // set tokens to the client
@@ -33,13 +34,17 @@ function getToken(oauth2Client, code, cb) {
 
 // retrieve an access token
 module.exports.getAuthUrl = function (cb) {
-  getAuthUrl(oauth2Client, cb);
+  getAuthUrl(cb);
 };
 
 module.exports.getToken = function (code, cb) {
-  getToken(oauth2Client, code, cb);
+  getToken(code, cb);
 };
 
-module.exports.getPlusPeople = function (cb) {
-  plus.people.get({ userId: 'me', auth: oauth2Client }, cb);
+module.exports.getSubscriptions = function (cb) {
+  Youtube.subscriptions.list({
+    part: 'id',
+    home: true,
+    auth: oauth2Client
+  }, cb);
 };
