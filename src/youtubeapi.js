@@ -7,7 +7,7 @@ const OAuth2Client = google.auth.OAuth2;
 const REDIRECT_URL = 'http://localhost:9000/youtube/callback';
 const oauth2Client = new OAuth2Client(credentials.CLIENT_ID, credentials.CLIENT_SECRET, REDIRECT_URL);
 
-const conf = new Configstore('Youtube');
+const conf = new Configstore('YouWatch');
 
 // Check if the stored access token (if existing) is still working
 module.exports.tryStoredAccessToken = function (cb) {
