@@ -82,18 +82,18 @@ app.on('ready', () => {
     YoutubeApi.tryStoredAccessToken(function (noValidAccessToken, token) {
       if (noValidAccessToken) {
         socket.emit('youtube/notauthenticated');
-
-        socket.on('youtube/auth', function () {
-          socket.emit('youtube/waiting');
-
-          YoutubeApi.getAuthUrl((url) => {
-            socket.emit('youtube/waitingforuser')
-            windows[AUTH_WINDOW] = createLogInWindow(url);
-          });
-        });
       } else {
-        io.emit('youtube/callback', token);
+        socket.emit('youtube/callback', token);
       }
+    });
+
+    socket.on('youtube/auth', function () {
+      socket.emit('youtube/waiting');
+
+      YoutubeApi.getAuthUrl((url) => {
+        socket.emit('youtube/waitingforuser')
+        windows[AUTH_WINDOW] = createLogInWindow(url);
+      });
     });
   });
 

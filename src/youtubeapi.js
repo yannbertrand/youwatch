@@ -11,11 +11,11 @@ const conf = new Configstore('Youtube');
 
 // Check if the stored access token (if existing) is still working
 module.exports.tryStoredAccessToken = function (cb) {
-  if(!conf.get('token')) {
+  if(!conf.get('tokens')) {
     return cb(true);
   }
 
-  oauth2Client.setCredentials(conf.get('token'));
+  oauth2Client.setCredentials(conf.get('tokens'));
 
   google.youtube('v3').subscriptions.list({
     part: 'id',
@@ -24,7 +24,14 @@ module.exports.tryStoredAccessToken = function (cb) {
   }, function (err, response) {
     if (err) return cb(true);
 
-    return cb(false, conf.get('token'));
+    // Refresh the access token
+    oauth2Client.refreshAccessToken(function (err, newTokens) {
+      if (err) return cb(true);
+
+      conf.set('tokens', newTokens);
+
+      return cb(false, newTokens);
+    });
   });
 };
 
@@ -33,6 +40,7 @@ module.exports.getAuthUrl = function (cb) {
   // generate consent page url
   var url = oauth2Client.generateAuthUrl({
     access_type: 'offline', // will return a refresh token
+    // approval_prompt : 'force',
     scope: 'https://www.googleapis.com/auth/youtube.readonly' // can be a space-delimited string or an array of scopes
   });
 
@@ -42,8 +50,10 @@ module.exports.getAuthUrl = function (cb) {
 // retrieve an access token
 module.exports.getToken = function (code, cb) {
   // request access token
-  oauth2Client.getToken(code, function(err, token) {
-    conf.set('token', token);
-    cb(token);
+  oauth2Client.getToken(code, function(err, tokens) {
+    if (!err) {
+      conf.set('tokens', tokens);
+      cb(tokens);
+    }
   });
 };
