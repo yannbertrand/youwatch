@@ -3,6 +3,5 @@
 
 module.exports = {
   CLIENT_ID: 'YOUR CLIENT ID HERE',
-  CLIENT_SECRET: 'YOUR CLIENT SECRET HERE',
-  REDIRECT_URL: 'http://localhost:9000/hello'
+  CLIENT_SECRET: 'YOUR CLIENT SECRET HERE'
 };
