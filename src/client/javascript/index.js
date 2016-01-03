@@ -50,10 +50,18 @@ var addSubscriptionToList = function (elem, subscription, uploads) {
     var ul = document.createElement('ul');
     var li2;
     var videoTitle;
+    var img;
     uploads.items.forEach((upload) => {
       li2 = document.createElement('li');
       videoTitle = document.createTextNode(upload.snippet.title);
       li2.appendChild(videoTitle);
+      if (upload.snippet.thumbnails.high) {
+        img = document.createElement('img');
+        img.src = upload.snippet.thumbnails.high.url;
+        li2.appendChild(img);
+      } else {
+        console.log(upload.snippet.thumbnails);
+      }
       ul.appendChild(li2);
     });
     li.appendChild(ul);
