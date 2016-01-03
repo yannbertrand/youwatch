@@ -17,14 +17,62 @@ var getASubscriptionsPage = function (pageToken, cb) {
     .execute(cb);
 };
 
-var addSubscriptionsToList = function (elem, subscriptions) {
-  subscriptions.items.forEach(function (subscription) {
-    elem.innerHTML = elem.innerHTML + '<li>' + subscription.snippet.title + '</li>';
-  });
+var getChannelDetails = (channelId, cb) => {
+  var params = {
+    part: 'id, contentDetails',
+    id: channelId
+  };
+
+  gapi.client.youtube
+    .channels.list(params)
+    .execute(cb);
+};
+
+var getLastUploadedVideos = function (playlistId, cb) {
+  var params = {
+    part: 'id, snippet',
+    playlistId: playlistId
+  };
+
+  gapi.client.youtube
+    .playlistItems.list(params)
+    .execute(cb);
+};
+
+var addSubscriptionToList = function (elem, subscription, uploads) {
+  var li = document.createElement('li');
+  var strong = document.createElement('strong');
+  var channelTitle = document.createTextNode(subscription.snippet.title);
+
+  strong.appendChild(channelTitle);
+  li.appendChild(strong);
+  if (uploads.items.length) {
+    var ul = document.createElement('ul');
+    var li2;
+    var videoTitle;
+    uploads.items.forEach((upload) => {
+      li2 = document.createElement('li');
+      videoTitle = document.createTextNode(upload.snippet.title);
+      li2.appendChild(videoTitle);
+      ul.appendChild(li2);
+    });
+    li.appendChild(ul);
+  }
+  elem.appendChild(li);
 };
 
 var constructPageSubscriptionsList = function (elem, page) {
-  addSubscriptionsToList(elem, page);
+  page.items.forEach(function (subscription) {
+    ((subscription) => {
+      getChannelDetails(subscription.snippet.resourceId.channelId, (channel) => {
+        if (channel.pageInfo.totalResults > 0) {
+          getLastUploadedVideos(channel.items[0].contentDetails.relatedPlaylists.uploads, (uploads) => {
+            addSubscriptionToList(elem, subscription, uploads);
+          });
+        }
+      });
+    })(subscription);
+  });
 
   if (page.nextPageToken) {
     getASubscriptionsPage(page.nextPageToken, function (nextPage) {
@@ -34,11 +82,11 @@ var constructPageSubscriptionsList = function (elem, page) {
 };
 
 var constructSubscriptionsList = function (elem) {
-  elem.innerHTML += '<ul>';
+  var ul = document.createElement('ul');
   getASubscriptionsPage(null, function (nextPage) {
-    constructPageSubscriptionsList(elem, nextPage);
+    constructPageSubscriptionsList(ul, nextPage);
   });
-  elem.innerHTML += '</ul>';
+  elem.appendChild(ul);
 };
 
 var openAuthWindow = function (_btn) {
