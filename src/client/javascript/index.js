@@ -1,135 +1,88 @@
 var socket = io('http://localhost:9000');
 
-
-var getASubscriptionsPage = function (pageToken, cb) {
-  var params = {
-    part: 'id, snippet',
-    mine: true,
-    maxResults: 50,
-    order: 'alphabetical'
-  };
-
-  if (pageToken)
-    params.pageToken = pageToken;
-
-  gapi.client.youtube
-    .subscriptions.list(params)
-    .execute(cb);
-};
-
-var getChannelDetails = (channelId, cb) => {
-  var params = {
-    part: 'id, contentDetails',
-    id: channelId
-  };
-
-  gapi.client.youtube
-    .channels.list(params)
-    .execute(cb);
-};
-
-var getLastUploadedVideos = function (playlistId, cb) {
-  var params = {
-    part: 'id, snippet',
-    playlistId: playlistId
-  };
-
-  gapi.client.youtube
-    .playlistItems.list(params)
-    .execute(cb);
-};
-
-var addSubscriptionToList = function (elem, subscription, uploads) {
-  var li = document.createElement('li');
-  var strong = document.createElement('strong');
-  var channelTitle = document.createTextNode(subscription.snippet.title);
-
-  strong.appendChild(channelTitle);
-  li.appendChild(strong);
-  if (uploads.items.length) {
-    var ul = document.createElement('ul');
-    var li2;
-    var videoTitle;
-    var img;
-    uploads.items.forEach((upload) => {
-      li2 = document.createElement('li');
-      videoTitle = document.createTextNode(upload.snippet.title);
-      li2.appendChild(videoTitle);
-      if (upload.snippet.thumbnails.high) {
-        img = document.createElement('img');
-        img.src = upload.snippet.thumbnails.high.url;
-        li2.appendChild(img);
-      } else {
-        console.log(upload.snippet.thumbnails);
-      }
-      ul.appendChild(li2);
-    });
-    li.appendChild(ul);
+var Video = React.createClass({
+  render: function () {
+    return (
+      <article className="video col-md-3 col-sm-6 col-xs-12">
+        <img className="thumbnail" src={this.props.thumbnail} />
+        <header>{this.props.title} <small>{this.props.channel}</small></header>
+      </article>
+    );
   }
-  elem.appendChild(li);
-};
+});
 
-var constructPageSubscriptionsList = function (elem, page) {
-  page.items.forEach(function (subscription) {
-    ((subscription) => {
-      getChannelDetails(subscription.snippet.resourceId.channelId, (channel) => {
-        if (channel.pageInfo.totalResults > 0) {
-          getLastUploadedVideos(channel.items[0].contentDetails.relatedPlaylists.uploads, (uploads) => {
-            addSubscriptionToList(elem, subscription, uploads);
-          });
-        }
+var VideoGrid = React.createClass({
+  render: function () {
+    var videoNodes = this.props.videos.map((video) => {
+      return (
+        <Video
+          key={video.key}
+          thumbnail={video.thumbnail}
+          title={video.title}
+          channel={video.channel} />
+      )
+    });
+
+    return (
+      <section id="videos-grid" className="row">
+        {videoNodes}
+      </section>
+    );
+  }
+});
+
+var SubscriptionPage = React.createClass({
+  loadSubscriptions: function () {
+    // ToDo
+  },
+  getInitialState: function () { return { videos: [] }; },
+  componentDidMount: function () {
+    this.loadSubscriptions();
+
+    setTimeout(() => {
+      this.setState({
+        videos: [{
+          key: 'xfDX5AkMoyM',
+          title: 'Practical Skills: The Smart Automatic Mining System [Vanilla Survival]',
+          channel: 'Mumbo Jumbo',
+          thumbnail: 'https://i.ytimg.com/vi_webp/xfDX5AkMoyM/mqdefault.webp'
+        }, {
+          key: 'V8tiGnCrc4g',
+          title: '30 Protein Pancakes in 2 Minutes',
+          channel: 'Furious Pete',
+          thumbnail: 'https://i.ytimg.com/vi_webp/V8tiGnCrc4g/mqdefault.webp'
+        }]
       });
-    })(subscription);
-  });
-
-  if (page.nextPageToken) {
-    getASubscriptionsPage(page.nextPageToken, function (nextPage) {
-      constructPageSubscriptionsList(elem, nextPage);
-    });
+    }, 1000);
+  },
+  render: function () {
+    if (this.state.videos.length) {
+      return (
+        <div>
+          <h3>Your subscriptions</h3>
+          <VideoGrid videos={this.state.videos} />
+        </div>
+      );
+    }
+    
+    return (
+      <div>
+        <h1>You are connected</h1>
+        <h3>Let us load your data...</h3>
+      </div>
+    );
   }
-};
-
-var constructSubscriptionsList = function (elem) {
-  var ul = document.createElement('ul');
-  getASubscriptionsPage(null, function (nextPage) {
-    constructPageSubscriptionsList(ul, nextPage);
-  });
-  elem.appendChild(ul);
-};
-
-var openAuthWindow = function (_btn) {
-  _btn.toElement.disabled = true;
-
-  document.getElementById('status').innerHTML = 'Loading...';
-
-  socket.emit('youtube/auth');
-}
-
-socket.on('youtube/notauthenticated', function () {
-  main.innerHTML = '<button id="open-auth-window" class="btn btn-primary btn-lg">Connect</button><br>';
-  main.innerHTML += '<span id="status"></span>';
-
-  document.getElementById('open-auth-window').onclick = openAuthWindow;
 });
 
-socket.on('youtube/asked', function () {
-  document.getElementById('status').innerHTML = 'Waiting for YouTube response...';
-});
-
-socket.on('youtube/waitingforuser', function () {
-  document.getElementById('status').innerHTML = 'Please fill in the required informations in the other window';
-});
 
 socket.on('youtube/callback', function (token) {
-  var main = document.getElementById('main');
-  main.innerHTML = '<h1>Connected to the YouTube API :-)</h1>';
-  main.innerHTML += 'Your subscriptions:<br />';
+  ReactDOM.render(
+    <SubscriptionPage />,
+    document.getElementById('main')
+  );
 
   gapi.auth.setToken(token);
-  gapi.client.load('youtube', 'v3', function () {
-    // Retrieve user's subscriptions
-    constructSubscriptionsList(main);
-  });
+  gapi.client.load('youtube', 'v3');
 });
 
 
