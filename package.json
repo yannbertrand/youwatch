@@ -1,10 +1,10 @@
 {
-  "name": "youtube",
-  "productName": "Youtube",
+  "name": "youwatch",
+  "productName": "YouWatch",
   "version": "0.0.0",
   "description": "My fantabulous app",
   "license": "MIT",
-  "repository": "YannBertrand/youtube",
+  "repository": "YannBertrand/YouWatch",
   "main": "src/app.js",
   "author": {
     "name": "Yann Bertrand",
