@@ -78,8 +78,8 @@ app.on('activate-with-no-open-windows', () => {
 app.on('ready', () => {
   windows[MAIN_WINDOW] = createMainWindow();
 
-  io.on('connection', function (socket) {
-    YoutubeApi.tryStoredAccessToken(function (noValidAccessToken, token) {
+  io.on('connection', (socket) => {
+    YoutubeApi.tryStoredAccessToken((noValidAccessToken, token) => {
       if (noValidAccessToken) {
         socket.emit('youtube/notauthenticated');
       } else {
@@ -87,12 +87,22 @@ app.on('ready', () => {
       }
     });
 
-    socket.on('youtube/auth', function () {
+    socket.on('youtube/auth', () => {
       socket.emit('youtube/waiting');
 
       YoutubeApi.getAuthUrl((url) => {
         socket.emit('youtube/waitingforuser')
         windows[AUTH_WINDOW] = createLogInWindow(url);
+      });
+    });
+
+    socket.on('subscriptions/list', () => {
+      YoutubeApi.getSubscriptions((err, subscriptions) => {
+        if (err) {
+          console.log(err);
+        } else {
+          socket.emit('subscriptions/list', subscriptions);
+        }
       });
     });
   });

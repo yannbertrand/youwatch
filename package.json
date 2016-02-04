@@ -29,6 +29,7 @@
     "electron-app"
   ],
   "dependencies": {
+    "async": "^1.5.2",
     "configstore": "^1.4.0",
     "electron-debug": "^0.2.1",
     "googleapis": "^2.1.7",

@@ -1,6 +1,7 @@
 const credentials = require('./credentials');
 const Configstore = require('configstore');
 
+const async = require('async');
 const google = require('googleapis');
 const OAuth2Client = google.auth.OAuth2;
 
@@ -55,5 +56,78 @@ module.exports.getToken = function (code, cb) {
       conf.set('tokens', tokens);
       cb(tokens);
     }
+  });
+};
+
+module.exports.getSubscriptions = function (cb) {
+  async.auto({
+
+    getASubscriptionsPage: function (next) {
+      google.youtube('v3').subscriptions.list({
+        part: 'id, snippet',
+        mine: true,
+        maxResults: 50,
+        order: 'alphabetical',
+        auth: oauth2Client
+      }, function (err, subscriptionsPage) {
+        if (err) return next(err);
+        next(null, subscriptionsPage.items);
+      });
+    },
+
+    getChannelDetails: ['getASubscriptionsPage', function (next, results) {
+      var channelsDetails = [];
+
+      async.each(results['getASubscriptionsPage'], function (subscription, nextSubscription) {
+        google.youtube('v3').channels.list({
+          part: 'id, contentDetails',
+          id: subscription.snippet.resourceId.channelId,
+          auth: oauth2Client
+        }, function (err, channelDetails) {
+          if (err) return nextSubscription(err);
+
+          channelsDetails.push(channelDetails);
+          nextSubscription();
+        });
+      }, function (err) {
+        next(err, channelsDetails);
+      });
+    }],
+
+    getLastUploadedVideos: ['getChannelDetails', function (next, results) {
+      var lastUploadedVideos = [];
+
+      async.each(results['getChannelDetails'], function (channel, nextChannel) {
+        if (channel.pageInfo.totalResults <= 0) return nextChannel();
+
+        google.youtube('v3').playlistItems.list({
+          part: 'id, snippet',
+          playlistId: channel.items[0].contentDetails.relatedPlaylists.uploads,
+          auth: oauth2Client
+        }, function (err, lastUploadedVideosFromChannel) {
+          if (err) return nextChannel(err);
+
+          lastUploadedVideosFromChannel = lastUploadedVideosFromChannel.items.map(uploadedVideoFromChannel => {
+            return {
+              id: uploadedVideoFromChannel.id,
+              thumbnail: uploadedVideoFromChannel.snippet.thumbnails.high.url,
+              title: uploadedVideoFromChannel.snippet.title,
+              channel: uploadedVideoFromChannel.snippet.channelTitle
+            };
+          });
+          
+          // ToDo: Order the videos by desc date
+          lastUploadedVideos = lastUploadedVideos.concat(lastUploadedVideosFromChannel);
+          nextChannel();
+        });
+      }, function (err) {
+        next(err, lastUploadedVideos);
+      });
+    }]
+
+  }, function (err, results) {
+    if (err) return cb(err);
+
+    cb(null, results['getLastUploadedVideos']);
   });
 };
