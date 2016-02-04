@@ -1,6 +1,6 @@
-var socket = io('http://localhost:9000');
+const Socket = io('http://localhost:9000');
 
-var Video = React.createClass({
+const Video = React.createClass({
   render: function () {
     return (
       <article className="video col-md-3 col-sm-6 col-xs-12">
@@ -11,12 +11,12 @@ var Video = React.createClass({
   }
 });
 
-var VideoGrid = React.createClass({
+const VideoGrid = React.createClass({
   render: function () {
-    var videoNodes = this.props.videos.map((video) => {
+    let videoNodes = this.props.videos.map((video) => {
       return (
         <Video
-          key={video.key}
+          id={video.id}
           thumbnail={video.thumbnail}
           title={video.title}
           channel={video.channel} />
@@ -31,29 +31,17 @@ var VideoGrid = React.createClass({
   }
 });
 
-var SubscriptionPage = React.createClass({
+const SubscriptionPage = React.createClass({
   loadSubscriptions: function () {
     // ToDo
+    Socket.emit('subscriptions/list');
+    Socket.on('subscriptions/list', (subscriptions) => {
+      this.setState({ videos: subscriptions })
+    });
   },
   getInitialState: function () { return { videos: [] }; },
   componentDidMount: function () {
     this.loadSubscriptions();
-
-    setTimeout(() => {
-      this.setState({
-        videos: [{
-          key: 'xfDX5AkMoyM',
-          title: 'Practical Skills: The Smart Automatic Mining System [Vanilla Survival]',
-          channel: 'Mumbo Jumbo',
-          thumbnail: 'https://i.ytimg.com/vi_webp/xfDX5AkMoyM/mqdefault.webp'
-        }, {
-          key: 'V8tiGnCrc4g',
-          title: '30 Protein Pancakes in 2 Minutes',
-          channel: 'Furious Pete',
-          thumbnail: 'https://i.ytimg.com/vi_webp/V8tiGnCrc4g/mqdefault.webp'
-        }]
-      });
-    }, 1000);
   },
   render: function () {
     if (this.state.videos.length) {
@@ -75,7 +63,22 @@ var SubscriptionPage = React.createClass({
 });
 
 
-socket.on('youtube/callback', function (token) {
+var openAuthWindow = function (_btn) {
+  _btn.toElement.disabled = true;
+
+  document.getElementById('status').innerHTML = 'Loading...';
+
+  Socket.emit('youtube/auth');
+}
+
+Socket.on('youtube/notauthenticated', function () {
+  main.innerHTML = '<button id="open-auth-window" class="btn btn-primary btn-lg">Connect</button><br>';
+  main.innerHTML += '<span id="status"></span>';
+
+  document.getElementById('open-auth-window').onclick = openAuthWindow;
+});
+
+Socket.on('youtube/callback', function (token) {
   ReactDOM.render(
     <SubscriptionPage />,
     document.getElementById('main')
