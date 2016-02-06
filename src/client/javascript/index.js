@@ -16,7 +16,7 @@ const VideoGrid = React.createClass({
     let videoNodes = this.props.videos.map((video) => {
       return (
         <Video
-          id={video.id}
+          key={video.id}
           thumbnail={video.thumbnail}
           title={video.title}
           channel={video.channel} />
@@ -72,10 +72,15 @@ var openAuthWindow = function (_btn) {
 }
 
 Socket.on('youtube/notauthenticated', function () {
-  main.innerHTML = '<button id="open-auth-window" class="btn btn-primary btn-lg">Connect</button><br>';
-  main.innerHTML += '<span id="status"></span>';
-
-  document.getElementById('open-auth-window').onclick = openAuthWindow;
+  ReactDOM.render(
+    (
+      <div>
+        <button id="open-auth-window" class="btn btn-primary btn-lg" onclick="openAuthWindow()">Connect</button><br />
+        <span id="status"></span>
+      </div>
+    ),
+    document.getElementById('main')
+  );
 });
 
 Socket.on('youtube/callback', function (token) {
