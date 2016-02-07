@@ -13,21 +13,25 @@ const Video = React.createClass({
 
 const VideoGrid = React.createClass({
   render: function () {
-    let videoNodes = this.props.videos.map((video) => {
-      return (
-        <Video
-          key={video.id}
-          thumbnail={video.thumbnail}
-          title={video.title}
-          channel={video.channel} />
-      )
-    });
+    if (this.props.videos.length) {
+      let videoNodes = this.props.videos.map((video) => {
+        return (
+          <Video
+            key={video.id}
+            thumbnail={video.thumbnail}
+            title={video.title}
+            channel={video.channel} />
+        )
+      });
 
-    return (
-      <section id="videos-grid" className="row">
-        {videoNodes}
-      </section>
-    );
+      return (
+        <section id="videos-grid" className="row">
+          {videoNodes}
+        </section>
+      );
+    }
+
+    return <h4>Nothing to show at the moment</h4>
   }
 });
 
@@ -36,27 +40,27 @@ const SubscriptionPage = React.createClass({
     // ToDo
     Socket.emit('subscriptions/list');
     Socket.on('subscriptions/list', (subscriptions) => {
-      this.setState({ videos: subscriptions })
+      this.setState({ loading: false, videos: subscriptions })
     });
   },
-  getInitialState: function () { return { videos: [] }; },
+  getInitialState: function () { return { loading: true, videos: null }; },
   componentDidMount: function () {
     this.loadSubscriptions();
   },
   render: function () {
-    if (this.state.videos.length) {
+    if (this.state.loading) {
       return (
         <div>
-          <h3>Your subscriptions</h3>
-          <VideoGrid videos={this.state.videos} />
+          <h1>You are connected</h1>
+          <h3>Let us load your data...</h3>
         </div>
       );
     }
     
     return (
       <div>
-        <h1>You are connected</h1>
-        <h3>Let us load your data...</h3>
+        <h3>Your subscriptions</h3>
+        <VideoGrid videos={this.state.videos} />
       </div>
     );
   }
