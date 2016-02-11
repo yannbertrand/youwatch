@@ -1,3 +1,33 @@
 article.video img {
     width: 100%;
 }
+h5.title {
+    cursor: pointer;
+}
+
+#current-playlist {
+    position: fixed;
+    bottom: 0px;
+    right: 0px;
+    width: 680px;
+    height: 270px;
+    background-color: white;
+    box-shadow: -6px -4px 15px -2px rgba(0,0,0,0.75);
+}
+
+#current-playlist #playlist {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 200px;
+    height: 100%;
+}
+
+#current-playlist #current-video {
+    position: absolute;
+    top: 0px;
+    left: 200px;
+    width: 480px;
+    height: 100%;
+    background-color: black;
+}

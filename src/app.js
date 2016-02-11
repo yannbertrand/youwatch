@@ -105,6 +105,11 @@ app.on('ready', () => {
         }
       });
     });
+
+    socket.on('video/watch', (video) => {
+      socket.emit('video/watch', video.id);
+      socket.emit('playlist/update', [ video ]);
+    });
   });
 
   server.route({

@@ -65,10 +65,11 @@ module.exports.getSubscriptions = function (cb) {
     getSubscriptions: function (next) {
       var subscriptions = [];
       var nextPageToken = true;
+      var i = 1;
 
       async.whilst(
-        () => { return nextPageToken; },
-        (nextPage) => {
+        () => nextPageToken,
+        function (nextPage) {
           google.youtube('v3').subscriptions.list({
             part: 'id, snippet',
             mine: true,
@@ -77,14 +78,17 @@ module.exports.getSubscriptions = function (cb) {
             pageToken: nextPageToken || null,
             auth: oauth2Client
           }, function (err, aSubscriptionsPage) {
-            if (err) return next(err);
+            if (err) {
+              console.log('Error when trying to find a subscription page');
+              return nextPage(); // In fact retrying the same page
+            }
 
             nextPageToken = aSubscriptionsPage.nextPageToken || false;
             subscriptions = subscriptions.concat(aSubscriptionsPage.items);
             nextPage(null, subscriptions);
           });
         },
-        (err, allSubscriptions) => {
+        function (err, allSubscriptions) {
             if (err) return next(err);
             next(null, allSubscriptions);
         }
@@ -100,9 +104,14 @@ module.exports.getSubscriptions = function (cb) {
           id: subscription.snippet.resourceId.channelId,
           auth: oauth2Client
         }, function (err, channelDetails) {
-          if (err) return nextSubscription(err);
+          if (err) {
+            console.log('Error when trying to get channel ' + subscription.snippet.resourceId.channelId, err);
+            return nextSubscription();
+          }
 
-          channelsDetails.push(channelDetails);
+          if (channelDetails)
+            channelsDetails.push(channelDetails);
+
           nextSubscription();
         });
       }, function (err) {
@@ -117,15 +126,18 @@ module.exports.getSubscriptions = function (cb) {
         if (channel.pageInfo.totalResults <= 0) return nextChannel();
 
         google.youtube('v3').playlistItems.list({
-          part: 'id, snippet',
+          part: 'id, snippet, contentDetails',
           playlistId: channel.items[0].contentDetails.relatedPlaylists.uploads,
           auth: oauth2Client
         }, function (err, lastUploadedVideosFromChannel) {
-          if (err) return nextChannel(err);
+          if (err) {
+            console.log('Error when trying to find playlist ' + channel.items[0].contentDetails.relatedPlaylists.uploads + ' from channel ' + channel.items[0].id, err);
+            return nextChannel();
+          }
 
           lastUploadedVideosFromChannel = lastUploadedVideosFromChannel.items.map(uploadedVideoFromChannel => {
             return {
-              id: uploadedVideoFromChannel.id,
+              id: uploadedVideoFromChannel.contentDetails.videoId,
               thumbnail: uploadedVideoFromChannel.snippet.thumbnails.high.url,
               title: uploadedVideoFromChannel.snippet.title,
               channel: uploadedVideoFromChannel.snippet.channelTitle,
@@ -133,7 +145,6 @@ module.exports.getSubscriptions = function (cb) {
             };
           });
           
-          // ToDo: Order the videos by desc date
           lastUploadedVideos = lastUploadedVideos.concat(lastUploadedVideosFromChannel);
           nextChannel();
         });

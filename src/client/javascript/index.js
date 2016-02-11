@@ -1,11 +1,93 @@
 const Socket = io('http://localhost:9000');
 
+const CurrentVideo = React.createClass({
+  render: function () {
+    return (
+      <iframe id="current-video"
+              src={this.props.src}
+              frameBorder="0" allowFullScreen>
+      </iframe>
+    );
+  }
+});
+
+const PlaylistItem = React.createClass({
+  render: function () {
+    return (
+      <div>
+        <h5 className="title" onClick={this.watchVideo}>{this.props.title}</h5>
+        <h6>{this.props.channel}</h6>
+      </div>
+    );
+  }
+});
+
+const Playlist = React.createClass({
+  render: function () {
+    let videos = this.props.videos.map((video) => {
+      return (
+        <PlaylistItem
+          key={video.id}
+          id={video.id}
+          thumbnail={video.thumbnail}
+          title={video.title}
+          channel={video.channel} />
+      );
+    });
+
+    return (
+      <div id="playlist">
+        {videos}
+      </div>
+    );
+  }
+});
+
+const CurrentPlaylist = React.createClass({
+  getInitialState: () => { return { videos: [], currentVideoSrc: null }; },
+  componentDidMount: function () {
+    Socket.on('playlist/update', (playlist) => {
+      this.setState((state) => {
+        return {
+          videos: playlist,
+          currentVideoSrc: state.currentVideoSrc
+        };
+      });
+    });
+
+    Socket.on('video/watch', (id) => {
+      this.setState((state) => {
+        return {
+          videos: state.videos,
+          currentVideoSrc: 'https://www.youtube.com/embed/' + id
+        };
+      });
+    });
+  },
+  render: function () {
+    return (
+      <div id="current-playlist">
+        <Playlist videos={this.state.videos} />
+        <CurrentVideo src={this.state.currentVideoSrc} />
+      </div>
+    );
+  }
+});
+
 const Video = React.createClass({
+  watchVideo: function () {
+    if (this.props.id) {
+      Socket.emit('video/watch', this.props)
+    }
+  },
   render: function () {
     return (
       <article className="video col-md-3 col-sm-6 col-xs-12">
         <img className="thumbnail" src={this.props.thumbnail} />
-        <header>{this.props.title} <small>{this.props.channel}</small></header>
+        <header>
+          <h5 className="title" onClick={this.watchVideo}>{this.props.title}</h5>
+          <h6>{this.props.channel}</h6>
+        </header>
       </article>
     );
   }
@@ -18,6 +100,7 @@ const VideoGrid = React.createClass({
         return (
           <Video
             key={video.id}
+            id={video.id}
             thumbnail={video.thumbnail}
             title={video.title}
             channel={video.channel} />
@@ -36,16 +119,12 @@ const VideoGrid = React.createClass({
 });
 
 const SubscriptionPage = React.createClass({
-  loadSubscriptions: function () {
-    // ToDo
+  getInitialState: function () { return { loading: true, videos: null }; },
+  componentDidMount: function () {
     Socket.emit('subscriptions/list');
     Socket.on('subscriptions/list', (subscriptions) => {
       this.setState({ loading: false, videos: subscriptions })
     });
-  },
-  getInitialState: function () { return { loading: true, videos: null }; },
-  componentDidMount: function () {
-    this.loadSubscriptions();
   },
   render: function () {
     if (this.state.loading) {
@@ -61,6 +140,7 @@ const SubscriptionPage = React.createClass({
       <div>
         <h3>Your subscriptions</h3>
         <VideoGrid videos={this.state.videos} />
+        <CurrentPlaylist />
       </div>
     );
   }
@@ -79,7 +159,7 @@ Socket.on('youtube/notauthenticated', function () {
   ReactDOM.render(
     (
       <div>
-        <button id="open-auth-window" class="btn btn-primary btn-lg" onclick="openAuthWindow()">Connect</button><br />
+        <button id="open-auth-window" className="btn btn-primary btn-lg" onclick="openAuthWindow()">Connect</button><br />
         <span id="status"></span>
       </div>
     ),
