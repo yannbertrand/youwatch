@@ -62,23 +62,39 @@ module.exports.getToken = function (code, cb) {
 module.exports.getSubscriptions = function (cb) {
   async.auto({
 
-    getASubscriptionsPage: function (next) {
-      google.youtube('v3').subscriptions.list({
-        part: 'id, snippet',
-        mine: true,
-        maxResults: 50,
-        order: 'alphabetical',
-        auth: oauth2Client
-      }, function (err, subscriptionsPage) {
-        if (err) return next(err);
-        next(null, subscriptionsPage.items);
-      });
+    getSubscriptions: function (next) {
+      var subscriptions = [];
+      var nextPageToken = true;
+
+      async.whilst(
+        () => { return nextPageToken; },
+        (nextPage) => {
+          google.youtube('v3').subscriptions.list({
+            part: 'id, snippet',
+            mine: true,
+            maxResults: 50,
+            order: 'alphabetical',
+            pageToken: nextPageToken || null,
+            auth: oauth2Client
+          }, function (err, aSubscriptionsPage) {
+            if (err) return next(err);
+
+            nextPageToken = aSubscriptionsPage.nextPageToken || false;
+            subscriptions = subscriptions.concat(aSubscriptionsPage.items);
+            nextPage(null, subscriptions);
+          });
+        },
+        (err, allSubscriptions) => {
+            if (err) return next(err);
+            next(null, allSubscriptions);
+        }
+      );
     },
 
-    getChannelDetails: ['getASubscriptionsPage', function (next, results) {
+    getChannelDetails: ['getSubscriptions', function (next, results) {
       var channelsDetails = [];
 
-      async.each(results['getASubscriptionsPage'], function (subscription, nextSubscription) {
+      async.each(results['getSubscriptions'], function (subscription, nextSubscription) {
         google.youtube('v3').channels.list({
           part: 'id, contentDetails',
           id: subscription.snippet.resourceId.channelId,
@@ -112,7 +128,8 @@ module.exports.getSubscriptions = function (cb) {
               id: uploadedVideoFromChannel.id,
               thumbnail: uploadedVideoFromChannel.snippet.thumbnails.high.url,
               title: uploadedVideoFromChannel.snippet.title,
-              channel: uploadedVideoFromChannel.snippet.channelTitle
+              channel: uploadedVideoFromChannel.snippet.channelTitle,
+              publishedAt: new Date(uploadedVideoFromChannel.snippet.publishedAt)
             };
           });
           
@@ -123,11 +140,17 @@ module.exports.getSubscriptions = function (cb) {
       }, function (err) {
         next(err, lastUploadedVideos);
       });
+    }],
+
+    orderLastUploadedVideos: ['getLastUploadedVideos', function (next, results) {
+      next(null, results['getLastUploadedVideos'].sort((firstVideo, secondVideo) => {
+        return secondVideo.publishedAt.getTime() - firstVideo.publishedAt.getTime();
+      }));
     }]
 
   }, function (err, results) {
     if (err) return cb(err);
 
-    cb(null, results['getLastUploadedVideos']);
+    cb(null, results['orderLastUploadedVideos']);
   });
 };
