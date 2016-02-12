@@ -147,19 +147,19 @@ const SubscriptionPage = React.createClass({
 });
 
 
-var openAuthWindow = function (_btn) {
-  _btn.toElement.disabled = true;
-
-  document.getElementById('status').innerHTML = 'Loading...';
-
-  Socket.emit('youtube/auth');
-}
-
 Socket.on('youtube/notauthenticated', function () {
+  function openAuthWindow() {
+    // _btn.toElement.disabled = true;
+
+    // document.getElementById('status').innerHTML = 'Loading...';
+
+    Socket.emit('youtube/auth');
+  };
+
   ReactDOM.render(
     (
       <div>
-        <button id="open-auth-window" className="btn btn-primary btn-lg" onclick="openAuthWindow()">Connect</button><br />
+        <button id="open-auth-window" className="btn btn-primary btn-lg" onClick={openAuthWindow}>Connect</button><br />
         <span id="status"></span>
       </div>
     ),
