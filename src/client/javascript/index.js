@@ -1,5 +1,7 @@
 const Socket = io('http://localhost:9000');
+const mainElement = document.getElementById('main');
 
+/* Subscriptions Page */
 const CurrentVideo = React.createClass({
   render: function () {
     return (
@@ -83,7 +85,7 @@ const Video = React.createClass({
   render: function () {
     return (
       <article className="video col-md-3 col-sm-6 col-xs-12">
-        <img className="img-rounded" src={this.props.thumbnail} />
+        <img className="thumbnail" src={this.props.thumbnail} />
         <header>
           <h5 className="title" onClick={this.watchVideo}>{this.props.title}</h5>
           <h6>{this.props.channel}</h6>
@@ -118,7 +120,7 @@ const VideoGrid = React.createClass({
   }
 });
 
-const SubscriptionPage = React.createClass({
+const SubscriptionsPage = React.createClass({
   getInitialState: function () { return { loading: true, videos: null }; },
   componentDidMount: function () {
     Socket.emit('subscriptions/list');
@@ -129,9 +131,10 @@ const SubscriptionPage = React.createClass({
   render: function () {
     if (this.state.loading) {
       return (
-        <div>
-          <h1>You are connected</h1>
-          <h3>Let us load your data...</h3>
+        <div className="jumbotron">
+          <h1 className="display-3">Let us load your data</h1>
+          <p className="lead">You are connected to the YouTube API</p>
+          <p>It may take a while</p>
         </div>
       );
     }
@@ -146,35 +149,53 @@ const SubscriptionPage = React.createClass({
   }
 });
 
+/* Subscriptions Page */
+
+/* Authentification */
+
+const AuthentificationPage = React.createClass({
+  getInitialState: function () { return { loading: false }; },
+  openAuthWindow: function () {
+    this.setState({ loading: true });
+    Socket.emit('youtube/auth');
+  },
+  render: function () {
+    if (this.state.loading) {
+      return (
+        <div className="jumbotron">
+          <h1 className="display-3">YouWatch</h1>
+          <p className="lead">Please fulfill the informations on the other window</p>
+          <p className="lead">
+            <button className="btn btn-primary btn-lg disabled">Logging in...</button>
+          </p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="jumbotron">
+        <h1 className="display-3">YouWatch</h1>
+        <p className="lead">Let's connect to your YouTube Account</p>
+        <p className="lead">
+          <button className="btn btn-primary btn-lg" onClick={this.openAuthWindow}>Log in</button>
+        </p>
+      </div>
+    );
+  }
+});
+
+/* Authentification */
 
 Socket.on('youtube/notauthenticated', function () {
-  function openAuthWindow() {
-    // _btn.toElement.disabled = true;
-
-    // document.getElementById('status').innerHTML = 'Loading...';
-
-    Socket.emit('youtube/auth');
-  };
-
   ReactDOM.render(
-    (
-      <div>
-        <button id="open-auth-window" className="btn btn-primary btn-lg" onClick={openAuthWindow}>Connect</button><br />
-        <span id="status"></span>
-      </div>
-    ),
-    document.getElementById('main')
+    <AuthentificationPage />,
+    mainElement
   );
 });
 
 Socket.on('youtube/callback', function (token) {
   ReactDOM.render(
-    <SubscriptionPage />,
-    document.getElementById('main')
+    <SubscriptionsPage />,
+    mainElement
   );
-
-  gapi.auth.setToken(token);
-  gapi.client.load('youtube', 'v3');
 });
-
-

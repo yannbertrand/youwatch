@@ -54,6 +54,7 @@ module.exports.getToken = function (code, cb) {
   oauth2Client.getToken(code, function(err, tokens) {
     if (!err) {
       conf.set('tokens', tokens);
+      oauth2Client.setCredentials(tokens);
       cb(tokens);
     }
   });
