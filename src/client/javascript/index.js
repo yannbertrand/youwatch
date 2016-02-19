@@ -14,11 +14,19 @@ const CurrentVideo = React.createClass({
 });
 
 const PlaylistItem = React.createClass({
+  watchVideo: function () {
+    if (this.props.id) {
+      Socket.emit('video/watch', this.props);
+    }
+  },
   render: function () {
     return (
       <div>
-        <h5 className="title" onClick={this.watchVideo}>{this.props.title}</h5>
-        <h6>{this.props.channel}</h6>
+        <div className="playlist-item">
+          <h6 className="title" onClick={this.watchVideo}>{this.props.title}</h6>
+          <h7>{this.props.channel}</h7>
+        </div>
+        <hr />
       </div>
     );
   }
@@ -26,16 +34,17 @@ const PlaylistItem = React.createClass({
 
 const Playlist = React.createClass({
   render: function () {
-    let videos = this.props.videos.map((video) => {
-      return (
+    let videos = [];
+    for (var index in this.props.videos) {
+      videos.push(
         <PlaylistItem
-          key={video.id}
-          id={video.id}
-          thumbnail={video.thumbnail}
-          title={video.title}
-          channel={video.channel} />
-      );
-    });
+          key={this.props.videos[index].id}
+          id={this.props.videos[index].id}
+          thumbnail={this.props.videos[index].thumbnail}
+          title={this.props.videos[index].title}
+          channel={this.props.videos[index].channel} />
+        );
+    }
 
     return (
       <div id="playlist">
@@ -79,7 +88,7 @@ const CurrentPlaylist = React.createClass({
 const Video = React.createClass({
   watchVideo: function () {
     if (this.props.id) {
-      Socket.emit('video/watch', this.props)
+      Socket.emit('video/watch', this.props);
     }
   },
   render: function () {
@@ -87,8 +96,8 @@ const Video = React.createClass({
       <article className="video col-md-3 col-sm-6 col-xs-12">
         <img className="thumbnail" src={this.props.thumbnail} />
         <header>
-          <h5 className="title" onClick={this.watchVideo}>{this.props.title}</h5>
-          <h6>{this.props.channel}</h6>
+          <h6 className="title" onClick={this.watchVideo}>{this.props.title}</h6>
+          <h7>{this.props.channel}</h7>
         </header>
       </article>
     );
@@ -141,7 +150,6 @@ const SubscriptionsPage = React.createClass({
     
     return (
       <div>
-        <h3>Your subscriptions</h3>
         <VideoGrid videos={this.state.videos} />
         <CurrentPlaylist />
       </div>

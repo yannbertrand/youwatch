@@ -106,9 +106,14 @@ app.on('ready', () => {
       });
     });
 
+    let currentPlaylist = {};
     socket.on('video/watch', (video) => {
       socket.emit('video/watch', video.id);
-      socket.emit('playlist/update', [ video ]);
+
+      if (!currentPlaylist[video.id]) {
+        currentPlaylist[video.id] = video;
+      }
+      socket.emit('playlist/update', currentPlaylist);
     });
   });
 
