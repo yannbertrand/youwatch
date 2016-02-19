@@ -1,15 +1,23 @@
 article.video img {
     width: 100%;
 }
-h5.title {
+h6.title {
     cursor: pointer;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+h7 {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 #current-playlist {
     position: fixed;
     bottom: 0px;
     right: 0px;
-    width: 680px;
+    width: 780px;
     height: 270px;
     background-color: white;
     box-shadow: -6px -4px 15px -2px rgba(0,0,0,0.75);
@@ -19,14 +27,19 @@ h5.title {
     position: absolute;
     top: 0px;
     left: 0px;
-    width: 200px;
+    width: 300px;
     height: 100%;
+    overflow: auto;
+}
+
+#current-playlist #playlist .playlist-item {
+    padding: 10px;
 }
 
 #current-playlist #current-video {
     position: absolute;
     top: 0px;
-    left: 200px;
+    left: 300px;
     width: 480px;
     height: 100%;
     background-color: black;
