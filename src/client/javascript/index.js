@@ -83,7 +83,7 @@ const Video = React.createClass({
   render: function () {
     return (
       <article className="video col-md-3 col-sm-6 col-xs-12">
-        <img className="thumbnail" src={this.props.thumbnail} />
+        <img className="img-rounded" src={this.props.thumbnail} />
         <header>
           <h5 className="title" onClick={this.watchVideo}>{this.props.title}</h5>
           <h6>{this.props.channel}</h6>
