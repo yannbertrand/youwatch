@@ -1,6 +1,9 @@
 .jumbotron {
     margin-top: 15px;
 }
+a {
+    cursor: pointer;
+}
 
 #videos-grid article.video img {
     width: 100%;
