@@ -23,8 +23,12 @@ const PlaylistItem = React.createClass({
     return (
       <div>
         <div className="playlist-item">
-          <h6 className="title" onClick={this.watchVideo}>{this.props.title}</h6>
-          <h7>{this.props.channel}</h7>
+          <h5>
+            <a onClick={this.watchVideo} title={this.props.title}>
+              {this.props.title}
+            </a>
+          </h5>
+          <h6>{this.props.channel}</h6>
         </div>
         <hr />
       </div>
@@ -94,10 +98,14 @@ const Video = React.createClass({
   render: function () {
     return (
       <article className="video col-md-3 col-sm-6 col-xs-12">
-        <img className="thumbnail" src={this.props.thumbnail} />
+        <img className="thumbnail lazyload blur-up" data-sizes="auto" data-src={this.props.thumbnail} />
         <header>
-          <h6 className="title" onClick={this.watchVideo}>{this.props.title}</h6>
-          <h7>{this.props.channel}</h7>
+          <h5>
+            <a onClick={this.watchVideo} title={this.props.title}>
+              {this.props.title}
+            </a>
+          </h5>
+          <h6>{this.props.channel}</h6>
         </header>
       </article>
     );
