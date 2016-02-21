@@ -5,6 +5,26 @@ a {
     cursor: pointer;
 }
 
+.ratio-container {
+    position: relative;
+}
+.ratio-container:after {
+    content: '';
+    display: block;
+    height: 0;
+    width: 100%;
+    /* 480:360 = 75.00% = calc(360 / 480 * 100%) */
+    padding-bottom: 75.00%;
+}
+.ratio-container > * {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
 #videos-grid article.video img {
     width: 100%;
     height: 100%;
