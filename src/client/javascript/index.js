@@ -206,6 +206,62 @@ const AuthentificationPage = React.createClass({
 
 /* Authentification */
 
+/* No Internet */
+
+const NoInternetPage = React.createClass({
+  getInitialState: function () {
+    return { i: 2000, loading: false, connected: false };
+  },
+  tryToReconnect: function () {
+    var i = (this.state.i === 64000)? 64000: this.state.i*2;
+    this.setState({ i: i, loading: false, connected: false });
+
+    setTimeout(function () {
+      this.setState({ i: i, loading: true, connected: false });
+      Socket.emit('internet/reconnect');
+    }, i);
+  },
+  reconnected: function () {
+    this.setState({ i: i, loading: false, connected: true });
+  },
+  componentDidMount: function () {
+    this.tryToReconnect();
+
+    Socket.on('internet/notconnected', this.tryToReconnect);
+
+    Socket.on('internet/reconnected', this.reconnected);
+  },
+  render: function () {
+    if (this.state.connected) {
+      return (
+        <div class="jumbotron">
+          <h1 className="display-3">You're now connected to the internet</h1>
+          <p className="lead"><i class="fa fa-spinner"></i> Reloading the app</p>
+        </div>
+      );
+    }
+
+    let loading = (this.state.loading)? 'Trying to reconnect...': 'Waiting...';
+
+    return (
+      <div className="jumbotron">
+        <h1 className="display-3">You're not connected to the internet</h1>
+        <p className="lead">Offline mode is not implemented yet</p>
+        <p><i class="fa fa-spinner"></i> {loading}</p>
+      </div>
+    );
+  }
+});
+
+/* No Internet */
+
+Socket.on('internet/notconnected', function () {
+  ReactDOM.render(
+    <NoInternetPage />,
+    mainElement
+  );
+})
+
 Socket.on('youtube/notauthenticated', function () {
   ReactDOM.render(
     <AuthentificationPage />,
@@ -218,4 +274,8 @@ Socket.on('youtube/callback', function (token) {
     <SubscriptionsPage />,
     mainElement
   );
+});
+
+Socket.on('app/reloading', function (page) {
+  // ToDo go on page
 });
