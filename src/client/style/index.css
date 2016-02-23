@@ -1,8 +1,12 @@
+a {
+    cursor: pointer;
+}
+
 .jumbotron {
     margin-top: 15px;
 }
-a {
-    cursor: pointer;
+.jumbotron #loader {
+    width: 75px;
 }
 
 .ratio-container {
