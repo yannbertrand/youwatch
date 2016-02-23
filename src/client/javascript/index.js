@@ -216,27 +216,32 @@ const NoInternetPage = React.createClass({
     var i = (this.state.i === 64000)? 64000: this.state.i*2;
     this.setState({ i: i, loading: false, connected: false });
 
-    setTimeout(function () {
-      this.setState({ i: i, loading: true, connected: false });
+    setTimeout(() => {
+      this.setState((state) => {
+        return {
+          i: state.i,
+          loading: true,
+          connected: false
+        };
+      });
       Socket.emit('internet/reconnect');
     }, i);
   },
   reconnected: function () {
-    this.setState({ i: i, loading: false, connected: true });
+    this.setState({ i: 0, loading: false, connected: true });
   },
   componentDidMount: function () {
     this.tryToReconnect();
 
     Socket.on('internet/notconnected', this.tryToReconnect);
-
     Socket.on('internet/reconnected', this.reconnected);
   },
   render: function () {
     if (this.state.connected) {
       return (
-        <div class="jumbotron">
+        <div className="jumbotron">
           <h1 className="display-3">You're now connected to the internet</h1>
-          <p className="lead"><i class="fa fa-spinner"></i> Reloading the app</p>
+          <p className="lead"><i className="fa fa-spinner"></i> Reloading the app</p>
         </div>
       );
     }
@@ -247,7 +252,7 @@ const NoInternetPage = React.createClass({
       <div className="jumbotron">
         <h1 className="display-3">You're not connected to the internet</h1>
         <p className="lead">Offline mode is not implemented yet</p>
-        <p><i class="fa fa-spinner"></i> {loading}</p>
+        <p><i className="fa fa-spinner"></i> {loading}</p>
       </div>
     );
   }
