@@ -81,10 +81,17 @@ app.on('ready', () => {
   io.on('connection', (socket) => {
     YoutubeApi.tryStoredAccessToken((noValidAccessToken, token) => {
       if (noValidAccessToken) {
+        // socket.emit('internet/notconnected');
         socket.emit('youtube/notauthenticated');
       } else {
         socket.emit('youtube/callback', token);
       }
+    });
+
+    socket.on('internet/reconnect', () => {
+      setTimeout(() => {
+        socket.emit('internet/notconnected');
+      }, 1000);
     });
 
     socket.on('youtube/auth', () => {

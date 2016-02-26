@@ -246,7 +246,9 @@ const NoInternetPage = React.createClass({
       );
     }
 
-    let loading = (this.state.loading)? 'Trying to reconnect...': 'Waiting...';
+    let loading = (this.state.loading)?
+      'Trying to reconnect...':
+      'Waiting ' + this.state.i / 1000 + ' seconds...';
 
     return (
       <div className="jumbotron">
