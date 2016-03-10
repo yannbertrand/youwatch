@@ -1,6 +1,32 @@
 const Socket = io('http://localhost:9000');
 const mainElement = document.getElementById('main');
 
+/* Utils */
+const Timer = React.createClass({
+  getInitialState: function () {
+    return { secondsToWait: this.props.secondsToWait };
+  },
+  runTimer: function () {
+    let timer = setInterval(() => {
+      if (this.state.secondsToWait === 0) clearInterval(timer);
+
+      this.setState({ secondsToWait: this.state.secondsToWait - 1 });
+    }, 1000);
+  },
+  componentDidMount: function () {
+    this.runTimer();
+  },
+  render: function () {
+    if (this.state.secondsToWait > 0) {
+      let unit = (this.state.secondsToWait > 1)? 'seconds': 'second';
+      return <p><i className="fa fa-spinner"></i> Waiting {this.state.secondsToWait} {unit}...</p>;
+    }
+
+    return <p>Done!</p>;
+  }
+});
+/* Utils */
+
 /* Subscriptions Page */
 const CurrentVideo = React.createClass({
   render: function () {
@@ -210,22 +236,27 @@ const AuthentificationPage = React.createClass({
 
 const NoInternetPage = React.createClass({
   getInitialState: function () {
-    return { i: 2000, loading: false, connected: false };
+    return { i: 1000, loading: false, connected: false };
   },
   tryToReconnect: function () {
-    var i = (this.state.i === 64000)? 64000: this.state.i*2;
-    this.setState({ i: i, loading: false, connected: false });
+    this.setState((state) => {
+      return {
+        i: state.i,
+        loading: false,
+        connected: false
+      }
+    });
 
     setTimeout(() => {
       this.setState((state) => {
         return {
-          i: state.i,
+          i: (state.i === 64000)? 64000: state.i*2,
           loading: true,
           connected: false
         };
       });
       Socket.emit('internet/reconnect');
-    }, i);
+    }, this.state.i);
   },
   reconnected: function () {
     this.setState({ i: 0, loading: false, connected: true });
@@ -246,15 +277,18 @@ const NoInternetPage = React.createClass({
       );
     }
 
-    let loading = (this.state.loading)?
-      'Trying to reconnect...':
-      'Waiting ' + this.state.i / 1000 + ' seconds...';
+    let loadingString = '';
+    if (this.state.loading) {
+      loadingString = <p><i className="fa fa-spinner"></i> Trying to reconnect...</p>;
+    } else {
+      loadingString = <Timer secondsToWait={this.state.i / 1000} />;
+    }
 
     return (
       <div className="jumbotron">
         <h1 className="display-3">You're not connected to the internet</h1>
         <p className="lead">Offline mode is not implemented yet</p>
-        <p><i className="fa fa-spinner"></i> {loading}</p>
+        {loadingString}
       </div>
     );
   }
