@@ -81,10 +81,17 @@ app.on('ready', () => {
   io.on('connection', (socket) => {
     YoutubeApi.tryStoredAccessToken((noValidAccessToken, token) => {
       if (noValidAccessToken) {
+        // socket.emit('internet/notconnected');
         socket.emit('youtube/notauthenticated');
       } else {
         socket.emit('youtube/callback', token);
       }
+    });
+
+    socket.on('internet/reconnect', () => {
+      setTimeout(() => {
+        socket.emit('internet/notconnected');
+      }, 1000);
     });
 
     socket.on('youtube/auth', () => {
@@ -104,6 +111,16 @@ app.on('ready', () => {
           socket.emit('subscriptions/list', subscriptions);
         }
       });
+    });
+
+    let currentPlaylist = {};
+    socket.on('video/watch', (video) => {
+      socket.emit('video/watch', video.id);
+
+      if (!currentPlaylist[video.id]) {
+        currentPlaylist[video.id] = video;
+      }
+      socket.emit('playlist/update', currentPlaylist);
     });
   });
 
