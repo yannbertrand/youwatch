@@ -4,18 +4,25 @@
         <meta charset="utf-8">
         <title>YouWatch</title>
         <link rel="stylesheet" href="style/librairies/bootstrap.css">
+        <link rel="stylesheet" href="style/librairies/fontawesome.css">
         <link rel="stylesheet" href="style/index.css">
     </head>
 
     <body>
-        <div id="main"></div>
+        <div id="main" class="container-fluid">
+            <div class="jumbotron">
+                <h1 class="display-3">
+                    <i id="loader" class="fa fa-spinner"></i> Loading...
+                </h1>
+            </div>
+        </div>
 
         <script src="http://localhost:9000/socket.io/socket.io.js"></script>
         <script src="javascript/dependencies/react.js"></script>
         <script src="javascript/dependencies/react-dom.js"></script>
-        <script src="javascript/dependencies/babel.js"></script>
         <script src="javascript/dependencies/bootstrap.js"></script>
-        <script src="https://apis.google.com/js/client.js"></script>
-        <script type="text/babel" src="javascript/index.js"></script>
+        <script src="javascript/dependencies/lazysizes.js"></script>
+        <script src="javascript/utils.js"></script>
+        <script src="javascript/index.js"></script>
     </body>
 </html>

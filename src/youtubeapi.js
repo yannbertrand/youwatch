@@ -54,6 +54,7 @@ module.exports.getToken = function (code, cb) {
   oauth2Client.getToken(code, function(err, tokens) {
     if (!err) {
       conf.set('tokens', tokens);
+      oauth2Client.setCredentials(tokens);
       cb(tokens);
     }
   });
@@ -62,31 +63,56 @@ module.exports.getToken = function (code, cb) {
 module.exports.getSubscriptions = function (cb) {
   async.auto({
 
-    getASubscriptionsPage: function (next) {
-      google.youtube('v3').subscriptions.list({
-        part: 'id, snippet',
-        mine: true,
-        maxResults: 50,
-        order: 'alphabetical',
-        auth: oauth2Client
-      }, function (err, subscriptionsPage) {
-        if (err) return next(err);
-        next(null, subscriptionsPage.items);
-      });
+    getSubscriptions: function (next) {
+      var subscriptions = [];
+      var nextPageToken = true;
+      var i = 1;
+
+      async.whilst(
+        () => nextPageToken,
+        function (nextPage) {
+          google.youtube('v3').subscriptions.list({
+            part: 'id, snippet',
+            mine: true,
+            maxResults: 50,
+            order: 'alphabetical',
+            pageToken: nextPageToken || null,
+            auth: oauth2Client
+          }, function (err, aSubscriptionsPage) {
+            if (err) {
+              console.log('Error when trying to find a subscription page');
+              return nextPage(); // In fact retrying the same page
+            }
+
+            nextPageToken = aSubscriptionsPage.nextPageToken || false;
+            subscriptions = subscriptions.concat(aSubscriptionsPage.items);
+            nextPage(null, subscriptions);
+          });
+        },
+        function (err, allSubscriptions) {
+            if (err) return next(err);
+            next(null, allSubscriptions);
+        }
+      );
     },
 
-    getChannelDetails: ['getASubscriptionsPage', function (next, results) {
+    getChannelDetails: ['getSubscriptions', function (next, results) {
       var channelsDetails = [];
 
-      async.each(results['getASubscriptionsPage'], function (subscription, nextSubscription) {
+      async.each(results['getSubscriptions'], function (subscription, nextSubscription) {
         google.youtube('v3').channels.list({
           part: 'id, contentDetails',
           id: subscription.snippet.resourceId.channelId,
           auth: oauth2Client
         }, function (err, channelDetails) {
-          if (err) return nextSubscription(err);
+          if (err) {
+            console.log('Error when trying to get channel ' + subscription.snippet.resourceId.channelId, err);
+            return nextSubscription();
+          }
 
-          channelsDetails.push(channelDetails);
+          if (channelDetails)
+            channelsDetails.push(channelDetails);
+
           nextSubscription();
         });
       }, function (err) {
@@ -101,33 +127,42 @@ module.exports.getSubscriptions = function (cb) {
         if (channel.pageInfo.totalResults <= 0) return nextChannel();
 
         google.youtube('v3').playlistItems.list({
-          part: 'id, snippet',
+          part: 'id, snippet, contentDetails',
           playlistId: channel.items[0].contentDetails.relatedPlaylists.uploads,
           auth: oauth2Client
         }, function (err, lastUploadedVideosFromChannel) {
-          if (err) return nextChannel(err);
+          if (err) {
+            console.log('Error when trying to find playlist ' + channel.items[0].contentDetails.relatedPlaylists.uploads + ' from channel ' + channel.items[0].id, err);
+            return nextChannel();
+          }
 
           lastUploadedVideosFromChannel = lastUploadedVideosFromChannel.items.map(uploadedVideoFromChannel => {
             return {
-              id: uploadedVideoFromChannel.id,
+              id: uploadedVideoFromChannel.contentDetails.videoId,
               thumbnail: uploadedVideoFromChannel.snippet.thumbnails.high.url,
               title: uploadedVideoFromChannel.snippet.title,
-              channel: uploadedVideoFromChannel.snippet.channelTitle
+              channel: uploadedVideoFromChannel.snippet.channelTitle,
+              publishedAt: new Date(uploadedVideoFromChannel.snippet.publishedAt)
             };
           });
           
-          // ToDo: Order the videos by desc date
           lastUploadedVideos = lastUploadedVideos.concat(lastUploadedVideosFromChannel);
           nextChannel();
         });
       }, function (err) {
         next(err, lastUploadedVideos);
       });
+    }],
+
+    orderLastUploadedVideos: ['getLastUploadedVideos', function (next, results) {
+      next(null, results['getLastUploadedVideos'].sort((firstVideo, secondVideo) => {
+        return secondVideo.publishedAt.getTime() - firstVideo.publishedAt.getTime();
+      }));
     }]
 
   }, function (err, results) {
     if (err) return cb(err);
 
-    cb(null, results['getLastUploadedVideos']);
+    cb(null, results['orderLastUploadedVideos']);
   });
 };
