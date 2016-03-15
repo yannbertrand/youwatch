@@ -5,6 +5,7 @@ const BrowserWindow = require('browser-window');
 const YoutubeApi = require('./youtubeapi');
 
 const Hapi = require('hapi');
+const isOnline = require('is-online');
 
 // Create the Hapi Web Server
 const server = new Hapi.Server();
@@ -81,21 +82,6 @@ app.on('ready', () => {
   windows[MAIN_WINDOW] = createMainWindow();
 
   io.on('connection', (socket) => {
-    YoutubeApi.tryStoredAccessToken((noValidAccessToken, token) => {
-      if (noValidAccessToken) {
-        // socket.emit('internet/notconnected');
-        socket.emit('youtube/notauthenticated');
-      } else {
-        socket.emit('youtube/callback', token);
-      }
-    });
-
-    socket.on('internet/reconnect', () => {
-      setTimeout(() => {
-        socket.emit('internet/notconnected');
-      }, 1000);
-    });
-
     socket.on('youtube/auth', () => {
       socket.emit('youtube/waiting');
 
@@ -115,7 +101,6 @@ app.on('ready', () => {
       });
     });
 
-    let currentPlaylist = {};
     socket.on('video/watch', (video) => {
       socket.emit('video/watch', video.id);
 
@@ -124,6 +109,27 @@ app.on('ready', () => {
       }
       socket.emit('playlist/update', currentPlaylist);
     });
+
+    function launchApp() {
+      if (isOnline((err, online) => {
+        if (err || !online) {
+          return socket.emit('internet/notconnected');
+        }
+        
+        YoutubeApi.tryStoredAccessToken((noValidAccessToken, token) => {
+          if (noValidAccessToken) {
+            socket.emit('youtube/notauthenticated');
+          } else {
+            socket.emit('youtube/callback', token);
+          }
+        });
+      }));
+    }
+
+    socket.on('internet/reconnect', launchApp);
+
+    let currentPlaylist = {};
+    launchApp();
   });
 
   server.route({
