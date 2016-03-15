@@ -1,14 +1,16 @@
 'use strict';
 const app = require('app');
 const BrowserWindow = require('browser-window');
+
 const YoutubeApi = require('./youtubeapi');
+
 const Hapi = require('hapi');
 
 // Create the Hapi Web Server
 const server = new Hapi.Server();
 server.connection({
   host: 'localhost',
-  port: 9000
+  port: '@@PORT'
 });
 
 // Start the server

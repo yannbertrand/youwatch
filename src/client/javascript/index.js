@@ -1,4 +1,4 @@
-const Socket = io('http://localhost:9000');
+const Socket = io('http://localhost:@@PORT');
 const mainElement = document.getElementById('main');
 
 /* Subscriptions Page */
