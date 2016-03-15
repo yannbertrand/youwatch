@@ -1,22 +1,26 @@
-const credentials = require('./credentials');
+const CONFIG = require('./config');
+
 const Configstore = require('configstore');
 
 const async = require('async');
 const google = require('googleapis');
 const OAuth2Client = google.auth.OAuth2;
 
-const REDIRECT_URL = 'http://localhost:9000/youtube/callback';
-const oauth2Client = new OAuth2Client(credentials.CLIENT_ID, credentials.CLIENT_SECRET, REDIRECT_URL);
+const oauth2Client = new OAuth2Client(
+  CONFIG.CREDENTIALS.CLIENT_ID,
+  CONFIG.CREDENTIALS.CLIENT_SECRET,
+  'http://localhost:@@PORT/youtube/callback' // redirect url
+);
 
-const conf = new Configstore('YouWatch');
+const configStore = new Configstore('YouWatch');
 
 // Check if the stored access token (if existing) is still working
 module.exports.tryStoredAccessToken = function (cb) {
-  if(!conf.get('tokens')) {
+  if(!configStore.get('tokens')) {
     return cb(true);
   }
 
-  oauth2Client.setCredentials(conf.get('tokens'));
+  oauth2Client.setCredentials(configStore.get('tokens'));
 
   google.youtube('v3').subscriptions.list({
     part: 'id',
@@ -29,7 +33,7 @@ module.exports.tryStoredAccessToken = function (cb) {
     oauth2Client.refreshAccessToken(function (err, newTokens) {
       if (err) return cb(true);
 
-      conf.set('tokens', newTokens);
+      configStore.set('tokens', newTokens);
 
       return cb(false, newTokens);
     });
@@ -53,7 +57,7 @@ module.exports.getToken = function (code, cb) {
   // request access token
   oauth2Client.getToken(code, function(err, tokens) {
     if (!err) {
-      conf.set('tokens', tokens);
+      configStore.set('tokens', tokens);
       oauth2Client.setCredentials(tokens);
       cb(tokens);
     }

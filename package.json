@@ -46,6 +46,7 @@
     "gulp-babel": "^6.1.2",
     "gulp-cached": "^1.1.0",
     "gulp-debug": "^2.1.2",
+    "gulp-replace-task": "^0.11.0",
     "xo": "^0.9.0"
   },
   "xo": {
