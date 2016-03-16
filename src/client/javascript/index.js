@@ -2,14 +2,21 @@ const Socket = io('http://localhost:@@PORT');
 const mainElement = document.getElementById('main');
 
 /* Subscriptions Page */
-const CurrentVideo = React.createClass({
+const Player = React.createClass({
+  updatePlayer: function (id) {
+    this.state.player.cueVideoById(id);
+  },
+  componentDidMount: function () {
+    this.setState({
+      player: new YT.Player('player', {
+        // width: '480'
+      })
+    });
+
+    Socket.on('video/watch', this.updatePlayer);
+  },
   render: function () {
-    return (
-      <iframe id="current-video"
-              src={this.props.src}
-              frameBorder="0" allowFullScreen>
-      </iframe>
-    );
+    return <div id="player"></div>;
   }
 });
 
@@ -37,16 +44,24 @@ const PlaylistItem = React.createClass({
 });
 
 const Playlist = React.createClass({
+  getInitialState: function () {
+    return { videos: [] };
+  },
+  componentDidMount: function () {
+    Socket.on('playlist/update', (playlist) => {
+      this.setState({ videos: playlist });
+    });
+  },
   render: function () {
     let videos = [];
-    for (var index in this.props.videos) {
+    for (var index in this.state.videos) {
       videos.push(
         <PlaylistItem
-          key={this.props.videos[index].id}
-          id={this.props.videos[index].id}
-          thumbnail={this.props.videos[index].thumbnail}
-          title={this.props.videos[index].title}
-          channel={this.props.videos[index].channel} />
+          key={this.state.videos[index].id}
+          id={this.state.videos[index].id}
+          thumbnail={this.state.videos[index].thumbnail}
+          title={this.state.videos[index].title}
+          channel={this.state.videos[index].channel} />
         );
     }
 
@@ -59,31 +74,11 @@ const Playlist = React.createClass({
 });
 
 const CurrentPlaylist = React.createClass({
-  getInitialState: () => { return { videos: [], currentVideoSrc: null }; },
-  componentDidMount: function () {
-    Socket.on('playlist/update', (playlist) => {
-      this.setState((state) => {
-        return {
-          videos: playlist,
-          currentVideoSrc: state.currentVideoSrc
-        };
-      });
-    });
-
-    Socket.on('video/watch', (id) => {
-      this.setState((state) => {
-        return {
-          videos: state.videos,
-          currentVideoSrc: 'https://www.youtube.com/embed/' + id
-        };
-      });
-    });
-  },
   render: function () {
     return (
       <div id="current-playlist">
-        <Playlist videos={this.state.videos} />
-        <CurrentVideo src={this.state.currentVideoSrc} />
+        <Playlist />
+        <Player />
       </div>
     );
   }
@@ -135,7 +130,7 @@ const VideoGrid = React.createClass({
       );
     }
 
-    return <h4>Nothing to show at the moment</h4>
+    return <h4>Nothing to show at the moment</h4>;
   }
 });
 

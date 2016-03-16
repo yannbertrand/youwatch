@@ -90,7 +90,7 @@ a {
     padding: 10px;
 }
 
-#current-playlist #current-video {
+#current-playlist #player {
     position: absolute;
     top: 0px;
     left: 300px;
