@@ -39,7 +39,7 @@ gulp.task('check-port', function (cb) {
   });
 });
 
-gulp.task('electron:start', ['transpile', 'copy'], function() {
+gulp.task('electron:start', ['check-port', 'transpile', 'copy'], function() {
   electron.start();
 });
 
@@ -51,7 +51,7 @@ gulp.task('watch', ['electron:start'], function () {
   gulp.watch(['src/**/*'], ['transpile', 'copy', 'electron:restart']);
 });
 
-gulp.task('transpile', ['check-port'], function (cb) {
+gulp.task('transpile', function (cb) {
   gulp.src(['src/**/*.js'])
     .pipe(cache('transpile'))
     .pipe(debug())
@@ -63,7 +63,7 @@ gulp.task('transpile', ['check-port'], function (cb) {
     .on('end', cb);
 });
 
-gulp.task('copy', ['check-port'], function (cb) {
+gulp.task('copy', function (cb) {
   gulp.src(['src/**/*.*', '!src/**/*.js'])
     .pipe(cache('copy'))
     .pipe(debug())
@@ -72,4 +72,4 @@ gulp.task('copy', ['check-port'], function (cb) {
     .on('end', cb);
 });
 
-gulp.task('default', ['check-port', 'transpile', 'copy', 'electron:start', 'watch']);
+gulp.task('default', ['transpile', 'copy', 'check-port', 'electron:start', 'watch']);
