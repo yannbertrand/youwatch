@@ -222,7 +222,7 @@ const NoInternetPage = React.createClass({
     setTimeout(() => {
       this.setState((state) => {
         return {
-          i: (state.i === 64000)? 64000: state.i*2,
+          i: (state.i === 60000)? 60000: state.i+1000,
           loading: true,
           connected: false
         };
