@@ -101,13 +101,30 @@ app.on('ready', () => {
       });
     });
 
-    socket.on('video/watch', (video) => {
-      socket.emit('video/watch', video.id);
+    socket.on('video/cue', (video) => {
+      console.log('Cueing video: ', video.id);
+      socket.emit('video/cue', video.id);
 
       if (!currentPlaylist[video.id]) {
         currentPlaylist[video.id] = video;
       }
       socket.emit('playlist/update', currentPlaylist);
+    });
+
+    socket.on('video/start', (id) => {
+      console.log('Video started: ', id);
+    });
+
+    socket.on('video/pause', (id) => {
+      console.log('Video paused: ', id);
+    });
+
+    socket.on('video/buffer', (id) => {
+      console.log('Video buffering: ', id);
+    });
+
+    socket.on('video/end', (id) => {
+      console.log('Video ended: ', id);
     });
 
     function launchApp() {
