@@ -3,15 +3,44 @@ const mainElement = document.getElementById('main');
 
 /* Subscriptions Page */
 const Player = React.createClass({
-  updatePlayer: function (id) {
+  onStateChange: function (event) {
+    switch (event.data) {
+      case YT.PlayerState.PLAYING:
+        Socket.emit('video/start', this.state.player.getVideoData()['video_id']);
+        break;
+      case YT.PlayerState.PAUSED:
+        Socket.emit('video/pause', this.state.player.getVideoData()['video_id']);
+        break;
+      case YT.PlayerState.BUFFERING:
+        Socket.emit('video/buffer', this.state.player.getVideoData()['video_id']);
+        break;
+      case YT.PlayerState.ENDED:
+        Socket.emit('video/end', this.state.player.getVideoData()['video_id']);
+        break;
+    };
+  },
+  updateVideo: function (id) {
+    this.setState((state) => {
+      return {
+        id: id,
+        player: state.player
+      }
+    })
     this.state.player.cueVideoById(id);
   },
   componentDidMount: function () {
     this.setState({
-      player: new YT.Player('player')
+      id: null,
+      // YT may not be loaded at this time, need to find a solution...
+      // That's probably why I can't put this in a getInitialState method
+      player: new YT.Player('player', {
+          events: {
+            onStateChange: this.onStateChange
+          }
+        })
     });
 
-    Socket.on('video/watch', this.updatePlayer);
+    Socket.on('video/cue', this.updateVideo);
   },
   render: function () {
     return <div id="player"></div>;
@@ -21,7 +50,7 @@ const Player = React.createClass({
 const PlaylistItem = React.createClass({
   watchVideo: function () {
     if (this.props.id) {
-      Socket.emit('video/watch', this.props);
+      Socket.emit('video/cue', this.props);
     }
   },
   render: function () {
@@ -85,7 +114,7 @@ const CurrentPlaylist = React.createClass({
 const Video = React.createClass({
   watchVideo: function () {
     if (this.props.id) {
-      Socket.emit('video/watch', this.props);
+      Socket.emit('video/cue', this.props);
     }
   },
   render: function () {
