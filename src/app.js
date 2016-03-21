@@ -1,4 +1,7 @@
 'use strict';
+
+const CONFIG = require('./config');
+
 const app = require('app');
 const BrowserWindow = require('browser-window');
 
@@ -44,8 +47,8 @@ function onClosed(windowName) {
 
 function createMainWindow() {
   const win = new BrowserWindow({
-    width: 1200,
-    height: 700
+    width: CONFIG.MAIN_WINDOW.WIDTH,
+    height: CONFIG.MAIN_WINDOW.HEIGHT
   });
 
   win.loadUrl('file://' + __dirname + '/client/index.html');
@@ -56,8 +59,8 @@ function createMainWindow() {
 
 function createLogInWindow(url) {
   const win = new BrowserWindow({
-    width: 500,
-    height: 600
+    width: CONFIG.AUTH_WINDOW.WIDTH,
+    height: CONFIG.AUTH_WINDOW.HEIGHT
   });
 
   win.loadUrl(url);
