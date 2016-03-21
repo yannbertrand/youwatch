@@ -24,9 +24,20 @@ const Player = React.createClass({
       return {
         id: id,
         player: state.player
-      }
-    })
+      };
+    });
+
     this.state.player.cueVideoById(id);
+  },
+  playVideo: function (id) {
+    this.setState((state) => {
+      return {
+        id: id,
+        player: state.player
+      };
+    });
+
+    this.state.player.loadVideoById(id);
   },
   componentDidMount: function () {
     this.setState({
@@ -41,6 +52,7 @@ const Player = React.createClass({
     });
 
     Socket.on('video/cue', this.updateVideo);
+    Socket.on('video/play', this.playVideo);
   },
   render: function () {
     return <div id="player"></div>;

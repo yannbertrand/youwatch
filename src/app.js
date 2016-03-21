@@ -106,16 +106,25 @@ app.on('ready', () => {
 
     socket.on('video/cue', (video) => {
       console.log('Cueing video: ', video.id);
-      socket.emit('video/cue', video.id);
+      if (!Object.keys(currentPlaylist).length)
+        socket.emit('video/cue', video.id);
 
       if (!currentPlaylist[video.id]) {
         currentPlaylist[video.id] = video;
       }
+
       socket.emit('playlist/update', currentPlaylist);
+    });
+
+    socket.on('video/play', (video) => {
+      console.log('Play video: ', video.id);
+
+      socket.emit('video/play', video.id);
     });
 
     socket.on('video/start', (id) => {
       console.log('Video started: ', id);
+      isVideoPlaying = true;
     });
 
     socket.on('video/pause', (id) => {
@@ -128,6 +137,15 @@ app.on('ready', () => {
 
     socket.on('video/end', (id) => {
       console.log('Video ended: ', id);
+      isVideoPlaying = false;
+      delete currentPlaylist[id];
+      socket.emit('playlist/update', currentPlaylist);
+
+      let playlistVideosIds = Object.keys(currentPlaylist);
+      if (!playlistVideosIds.length) return;
+      let newVideoId = playlistVideosIds[0];
+
+      socket.emit('video/play', newVideoId);
     });
 
     function launchApp() {
@@ -149,6 +167,7 @@ app.on('ready', () => {
     socket.on('internet/reconnect', launchApp);
 
     let currentPlaylist = {};
+    let isVideoPlaying = false;
     launchApp();
   });
 
