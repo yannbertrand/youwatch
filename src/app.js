@@ -97,31 +97,14 @@ app.on('ready', () => {
     socket.on('subscriptions/list', () => {
       YoutubeApi.getSubscriptions((err, subscriptions) => {
         if (err) {
-          console.log(err);
+          console.error(err);
         } else {
           socket.emit('subscriptions/list', subscriptions);
         }
       });
     });
 
-    socket.on('video/cue', (video) => {
-      console.log('Cueing video: ', video.id);
-      if (!Object.keys(currentPlaylist).length)
-        socket.emit('video/cue', video.id);
-
-      if (!currentPlaylist[video.id]) {
-        currentPlaylist[video.id] = video;
-      }
-
-      socket.emit('playlist/update', currentPlaylist);
-    });
-
-    socket.on('video/play', (video) => {
-      console.log('Play video: ', video.id);
-
-      socket.emit('video/play', video.id);
-    });
-
+    // Video
     socket.on('video/start', (id) => {
       console.log('Video started: ', id);
       isVideoPlaying = true;
@@ -135,18 +118,89 @@ app.on('ready', () => {
       console.log('Video buffering: ', id);
     });
 
+    socket.on('video/play', (video) => {
+      console.log('Play video: ', video.id);
+
+      if (!playlist.contains(video.id)) {
+        console.error('You tried to launch a video that is not in the playlist');
+        return;
+      }
+
+      playlist.playNow(video);
+      socket.emit('playlist/update', playlist);
+
+      if (isVideoPlaying)
+        socket.emit('video/play', video.id);
+      else
+        socket.emit('video/cue', video.id);
+    });
+
+    socket.on('video/cue', (video) => {
+      console.log('Cueing video: ', video.id);
+      if (!playlist.length)
+        socket.emit('video/cue', video.id);
+
+      if (!playlist.contains(video.id)) {
+        console.log('Pushing a video into the playlist (' + video.id + ')');
+        playlist.push(video);
+        socket.emit('playlist/update', playlist);
+      }
+    });
+
+    socket.on('video/next', (video) => {
+      console.log('Set next video: ', video.id);
+      if (!playlist.length)
+        socket.emit('video/cue', video.id);
+
+      if (!playlist.contains(video.id)) {
+        playlist.setNext(video);
+      }
+
+      socket.emit('playlist/update', playlist);
+    });
+
     socket.on('video/end', (id) => {
       console.log('Video ended: ', id);
       isVideoPlaying = false;
-      delete currentPlaylist[id];
-      socket.emit('playlist/update', currentPlaylist);
+      playlist.remove(id);
+      socket.emit('playlist/update', playlist);
 
-      let playlistVideosIds = Object.keys(currentPlaylist);
-      if (!playlistVideosIds.length) return;
-      let newVideoId = playlistVideosIds[0];
+      if (!playlist.length) return;
 
-      socket.emit('video/play', newVideoId);
+      socket.emit('video/play', playlist[0].id);
     });
+
+    function isVideoInPlaylist(videoId) {
+      return ~concoctPlaylistVideoIds().indexOf(videoId);
+    }
+
+    // === _.pluck(playlist, 'id')
+    function concoctPlaylistVideoIds() {
+      let playlistVideosIds = [];
+
+      for (let video of playlist)
+        playlistVideosIds.push(video.id);
+
+      return playlistVideosIds;
+    }
+
+    function removeVideoFromPlaylist(videoId) {
+      if (!playlist.contains(videoId)) return;
+
+      playlist.splice(playlist.concoctVideoIds().indexOf(videoId), 1);
+    }
+
+    function playVideoNow(video) {
+      playlist.remove(video.id);
+      playlist.splice(0, 0, video);
+    }
+
+    function setNextVideoInPlaylist(video) {
+      if (playlist.length)
+        playlist.splice(1, 0, video);
+      else
+        playlist.push(video);
+    }
 
     function launchApp() {
       if (isOnline((err, online) => {
@@ -166,7 +220,13 @@ app.on('ready', () => {
 
     socket.on('internet/reconnect', launchApp);
 
-    let currentPlaylist = {};
+    let playlist = [];
+    playlist.concoctVideoIds = concoctPlaylistVideoIds;
+    playlist.remove = removeVideoFromPlaylist;
+    playlist.contains = isVideoInPlaylist;
+    playlist.playNow = playVideoNow;
+    playlist.setNext = setNextVideoInPlaylist;
+
     let isVideoPlaying = false;
     launchApp();
   });
