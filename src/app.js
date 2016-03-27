@@ -9,6 +9,7 @@ const YoutubeApi = require('./youtubeapi');
 
 const Hapi = require('hapi');
 const isOnline = require('is-online');
+const youtubeRegex = require('youtube-regex');
 
 // Create the Hapi Web Server
 const server = new Hapi.Server();
@@ -118,13 +119,8 @@ app.on('ready', () => {
       console.log('Video buffering: ', id);
     });
 
-    socket.on('video/play', (video) => {
+    function playVideo(video) {
       console.log('Play video: ', video.id);
-
-      if (!playlist.contains(video.id)) {
-        console.error('You tried to launch a video that is not in the playlist');
-        return;
-      }
 
       playlist.playNow(video);
       socket.emit('playlist/update', playlist);
@@ -133,8 +129,12 @@ app.on('ready', () => {
         socket.emit('video/play', video.id);
       else
         socket.emit('video/cue', video.id);
-    });
+    }
 
+    /* This method is called to play a video immediately */
+    socket.on('video/play', playVideo);
+
+    /* Put a video on the end of the playlist */
     socket.on('video/cue', (video) => {
       console.log('Cueing video: ', video.id);
       if (!playlist.length)
@@ -147,6 +147,7 @@ app.on('ready', () => {
       }
     });
 
+    /* Set a video as next to play */
     socket.on('video/next', (video) => {
       console.log('Set next video: ', video.id);
       if (!playlist.length)
@@ -157,6 +158,18 @@ app.on('ready', () => {
       }
 
       socket.emit('playlist/update', playlist);
+    });
+
+    /* When something is pasted, if it is a YouTube video, play it */
+    socket.on('video/paste', (text) => {
+      if (!youtubeRegex().test(text))
+        return;
+
+      let videoId = youtubeRegex().exec(text)[1];
+      YoutubeApi.getVideo(videoId, function (err, theVideo) {
+        if (err) return;
+        playVideo(theVideo);
+      });
     });
 
     socket.on('video/end', (id) => {
@@ -191,7 +204,8 @@ app.on('ready', () => {
     }
 
     function playVideoNow(video) {
-      playlist.remove(video.id);
+      if (playlist.contains(video.id))
+        playlist.remove(video.id);
       playlist.splice(0, 0, video);
     }
 
