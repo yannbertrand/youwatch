@@ -184,8 +184,17 @@ const SubscriptionsPage = React.createClass({
   componentDidMount: function () {
     Socket.emit('subscriptions/list');
     Socket.on('subscriptions/list', (subscriptions) => {
+      window.addEventListener('paste', this.onPaste);
       this.setState({ loading: false, videos: subscriptions })
     });
+  },
+  componentWillUnmount: function () {
+    window.removeEventListener('paste', this.onPaste);
+  },
+  onPaste: function (event) {
+    if (!event.clipboardData.getData('text/plain')) return;
+
+    Socket.emit('video/paste', event.clipboardData.getData('text/plain'));
   },
   render: function () {
     if (this.state.loading) {

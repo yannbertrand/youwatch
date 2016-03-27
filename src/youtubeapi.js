@@ -64,6 +64,31 @@ module.exports.getToken = function (code, cb) {
   });
 };
 
+module.exports.getVideo = function (videoId, cb) {
+  google.youtube('v3').videos.list({
+    part: 'id, snippet',
+    id: videoId,
+    auth: oauth2Client
+  }, function (err, videoPage) {
+    if (err) {
+      console.log('Error when trying to get a video', err);
+      return cb(err);
+    }
+    if (!videoPage.pageInfo.totalResults) {
+      console.log('Video not found');
+      return cb(404);
+    }
+
+    cb(null, {
+      id: videoPage.items[0].id,
+      thumbnail: videoPage.items[0].snippet.thumbnails.high.url,
+      title: videoPage.items[0].snippet.title,
+      channel: videoPage.items[0].snippet.channelTitle,
+      publishedAt: new Date(videoPage.items[0].snippet.publishedAt)
+    });
+  });
+};
+
 module.exports.getSubscriptions = function (cb) {
   async.auto({
 
