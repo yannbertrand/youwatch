@@ -60,9 +60,9 @@ const Player = React.createClass({
 });
 
 const PlaylistItem = React.createClass({
-  watchVideo: function () {
+  playVideo: function () {
     if (this.props.id) {
-      Socket.emit('video/cue', this.props);
+      Socket.emit('video/play', this.props);
     }
   },
   render: function () {
@@ -70,7 +70,7 @@ const PlaylistItem = React.createClass({
       <div>
         <div className="playlist-item">
           <h5>
-            <a onClick={this.watchVideo} title={this.props.title}>
+            <a onClick={this.playVideo} title={this.props.title}>
               {this.props.title}
             </a>
           </h5>
@@ -124,9 +124,14 @@ const CurrentPlaylist = React.createClass({
 });
 
 const Video = React.createClass({
-  watchVideo: function () {
+  cueVideo: function () {
     if (this.props.id) {
       Socket.emit('video/cue', this.props);
+    }
+  },
+  setNextVideo: function () {
+    if (this.props.id) {
+      Socket.emit('video/next', this.props);
     }
   },
   render: function () {
@@ -137,11 +142,12 @@ const Video = React.createClass({
         </div>
         <header>
           <h5>
-            <a onClick={this.watchVideo} title={this.props.title}>
+            <a onClick={this.setNextVideo} title={this.props.title}>
               {this.props.title}
             </a>
           </h5>
           <h6>{this.props.channel}</h6>
+          <h6><button onClick={this.cueVideo}>+</button></h6>
         </header>
       </article>
     );
