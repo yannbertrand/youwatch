@@ -17,8 +17,8 @@ a {
     display: block;
     height: 0;
     width: 100%;
-    /* 480:360 = 75.00% = calc(360 / 480 * 100%) */
-    padding-bottom: 75.00%;
+    /* 320:180 = 56.25% = 180/320 * 100 */
+    padding-bottom: 56.25%;
 }
 .ratio-container > * {
     position: absolute;
