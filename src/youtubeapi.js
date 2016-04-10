@@ -168,7 +168,7 @@ module.exports.getSubscriptions = function (cb) {
           lastUploadedVideosFromChannel = lastUploadedVideosFromChannel.items.map(uploadedVideoFromChannel => {
             return {
               id: uploadedVideoFromChannel.contentDetails.videoId,
-              thumbnail: uploadedVideoFromChannel.snippet.thumbnails.high.url,
+              thumbnail: uploadedVideoFromChannel.snippet.thumbnails.medium.url,
               title: uploadedVideoFromChannel.snippet.title,
               channel: uploadedVideoFromChannel.snippet.channelTitle,
               publishedAt: new Date(uploadedVideoFromChannel.snippet.publishedAt)
