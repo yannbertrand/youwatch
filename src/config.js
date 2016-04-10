@@ -16,13 +16,15 @@ module.exports = {
   // The main window config
   MAIN_WINDOW: {
     WIDTH: 1200,
-    HEIGHT: 700
+    HEIGHT: 700,
+    IS_DEV_TOOLS_OPEN: false
   },
 
   // The auth window config
   AUTH_WINDOW: {
     WIDTH: 500,
-    HEIGHT: 600
+    HEIGHT: 600,
+    IS_DEV_TOOLS_OPEN: false
   }
 
 };

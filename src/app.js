@@ -46,28 +46,37 @@ function onClosed(windowName) {
   windows[windowName] = null;
 }
 
-function createMainWindow() {
-  const win = new BrowserWindow({
-    width: CONFIG.MAIN_WINDOW.WIDTH,
-    height: CONFIG.MAIN_WINDOW.HEIGHT
-  });
+function createWindow(windowName, url, width, height, isDevToolsOpen) {
+  const win = new BrowserWindow({ width, height });
 
-  win.loadUrl('file://' + __dirname + '/client/index.html');
-  win.on('closed', onClosed.bind(MAIN_WINDOW));
+  win.loadUrl(url);
+  win.on('closed', onClosed.bind(windowName));
+
+  if (isDevToolsOpen) win.openDevTools();
 
   return win;
 }
 
+function createMainWindow() {
+  const url = 'file://' + __dirname + '/client/index.html';
+
+  return createWindow(
+    MAIN_WINDOW,
+    url,
+    CONFIG.MAIN_WINDOW.WIDTH,
+    CONFIG.MAIN_WINDOW.HEIGHT,
+    CONFIG.MAIN_WINDOW.IS_DEV_TOOLS_OPEN
+  );
+}
+
 function createLogInWindow(url) {
-  const win = new BrowserWindow({
-    width: CONFIG.AUTH_WINDOW.WIDTH,
-    height: CONFIG.AUTH_WINDOW.HEIGHT
-  });
-
-  win.loadUrl(url);
-  win.on('closed', onClosed.bind('auth'));
-
-  return win;
+  return createWindow(
+    AUTH_WINDOW,
+    url,
+    CONFIG.AUTH_WINDOW.WIDTH,
+    CONFIG.AUTH_WINDOW.HEIGHT,
+    CONFIG.AUTH_WINDOW.IS_DEV_TOOLS_OPEN
+  );
 }
 
 app.on('window-all-closed', () => {
