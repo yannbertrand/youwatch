@@ -29,6 +29,27 @@ a {
     display: block;
 }
 
+#sidebar {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 53px;
+    height: 100%;
+    overflow-x: none;
+    overflow-y: auto;
+}
+
+#sidebar .nav.nav-pills .nav-link.active {
+    border-radius: 0 .25rem .25rem 0;
+}
+
+#videos-grid {
+    position: absolute;
+    top: 0px;
+    left: 53px;
+    padding: 5px;
+}
+
 #videos-grid article.video img {
     width: 100%;
     height: 100%;
