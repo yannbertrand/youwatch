@@ -51,6 +51,16 @@ function createWindow(windowName, url, width, height, isDevToolsOpen) {
 
   win.loadUrl(url);
   win.on('closed', onClosed.bind(windowName));
+  win.on('enter-html-full-screen', (event) => {
+    // tmp
+    // This event is called when the YouTube player goes fullscreen
+    // It should only fullscreen the webview, but it does fullscreen the app
+    setTimeout(function () {
+      win.setFullScreen(false);
+    }, 1000);
+  });
+
+  win.setMinimumSize(780, 270);
 
   if (isDevToolsOpen) win.openDevTools();
 
