@@ -179,6 +179,27 @@ const VideoGrid = React.createClass({
   }
 });
 
+const Sidebar = React.createClass({
+  render: function () {
+    return (
+      <div id="sidebar">
+        <ul className="nav nav-pills nav-stacked">
+          <li className="nav-item">
+            <a href="#" className="nav-link active">
+              <i className="fa fa-th fa-fw"></i>
+            </a>
+          </li>
+          <li className="nav-item">
+            <a href="#" className="nav-link disabled">
+              <i className="fa fa-cog fa-fw"></i>
+            </a>
+          </li>
+        </ul>
+      </div>
+    );
+  }
+});
+
 const SubscriptionsPage = React.createClass({
   getInitialState: function () { return { loading: true, videos: null }; },
   componentDidMount: function () {
@@ -209,6 +230,7 @@ const SubscriptionsPage = React.createClass({
     
     return (
       <div>
+        <Sidebar />
         <VideoGrid videos={this.state.videos} />
         <CurrentPlaylist />
       </div>
