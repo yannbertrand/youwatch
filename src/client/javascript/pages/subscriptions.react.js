@@ -180,11 +180,12 @@ const SubscriptionsPage = React.createClass({
   componentDidMount: function () {
     Socket.emit('subscriptions/list');
     Socket.on('subscriptions/list', (subscriptions) => {
+      this.setState({ loading: false, videos: subscriptions });
       window.addEventListener('paste', this.onPaste);
-      this.setState({ loading: false, videos: subscriptions })
     });
   },
   componentWillUnmount: function () {
+    Socket.removeAllListeners('subscriptions/list');
     window.removeEventListener('paste', this.onPaste);
   },
   onPaste: function (event) {

@@ -46,6 +46,9 @@ const Sidebar = React.createClass({
 });
 
 const App = React.createClass({
+  shouldComponentUpdate: function (nextProps, nextState) {
+    return nextState.currentPageName !== this.state.currentPageName;
+  },
   getInitialState: function () {
     return {
       pages: {
