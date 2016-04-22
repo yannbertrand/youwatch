@@ -162,6 +162,7 @@ const VideoGrid = React.createClass({
           <Video
             key={video.id}
             id={video.id}
+            duration={video.duration}
             thumbnail={video.thumbnail}
             title={video.title}
             channel={video.channel} />

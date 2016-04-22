@@ -71,7 +71,7 @@ module.exports.getVideo = function (videoId, cb) {
     auth: oauth2Client
   }, function (err, videoPage) {
     if (err) {
-      console.log('Error when trying to get a video', err);
+      console.log('Error while trying to get a video', err);
       return cb(err);
     }
     if (!videoPage.pageInfo.totalResults) {
@@ -109,7 +109,7 @@ module.exports.getSubscriptions = function (cb) {
             auth: oauth2Client
           }, function (err, aSubscriptionsPage) {
             if (err) {
-              console.log('Error when trying to find a subscription page');
+              console.log('Error while trying to find a subscription page');
               return nextPage(); // In fact retrying the same page
             }
 
@@ -135,7 +135,7 @@ module.exports.getSubscriptions = function (cb) {
           auth: oauth2Client
         }, function (err, channelDetails) {
           if (err) {
-            console.log('Error when trying to get channel ' + subscription.snippet.resourceId.channelId, err);
+            console.log('Error while trying to get channel ' + subscription.snippet.resourceId.channelId, err);
             return nextSubscription();
           }
 
@@ -150,41 +150,92 @@ module.exports.getSubscriptions = function (cb) {
     }],
 
     getLastUploadedVideos: ['getChannelDetails', function (next, results) {
-      var lastUploadedVideos = [];
+      var videosIds = [];
 
       async.each(results['getChannelDetails'], function (channel, nextChannel) {
         if (channel.pageInfo.totalResults <= 0) return nextChannel();
 
         google.youtube('v3').playlistItems.list({
-          part: 'id, snippet, contentDetails',
+          part: 'id, contentDetails',
           playlistId: channel.items[0].contentDetails.relatedPlaylists.uploads,
           auth: oauth2Client
         }, function (err, lastUploadedVideosFromChannel) {
           if (err) {
-            console.log('Error when trying to find playlist ' + channel.items[0].contentDetails.relatedPlaylists.uploads + ' from channel ' + channel.items[0].id, err);
+            console.log('Error while trying to find playlist ' + channel.items[0].contentDetails.relatedPlaylists.uploads + ' from channel ' + channel.items[0].id, err);
             return nextChannel();
           }
 
-          lastUploadedVideosFromChannel = lastUploadedVideosFromChannel.items.map(uploadedVideoFromChannel => {
-            return {
-              id: uploadedVideoFromChannel.contentDetails.videoId,
-              thumbnail: uploadedVideoFromChannel.snippet.thumbnails.medium.url,
-              title: uploadedVideoFromChannel.snippet.title,
-              channel: uploadedVideoFromChannel.snippet.channelTitle,
-              publishedAt: new Date(uploadedVideoFromChannel.snippet.publishedAt)
-            };
-          });
+          videosIds = videosIds.concat(
+            lastUploadedVideosFromChannel.items.map(uploadedVideoFromChannel => {
+              return uploadedVideoFromChannel.contentDetails.videoId;
+            })
+          );
           
-          lastUploadedVideos = lastUploadedVideos.concat(lastUploadedVideosFromChannel);
           nextChannel();
         });
       }, function (err) {
-        next(err, lastUploadedVideos);
+        next(err, videosIds);
       });
     }],
 
-    orderLastUploadedVideos: ['getLastUploadedVideos', function (next, results) {
-      next(null, results['getLastUploadedVideos'].sort((firstVideo, secondVideo) => {
+    constructVideosIdsStrings: ['getLastUploadedVideos', function (next, results) {
+      let counter = 0;
+      let idList = [];
+      let currentIds = '';
+
+      for (let videoId of results['getLastUploadedVideos']) {
+        currentIds += (counter? ', ' : '') + videoId;
+
+        if (++counter === 50) {
+          idList.push(currentIds);
+          currentIds = '';
+          counter = 0;
+        }
+      }
+
+      if (counter) {
+        idList.push(currentIds);
+      }
+
+      return next(null, idList);
+    }],
+
+    getVideosDetails: ['constructVideosIdsStrings', function (next, results) {
+      let videosDetails = [];
+      async.each(results['constructVideosIdsStrings'], function (ids, nextIds) {
+        google.youtube('v3').videos.list({
+          part: 'id, snippet, contentDetails',
+          id: ids,
+          auth: oauth2Client
+        }, function (err, videos) {
+          if (err) {
+            console.log('Error while trying to find videos', err);
+            return nextIds();
+          }
+
+          videosDetails = videosDetails.concat(
+            videos.items.map(video => {
+              return {
+                id: video.id,
+                duration: iso8601ToStringDuration(video.contentDetails.duration),
+                thumbnail: video.snippet.thumbnails.medium.url,
+                title: video.snippet.title,
+                channel: video.snippet.channelTitle,
+                publishedAt: new Date(video.snippet.publishedAt)
+              }
+            })
+          );
+
+          return nextIds();
+        });
+      }, function (err) {
+        next(err, videosDetails);
+      });
+
+    }],
+
+    orderLastUploadedVideos: ['getVideosDetails', function (next, results) {
+      next(null, results['getVideosDetails'].sort((firstVideo, secondVideo) => {
         return secondVideo.publishedAt.getTime() - firstVideo.publishedAt.getTime();
       }));
     }]
@@ -195,3 +246,65 @@ module.exports.getSubscriptions = function (cb) {
     cb(null, results['orderLastUploadedVideos']);
   });
 };
+
+
+
+function iso8601ToStringDuration(rawDuration) {
+  return constructDurationString(parse(rawDuration));
+
+  // From ISO8601-duration npm
+  // https://github.com/tolu/ISO8601-duration/blob/master/src/index.js
+  function parse(durationString) {
+    const numbers = '\\d+(?:[\\.,]\\d{0,3})?';
+    const weekPattern = `(${numbers}W)`;
+    const datePattern = `(${numbers}Y)?(${numbers}M)?(${numbers}D)?`;
+    const timePattern = `T(${numbers}H)?(${numbers}M)?(${numbers}S)?`;
+
+    const iso8601 = `P(?:${weekPattern}|${datePattern}(?:${timePattern})?)`;
+    const pattern = new RegExp(iso8601);
+    const objMap = ['weeks', 'years', 'months', 'days', 'hours', 'minutes', 'seconds'];
+
+    return durationString.match(pattern).slice(1).reduce((prev, next, idx) => {
+      prev[objMap[idx]] = parseFloat(next) || 0;
+      return prev;
+    }, {});
+  }
+
+  function constructDurationString(durationObject) {
+    let duration = '';
+    let flag = false;
+
+    if (flag || durationObject.hours) {
+      duration += leftpad(durationObject.hours) + ':';
+      flag = true;
+    }
+
+    if (flag || durationObject.minutes) {
+      duration += leftpad(durationObject.minutes) + ':';
+    } else {
+      duration += '0:';
+    }
+
+    duration += leftpad(durationObject.seconds, 2, 0);
+
+    return duration;
+  }
+
+  // The famous npm leftpad module-function
+  // https://github.com/camwest/left-pad/blob/master/index.js
+  function leftpad(str, len, ch) {
+    str = String(str);
+
+    var i = -1;
+
+    if (!ch && ch !== 0) ch = ' ';
+
+    len = len - str.length;
+
+    while (++i < len) {
+      str = ch + str;
+    }
+
+    return str;
+  }
+}
