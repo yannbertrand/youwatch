@@ -16,9 +16,9 @@
   },
   "electronVersion": "0.34.0",
   "scripts": {
+    "start": "gulp",
     "test": "xo",
-    "start": "electron .",
-    "build": "electron-packager . $npm_package_productName --out=dist --ignore='^/dist$' --prune --asar --all --version=$npm_package_electronVersion",
+    "package": "electron-packager . $npm_package_productName --out=build --ignore='^/build$' --prune --asar --all --version=$npm_package_electronVersion",
     "clean": "rm -f ~/.config/configstore/YouWatch.json; rm -rf ~/Library/Application\\ Support/YouWatch"
   },
   "files": [
