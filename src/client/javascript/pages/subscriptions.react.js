@@ -136,14 +136,18 @@ const Video = React.createClass({
         <div className="ratio-container">
           <img className="thumbnail lazyload blur-up" data-sizes="auto" data-src={this.props.thumbnail} src="images/loader.gif" />
         </div>
+        <span className="duration">{this.props.duration}</span>
+
         <header>
+          <button className="btn btn-secondary btn-sm cue"
+                  onClick={this.cueVideo}
+                  title="Cue this video">+</button>
           <h5>
             <a onClick={this.setNextVideo} title={this.props.title}>
               {this.props.title}
             </a>
           </h5>
           <h6>{this.props.channel}</h6>
-          <h6><button onClick={this.cueVideo}>+</button></h6>
         </header>
       </article>
     );

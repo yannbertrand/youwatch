@@ -65,8 +65,28 @@ a {
     filter: blur(0);
 }
 
-#videos-grid article.video h5,
-#videos-grid article.video h6,
+#videos-grid article.video span.duration {
+    padding: 0 4px;
+    font-weight: 500;
+    font-size: 11px;
+    background-color: #000;
+    color: #fff;
+    height: 14px;
+    line-height: 14px;
+    opacity: .75;
+    vertical-align: top;
+    display: inline-block;
+    position: absolute;
+    right: 18px;
+    margin-top: -16px;
+}
+
+#videos-grid article.video header {
+    margin-top: 2px;
+}
+
+#videos-grid article.video header h5,
+#videos-grid article.video header h6,
 #current-playlist #playlist .playlist-item h5,
 #current-playlist #playlist .playlist-item h6 {
     text-overflow: ellipsis;
@@ -74,14 +94,18 @@ a {
     white-space: nowrap;
 }
 
-#videos-grid article.video h5,
+#videos-grid article.video header h5,
 #current-playlist #playlist .playlist-item h5 {
     font-size: 0.9em;
     margin-bottom: .25rem;
 }
-#videos-grid article.video h6,
+#videos-grid article.video header h6,
 #current-playlist #playlist .playlist-item h6 {
     font-size: 0.7em;
+}
+
+#videos-grid article.video header button.cue {
+    float: right;
 }
 
 #current-playlist #playlist .playlist-item {
