@@ -105,6 +105,20 @@ app.on('ready', () => {
   windows[MAIN_WINDOW] = createMainWindow();
 
   io.on('connection', (socket) => {
+    socket.on('internet/reconnect', launchApp);
+
+    let subscriptions = [];
+
+    let playlist = [];
+    playlist.concoctVideoIds = concoctPlaylistVideoIds;
+    playlist.remove = removeVideoFromPlaylist;
+    playlist.contains = isVideoInPlaylist;
+    playlist.playNow = playVideoNow;
+    playlist.setNext = setNextVideoInPlaylist;
+
+    let isVideoPlaying = false;
+    launchApp();
+
     socket.on('youtube/auth', () => {
       socket.emit('youtube/waiting');
 
@@ -115,10 +129,14 @@ app.on('ready', () => {
     });
 
     socket.on('subscriptions/list', () => {
-      YoutubeApi.getSubscriptions((err, subscriptions) => {
+      if (subscriptions.length)
+        return socket.emit('subscriptions/list', subscriptions);
+      
+      YoutubeApi.getSubscriptions((err, _subscriptions) => {
         if (err) {
           console.error(err);
         } else {
+          subscriptions = _subscriptions;
           socket.emit('subscriptions/list', subscriptions);
         }
       });
@@ -250,18 +268,6 @@ app.on('ready', () => {
         });
       }));
     }
-
-    socket.on('internet/reconnect', launchApp);
-
-    let playlist = [];
-    playlist.concoctVideoIds = concoctPlaylistVideoIds;
-    playlist.remove = removeVideoFromPlaylist;
-    playlist.contains = isVideoInPlaylist;
-    playlist.playNow = playVideoNow;
-    playlist.setNext = setNextVideoInPlaylist;
-
-    let isVideoPlaying = false;
-    launchApp();
   });
 
   server.route({
