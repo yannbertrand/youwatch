@@ -132,7 +132,7 @@ const Video = React.createClass({
   },
   render: function () {
     return (
-      <article className="video col-md-3 col-sm-6 col-xs-12">
+      <article className="video col-xl-2 col-lg-3 col-md-4 col-sm-6 col-xs-12">
         <div className="ratio-container">
           <img className="thumbnail lazyload blur-up" data-sizes="auto" data-src={this.props.thumbnail} src="images/loader.gif" />
         </div>
