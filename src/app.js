@@ -3,34 +3,13 @@
 const CONFIG = require('./config');
 
 const app = require('app');
-const BrowserWindow = require('browser-window');
 
 const YoutubeApi = require('./youtubeapi');
+const Windows = require('./windows');
+const server = require('./server');
 
-const Hapi = require('hapi');
 const isOnline = require('is-online');
 const youtubeRegex = require('youtube-regex');
-
-// Create the Hapi Web Server
-const server = new Hapi.Server();
-server.connection({
-  host: 'localhost',
-  port: '@@PORT'
-});
-
-// Start the server
-server.start((err) => {
-  if (err) {
-    throw err;
-  }
-
-  console.log('Server running at:', server.info.uri);
-});
-
-const AUTH_WINDOW = 'auth';
-const MAIN_WINDOW = 'main';
-
-const io = require('socket.io')(server.listener);
 
 // report crashes to the Electron project
 require('crash-reporter').start();
@@ -38,78 +17,22 @@ require('crash-reporter').start();
 // adds debug features like hotkeys for triggering dev tools and reload
 require('electron-debug')();
 
-// prevent window being garbage collected
-let windows = {};
-
-function onClosed(windowName) {
-  // dereference the window
-  windows[windowName] = null;
-}
-
-function createWindow(windowName, url, width, height, isDevToolsOpen) {
-  const win = new BrowserWindow({ width, height });
-
-  win.loadUrl(url);
-  win.on('closed', onClosed.bind(windowName));
-  win.on('enter-html-full-screen', (event) => {
-    // tmp
-    // This event is called when the YouTube player goes fullscreen
-    // It should only fullscreen the webview, but it does fullscreen the app
-    setTimeout(function () {
-      win.setFullScreen(false);
-    }, 1000);
-  });
-
-  win.setMinimumSize(780, 270);
-
-  if (isDevToolsOpen) win.openDevTools();
-
-  return win;
-}
-
-function createMainWindow() {
-  const url = 'file://' + __dirname + '/client/index.html';
-
-  return createWindow(
-    MAIN_WINDOW,
-    url,
-    CONFIG.MAIN_WINDOW.WIDTH,
-    CONFIG.MAIN_WINDOW.HEIGHT,
-    CONFIG.MAIN_WINDOW.IS_DEV_TOOLS_OPEN
-  );
-}
-
-function createLogInWindow(url) {
-  return createWindow(
-    AUTH_WINDOW,
-    url,
-    CONFIG.AUTH_WINDOW.WIDTH,
-    CONFIG.AUTH_WINDOW.HEIGHT,
-    CONFIG.AUTH_WINDOW.IS_DEV_TOOLS_OPEN
-  );
-}
-
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
   }
 });
 
-app.on('activate-with-no-open-windows', () => {
-  if (!windows[MAIN_WINDOW]) {
-    windows[MAIN_WINDOW] = createMainWindow();
-  }
-});
+app.on('activate-with-no-open-windows', Windows.activateWithNoOpenWindows);
 
 app.on('ready', () => {
-  windows[MAIN_WINDOW] = createMainWindow();
+  Windows.openMainWindow();
 
-  io.on('connection', (socket) => {
+  server.io.on('connection', (socket) => {
     socket.on('internet/reconnect', launchApp);
 
     let subscriptions = [];
     let playlist = require('./playlist');
-    console.log(playlist);
 
     let isVideoPlaying = false;
     launchApp();
@@ -118,8 +41,8 @@ app.on('ready', () => {
       socket.emit('youtube/waiting');
 
       YoutubeApi.getAuthUrl((url) => {
-        socket.emit('youtube/waitingforuser')
-        windows[AUTH_WINDOW] = createLogInWindow(url);
+        socket.emit('youtube/waitingforuser');
+        Windows.openLogInWindow(url);
       });
     });
 
@@ -232,15 +155,15 @@ app.on('ready', () => {
     }
   });
 
-  server.route({
+  server.hapi.route({
     method: 'GET',
     path:'/youtube/callback',
     handler: function (request, reply) {
-      io.emit('youtube/waiting');
+      server.io.emit('youtube/waiting');
       YoutubeApi.getToken(request.query.code, function (token) {
-        io.emit('youtube/callback', token);
+        server.io.emit('youtube/callback', token);
 
-        windows[AUTH_WINDOW].close();
+        Windows.closeLogInWindow();
       });
     }
   });
