@@ -7,6 +7,7 @@ const app = require('app');
 const YoutubeApi = require('./youtubeapi');
 const Windows = require('./windows');
 const server = require('./server');
+const database = require('./database');
 
 const isOnline = require('is-online');
 const youtubeRegex = require('youtube-regex');
