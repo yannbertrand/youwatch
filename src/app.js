@@ -108,13 +108,8 @@ app.on('ready', () => {
     socket.on('internet/reconnect', launchApp);
 
     let subscriptions = [];
-
-    let playlist = [];
-    playlist.concoctVideoIds = concoctPlaylistVideoIds;
-    playlist.remove = removeVideoFromPlaylist;
-    playlist.contains = isVideoInPlaylist;
-    playlist.playNow = playVideoNow;
-    playlist.setNext = setNextVideoInPlaylist;
+    let playlist = require('./playlist');
+    console.log(playlist);
 
     let isVideoPlaying = false;
     launchApp();
@@ -219,39 +214,6 @@ app.on('ready', () => {
 
       socket.emit('video/play', playlist[0].id);
     });
-
-    function isVideoInPlaylist(videoId) {
-      return ~concoctPlaylistVideoIds().indexOf(videoId);
-    }
-
-    // === _.pluck(playlist, 'id')
-    function concoctPlaylistVideoIds() {
-      let playlistVideosIds = [];
-
-      for (let video of playlist)
-        playlistVideosIds.push(video.id);
-
-      return playlistVideosIds;
-    }
-
-    function removeVideoFromPlaylist(videoId) {
-      if (!playlist.contains(videoId)) return;
-
-      playlist.splice(playlist.concoctVideoIds().indexOf(videoId), 1);
-    }
-
-    function playVideoNow(video) {
-      if (playlist.contains(video.id))
-        playlist.remove(video.id);
-      playlist.splice(0, 0, video);
-    }
-
-    function setNextVideoInPlaylist(video) {
-      if (playlist.length)
-        playlist.splice(1, 0, video);
-      else
-        playlist.push(video);
-    }
 
     function launchApp() {
       if (isOnline((err, online) => {
