@@ -25,7 +25,7 @@ module.exports.tryStoredAccessToken = function (cb) {
   google.youtube('v3').subscriptions.list({
     part: 'id',
     mine: true,
-    auth: oauth2Client
+    auth: oauth2Client,
   }, function (err, response) {
     if (err) return cb(true);
 
@@ -46,7 +46,7 @@ module.exports.getAuthUrl = function (cb) {
   var url = oauth2Client.generateAuthUrl({
     access_type: 'offline', // will return a refresh token
     // approval_prompt : 'force',
-    scope: 'https://www.googleapis.com/auth/youtube.readonly' // can be a space-delimited string or an array of scopes
+    scope: 'https://www.googleapis.com/auth/youtube.readonly', // can be a space-delimited string or an array of scopes
   });
 
   return cb(url);
@@ -68,7 +68,7 @@ module.exports.getVideo = function (videoId, cb) {
   google.youtube('v3').videos.list({
     part: 'id, snippet',
     id: videoId,
-    auth: oauth2Client
+    auth: oauth2Client,
   }, function (err, videoPage) {
     if (err) {
       console.log('Error while trying to get a video', err);
@@ -106,7 +106,7 @@ module.exports.getSubscriptions = function (cb) {
             maxResults: 50,
             order: 'alphabetical',
             pageToken: nextPageToken || null,
-            auth: oauth2Client
+            auth: oauth2Client,
           }, function (err, aSubscriptionsPage) {
             if (err) {
               console.log('Error while trying to find a subscription page');
@@ -132,7 +132,7 @@ module.exports.getSubscriptions = function (cb) {
         google.youtube('v3').channels.list({
           part: 'id, contentDetails',
           id: subscription.snippet.resourceId.channelId,
-          auth: oauth2Client
+          auth: oauth2Client,
         }, function (err, channelDetails) {
           if (err) {
             console.log('Error while trying to get channel ' + subscription.snippet.resourceId.channelId, err);
@@ -158,7 +158,7 @@ module.exports.getSubscriptions = function (cb) {
         google.youtube('v3').playlistItems.list({
           part: 'id, contentDetails',
           playlistId: channel.items[0].contentDetails.relatedPlaylists.uploads,
-          auth: oauth2Client
+          auth: oauth2Client,
         }, function (err, lastUploadedVideosFromChannel) {
           if (err) {
             console.log('Error while trying to find playlist ' + channel.items[0].contentDetails.relatedPlaylists.uploads + ' from channel ' + channel.items[0].id, err);
@@ -206,7 +206,7 @@ module.exports.getSubscriptions = function (cb) {
         google.youtube('v3').videos.list({
           part: 'id, snippet, contentDetails',
           id: ids,
-          auth: oauth2Client
+          auth: oauth2Client,
         }, function (err, videos) {
           if (err) {
             console.log('Error while trying to find videos', err);
