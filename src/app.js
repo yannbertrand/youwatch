@@ -13,7 +13,10 @@ const isOnline = require('is-online');
 const youtubeRegex = require('youtube-regex');
 
 // report crashes to the Electron project
-require('crash-reporter').start();
+require('crash-reporter').start({
+  companyName: 'YouWatch',
+  submitURL: '',
+});
 
 // adds debug features like hotkeys for triggering dev tools and reload
 require('electron-debug')();
