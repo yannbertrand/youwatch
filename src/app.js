@@ -38,7 +38,7 @@ app.on('ready', () => {
     let subscriptions = [];
     let playlist = require('./playlist');
 
-    let isVideoPlaying = false;
+    let videoPlaying = null;
     launchApp();
 
     socket.on('youtube/auth', () => {
@@ -67,7 +67,7 @@ app.on('ready', () => {
     // Video
     socket.on('video/start', (id) => {
       console.log('Video started: ', id);
-      isVideoPlaying = true;
+      videoPlaying = id;
     });
 
     socket.on('video/pause', (id) => {
@@ -77,18 +77,6 @@ app.on('ready', () => {
     socket.on('video/buffer', (id) => {
       console.log('Video buffering: ', id);
     });
-
-    function playVideo(video) {
-      console.log('Play video: ', video.id);
-
-      playlist.playNow(video);
-      socket.emit('playlist/update', playlist);
-
-      if (isVideoPlaying)
-        socket.emit('video/play', video.id);
-      else
-        socket.emit('video/cue', video.id);
-    }
 
     /* This method is called to play a video immediately */
     socket.on('video/play', playVideo);
@@ -131,15 +119,14 @@ app.on('ready', () => {
       });
     });
 
+    socket.on('video/remove', (id) => {
+      console.log('Remove video: ', id);
+      removeVideo(id);
+    })
+
     socket.on('video/end', (id) => {
       console.log('Video ended: ', id);
-      isVideoPlaying = false;
-      playlist.remove(id);
-      socket.emit('playlist/update', playlist);
-
-      if (!playlist.length) return;
-
-      socket.emit('video/play', playlist[0].id);
+      removeVideo(id);
     });
 
     function launchApp() {
@@ -156,6 +143,35 @@ app.on('ready', () => {
           }
         });
       }));
+    }
+
+    function playVideo(video) {
+      console.log('Play video: ', video.id);
+
+      playlist.playNow(video);
+      socket.emit('playlist/update', playlist);
+
+      if (videoPlaying) {
+        socket.emit('video/play', video.id);
+      }
+      else
+        socket.emit('video/cue', video.id);
+    }
+
+    function removeVideo(id) {
+      playlist.remove(id);
+      socket.emit('video/remove');
+      socket.emit('playlist/update', playlist);
+
+      // if (!playlist.length) {
+      //   videoPlaying = null;
+      //   return;
+      // }
+
+      // if (videoPlaying === playlist[0].id) return;
+
+      // socket.emit('video/play', playlist[0].id);
+      // videoPlaying = playlist[0].id;
     }
   });
 

@@ -104,7 +104,8 @@ a {
     font-size: 0.7em;
 }
 
-#videos-grid article.video header button.cue {
+#videos-grid article.video header button.cue,
+#current-playlist #playlist .playlist-item button.remove {
     float: right;
 }
 
