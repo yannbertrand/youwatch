@@ -23,6 +23,8 @@ const Player = React.createClass({
       };
     });
 
+    console.log(this.state.player);
+
     this.state.player.cueVideoById(id);
   },
   playVideo: function (id) {
@@ -34,6 +36,9 @@ const Player = React.createClass({
     });
 
     this.state.player.loadVideoById(id);
+  },
+  removeVideo: function () {
+    this.state.player.stopVideo();
   },
   componentDidMount: function () {
     this.setState({
@@ -49,6 +54,7 @@ const Player = React.createClass({
 
     Socket.on('video/cue', this.updateVideo);
     Socket.on('video/play', this.playVideo);
+    Socket.on('video/remove', this.removeVideo);
   },
   render: function () {
     return <div id="player"></div>;
@@ -56,17 +62,25 @@ const Player = React.createClass({
 });
 
 const PlaylistItem = React.createClass({
-  playVideo: function () {
+  play: function () {
     if (this.props.id) {
       Socket.emit('video/play', this.props);
+    }
+  },
+  remove: function () {
+    if (this.props.id) {
+      Socket.emit('video/remove', this.props.id);
     }
   },
   render: function () {
     return (
       <div>
         <div className="playlist-item">
+          <button className="btn btn-secondary btn-sm remove"
+                  onClick={this.remove}
+                  title="Remove this video">x</button>
           <h5>
-            <a onClick={this.playVideo} title={this.props.title}>
+            <a onClick={this.play} title={this.props.title}>
               {this.props.title}
             </a>
           </h5>
@@ -115,41 +129,6 @@ const CurrentPlaylist = React.createClass({
         <Playlist />
         <Player />
       </div>
-    );
-  }
-});
-
-const Video = React.createClass({
-  cueVideo: function () {
-    if (this.props.id) {
-      Socket.emit('video/cue', this.props);
-    }
-  },
-  setNextVideo: function () {
-    if (this.props.id) {
-      Socket.emit('video/next', this.props);
-    }
-  },
-  render: function () {
-    return (
-      <article className="video col-xl-2 col-lg-3 col-md-4 col-sm-6 col-xs-12">
-        <div className="ratio-container">
-          <img className="thumbnail lazyload blur-up" data-sizes="auto" data-src={this.props.thumbnail} src="images/loader.gif" />
-        </div>
-        <span className="duration">{this.props.duration}</span>
-
-        <header>
-          <button className="btn btn-secondary btn-sm cue"
-                  onClick={this.cueVideo}
-                  title="Cue this video">+</button>
-          <h5>
-            <a onClick={this.setNextVideo} title={this.props.title}>
-              {this.props.title}
-            </a>
-          </h5>
-          <h6>{this.props.channel}</h6>
-        </header>
-      </article>
     );
   }
 });

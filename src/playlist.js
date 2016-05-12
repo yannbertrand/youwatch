@@ -1,4 +1,5 @@
 let playlist = [];
+playlist.getVideo = getVideoFromId;
 playlist.concoctVideoIds = concoctPlaylistVideoIds;
 playlist.remove = removeVideoFromPlaylist;
 playlist.contains = isVideoInPlaylist;
@@ -6,6 +7,12 @@ playlist.playNow = playVideoNow;
 playlist.setNext = setNextVideoInPlaylist;
 
 module.exports = playlist;
+
+function getVideoFromId(videoId) {
+  if (!playlist.contains(videoId)) return null;
+
+  return playlist[concoctPlaylistVideoIds().indexOf(videoId)];
+}
 
 // === _.pluck(playlist, 'id')
 function concoctPlaylistVideoIds() {

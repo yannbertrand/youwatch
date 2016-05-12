@@ -1,3 +1,38 @@
+const Video = React.createClass({
+  cueVideo: function () {
+    if (this.props.id) {
+      Socket.emit('video/cue', this.props);
+    }
+  },
+  setNextVideo: function () {
+    if (this.props.id) {
+      Socket.emit('video/next', this.props);
+    }
+  },
+  render: function () {
+    return (
+      <article className="video col-xl-2 col-lg-3 col-md-4 col-sm-6 col-xs-12">
+        <div className="ratio-container">
+          <img className="thumbnail lazyload blur-up" data-sizes="auto" data-src={this.props.thumbnail} src="images/loader.gif" />
+        </div>
+        <span className="duration">{this.props.duration}</span>
+
+        <header>
+          <button className="btn btn-secondary btn-sm cue"
+                  onClick={this.cueVideo}
+                  title="Cue this video">+</button>
+          <h5>
+            <a onClick={this.setNextVideo} title={this.props.title}>
+              {this.props.title}
+            </a>
+          </h5>
+          <h6>{this.props.channel}</h6>
+        </header>
+      </article>
+    );
+  }
+});
+
 const VideoGrid = React.createClass({
   render: function () {
     if (this.props.videos.length) {
