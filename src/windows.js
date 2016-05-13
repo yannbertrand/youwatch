@@ -26,7 +26,7 @@ function closeLogInWindow() {
 function createWindow(windowName, url, width, height, isDevToolsOpen) {
   const win = new BrowserWindow({ width, height });
 
-  win.loadUrl(url);
+  win.loadURL(url);
   win.on('closed', onClosed.bind(windowName));
   win.on('enter-html-full-screen', (event) => {
     // tmp
