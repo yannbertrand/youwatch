@@ -17,7 +17,7 @@
   "electronVersion": "0.34.1",
   "scripts": {
     "start": "gulp",
-    "test": "xo",
+    "test": "xo src/*.js",
     "package": "electron-packager . $npm_package_productName --out=build --ignore='^/build$' --prune --asar --all --version=$npm_package_electronVersion",
     "clean": "rm -f ~/.config/configstore/YouWatch.json; rm -rf ~/Library/Application\\ Support/YouWatch"
   },
