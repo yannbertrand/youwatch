@@ -1,10 +1,17 @@
-module.exports.openMainWindow = openMainWindow;
-module.exports.openLogInWindow = openLogInWindow;
-module.exports.closeLogInWindow = closeLogInWindow;
-module.exports.activateWithNoOpenWindows = activateWithNoOpenWindows;
+let BrowserWindow;
+let CONFIG;
 
-const BrowserWindow = require('browser-window');
-const CONFIG = require('./config');
+module.exports = function (electron, _CONFIG) {
+  BrowserWindow = electron.BrowserWindow;
+  CONFIG = _CONFIG;
+
+  return {
+    openMainWindow: openMainWindow,
+    openLogInWindow: openLogInWindow,
+    closeLogInWindow: closeLogInWindow,
+    activateWithNoOpenWindows: activateWithNoOpenWindows,
+  };
+};
 
 const MAIN_WINDOW = 'main';
 const AUTH_WINDOW = 'auth';
@@ -12,7 +19,8 @@ const AUTH_WINDOW = 'auth';
 let windows = {};
 
 function openMainWindow() {
-  windows[MAIN_WINDOW] = createMainWindow();
+  if (!windows[MAIN_WINDOW])
+    windows[MAIN_WINDOW] = createMainWindow();
 }
 
 function openLogInWindow(url) {
