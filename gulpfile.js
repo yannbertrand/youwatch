@@ -44,6 +44,7 @@ gulp.task('electron:start', ['check-port', 'transpile', 'copy'], function() {
 });
 
 gulp.task('electron:restart', ['transpile', 'copy'], function() {
+  electron.stop();
   electron.restart();
 });
 
