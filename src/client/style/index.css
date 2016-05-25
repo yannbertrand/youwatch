@@ -1,3 +1,146 @@
-article.video img {
+a {
+    cursor: pointer;
+}
+
+.jumbotron {
+    margin-top: 15px;
+}
+.jumbotron #loader {
+    width: 75px;
+}
+
+.ratio-container {
+    position: relative;
+}
+.ratio-container:after {
+    content: '';
+    display: block;
+    height: 0;
     width: 100%;
+    /* 320:180 = 56.25% = 180/320 * 100 */
+    padding-bottom: 56.25%;
+}
+.ratio-container > * {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+#sidebar {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 55px;
+    height: 100%;
+    overflow-x: none;
+    overflow-y: auto;
+}
+
+#sidebar .nav.nav-pills .nav-link.active {
+    border-radius: 0 .25rem .25rem 0;
+}
+
+#content {
+    position: absolute;
+    top: 0px;
+    left: 55px;
+    padding: 5px;
+}
+
+#videos-grid article.video img {
+    width: 100%;
+    height: 100%;
+}
+#videos-grid article.video img.blur-up {
+    -webkit-filter: blur(5px);
+    filter: blur(5px);
+    transition: filter 400ms, -webkit-filter 400ms;
+}
+
+#videos-grid article.video img.blur-up.lazyloaded {
+    -webkit-filter: blur(0);
+    filter: blur(0);
+}
+
+#videos-grid article.video span.duration {
+    padding: 0 4px;
+    font-weight: 500;
+    font-size: 11px;
+    background-color: #000;
+    color: #fff;
+    height: 14px;
+    line-height: 14px;
+    opacity: .75;
+    vertical-align: top;
+    display: inline-block;
+    position: absolute;
+    right: 18px;
+    margin-top: -16px;
+}
+
+#videos-grid article.video header {
+    margin-top: 2px;
+}
+
+#videos-grid article.video header h5,
+#videos-grid article.video header h6,
+#current-playlist #playlist .playlist-item h5,
+#current-playlist #playlist .playlist-item h6 {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+#videos-grid article.video header h5,
+#current-playlist #playlist .playlist-item h5 {
+    font-size: 0.9em;
+    margin-bottom: .25rem;
+}
+#videos-grid article.video header h6,
+#current-playlist #playlist .playlist-item h6 {
+    font-size: 0.7em;
+}
+
+#videos-grid article.video header button.cue,
+#current-playlist #playlist .playlist-item button.remove {
+    float: right;
+}
+
+#current-playlist #playlist .playlist-item {
+    margin-top: 1.5em;
+}
+
+#current-playlist {
+    position: fixed;
+    bottom: 0px;
+    right: 0px;
+    width: 780px;
+    height: 270px;
+    background-color: white;
+    box-shadow: -6px -4px 15px -2px rgba(0,0,0,0.75);
+}
+
+#current-playlist #playlist {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 300px;
+    height: 100%;
+    overflow: auto;
+}
+
+#current-playlist #playlist .playlist-item {
+    padding: 10px;
+}
+
+#current-playlist #player {
+    position: absolute;
+    top: 0px;
+    left: 300px;
+    width: 480px;
+    height: 100%;
+    background-color: black;
 }

@@ -1,27 +1,31 @@
-const credentials = require('./credentials');
+const CONFIG = require('./config');
+
 const Configstore = require('configstore');
 
 const async = require('async');
 const google = require('googleapis');
 const OAuth2Client = google.auth.OAuth2;
 
-const REDIRECT_URL = 'http://localhost:9000/youtube/callback';
-const oauth2Client = new OAuth2Client(credentials.CLIENT_ID, credentials.CLIENT_SECRET, REDIRECT_URL);
+const oauth2Client = new OAuth2Client(
+  CONFIG.CREDENTIALS.CLIENT_ID,
+  CONFIG.CREDENTIALS.CLIENT_SECRET,
+  'http://localhost:@@PORT/youtube/callback' // redirect url
+);
 
-const conf = new Configstore('YouWatch');
+const configStore = new Configstore('YouWatch');
 
 // Check if the stored access token (if existing) is still working
 module.exports.tryStoredAccessToken = function (cb) {
-  if(!conf.get('tokens')) {
+  if(!configStore.get('tokens')) {
     return cb(true);
   }
 
-  oauth2Client.setCredentials(conf.get('tokens'));
+  oauth2Client.setCredentials(configStore.get('tokens'));
 
   google.youtube('v3').subscriptions.list({
     part: 'id',
     mine: true,
-    auth: oauth2Client
+    auth: oauth2Client,
   }, function (err, response) {
     if (err) return cb(true);
 
@@ -29,7 +33,7 @@ module.exports.tryStoredAccessToken = function (cb) {
     oauth2Client.refreshAccessToken(function (err, newTokens) {
       if (err) return cb(true);
 
-      conf.set('tokens', newTokens);
+      configStore.set('tokens', newTokens);
 
       return cb(false, newTokens);
     });
@@ -42,7 +46,7 @@ module.exports.getAuthUrl = function (cb) {
   var url = oauth2Client.generateAuthUrl({
     access_type: 'offline', // will return a refresh token
     // approval_prompt : 'force',
-    scope: 'https://www.googleapis.com/auth/youtube.readonly' // can be a space-delimited string or an array of scopes
+    scope: 'https://www.googleapis.com/auth/youtube.readonly', // can be a space-delimited string or an array of scopes
   });
 
   return cb(url);
@@ -53,40 +57,91 @@ module.exports.getToken = function (code, cb) {
   // request access token
   oauth2Client.getToken(code, function(err, tokens) {
     if (!err) {
-      conf.set('tokens', tokens);
+      configStore.set('tokens', tokens);
+      oauth2Client.setCredentials(tokens);
       cb(tokens);
     }
+  });
+};
+
+module.exports.getVideo = function (videoId, cb) {
+  google.youtube('v3').videos.list({
+    part: 'id, snippet',
+    id: videoId,
+    auth: oauth2Client,
+  }, function (err, videoPage) {
+    if (err) {
+      console.log('Error while trying to get a video', err);
+      return cb(err);
+    }
+    if (!videoPage.pageInfo.totalResults) {
+      console.log('Video not found');
+      return cb(404);
+    }
+
+    cb(null, {
+      id: videoPage.items[0].id,
+      thumbnail: videoPage.items[0].snippet.thumbnails.high.url,
+      title: videoPage.items[0].snippet.title,
+      channel: videoPage.items[0].snippet.channelTitle,
+      publishedAt: new Date(videoPage.items[0].snippet.publishedAt)
+    });
   });
 };
 
 module.exports.getSubscriptions = function (cb) {
   async.auto({
 
-    getASubscriptionsPage: function (next) {
-      google.youtube('v3').subscriptions.list({
-        part: 'id, snippet',
-        mine: true,
-        maxResults: 50,
-        order: 'alphabetical',
-        auth: oauth2Client
-      }, function (err, subscriptionsPage) {
-        if (err) return next(err);
-        next(null, subscriptionsPage.items);
-      });
+    getSubscriptions: function (next) {
+      var subscriptions = [];
+      var nextPageToken = true;
+      var i = 1;
+
+      async.whilst(
+        () => nextPageToken,
+        function (nextPage) {
+          google.youtube('v3').subscriptions.list({
+            part: 'id, snippet',
+            mine: true,
+            maxResults: 50,
+            order: 'alphabetical',
+            pageToken: nextPageToken || null,
+            auth: oauth2Client,
+          }, function (err, aSubscriptionsPage) {
+            if (err) {
+              console.log('Error while trying to find a subscription page');
+              return nextPage(); // In fact retrying the same page
+            }
+
+            nextPageToken = aSubscriptionsPage.nextPageToken || false;
+            subscriptions = subscriptions.concat(aSubscriptionsPage.items);
+            nextPage(null, subscriptions);
+          });
+        },
+        function (err, allSubscriptions) {
+            if (err) return next(err);
+            next(null, allSubscriptions);
+        }
+      );
     },
 
-    getChannelDetails: ['getASubscriptionsPage', function (next, results) {
+    getChannelDetails: ['getSubscriptions', function (next, results) {
       var channelsDetails = [];
 
-      async.each(results['getASubscriptionsPage'], function (subscription, nextSubscription) {
+      async.each(results['getSubscriptions'], function (subscription, nextSubscription) {
         google.youtube('v3').channels.list({
           part: 'id, contentDetails',
           id: subscription.snippet.resourceId.channelId,
-          auth: oauth2Client
+          auth: oauth2Client,
         }, function (err, channelDetails) {
-          if (err) return nextSubscription(err);
+          if (err) {
+            console.log('Error while trying to get channel ' + subscription.snippet.resourceId.channelId, err);
+            return nextSubscription();
+          }
 
-          channelsDetails.push(channelDetails);
+          if (channelDetails)
+            channelsDetails.push(channelDetails);
+
           nextSubscription();
         });
       }, function (err) {
@@ -95,39 +150,161 @@ module.exports.getSubscriptions = function (cb) {
     }],
 
     getLastUploadedVideos: ['getChannelDetails', function (next, results) {
-      var lastUploadedVideos = [];
+      var videosIds = [];
 
       async.each(results['getChannelDetails'], function (channel, nextChannel) {
         if (channel.pageInfo.totalResults <= 0) return nextChannel();
 
         google.youtube('v3').playlistItems.list({
-          part: 'id, snippet',
+          part: 'id, contentDetails',
           playlistId: channel.items[0].contentDetails.relatedPlaylists.uploads,
-          auth: oauth2Client
+          auth: oauth2Client,
         }, function (err, lastUploadedVideosFromChannel) {
-          if (err) return nextChannel(err);
+          if (err) {
+            console.log('Error while trying to find playlist ' + channel.items[0].contentDetails.relatedPlaylists.uploads + ' from channel ' + channel.items[0].id, err);
+            return nextChannel();
+          }
 
-          lastUploadedVideosFromChannel = lastUploadedVideosFromChannel.items.map(uploadedVideoFromChannel => {
-            return {
-              id: uploadedVideoFromChannel.id,
-              thumbnail: uploadedVideoFromChannel.snippet.thumbnails.high.url,
-              title: uploadedVideoFromChannel.snippet.title,
-              channel: uploadedVideoFromChannel.snippet.channelTitle
-            };
-          });
+          videosIds = videosIds.concat(
+            lastUploadedVideosFromChannel.items.map(uploadedVideoFromChannel => {
+              return uploadedVideoFromChannel.contentDetails.videoId;
+            })
+          );
           
-          // ToDo: Order the videos by desc date
-          lastUploadedVideos = lastUploadedVideos.concat(lastUploadedVideosFromChannel);
           nextChannel();
         });
       }, function (err) {
-        next(err, lastUploadedVideos);
+        next(err, videosIds);
       });
+    }],
+
+    constructVideosIdsStrings: ['getLastUploadedVideos', function (next, results) {
+      let counter = 0;
+      let idList = [];
+      let currentIds = '';
+
+      for (let videoId of results['getLastUploadedVideos']) {
+        currentIds += (counter? ', ' : '') + videoId;
+
+        if (++counter === 50) {
+          idList.push(currentIds);
+          currentIds = '';
+          counter = 0;
+        }
+      }
+
+      if (counter) {
+        idList.push(currentIds);
+      }
+
+      return next(null, idList);
+    }],
+
+    getVideosDetails: ['constructVideosIdsStrings', function (next, results) {
+      let videosDetails = [];
+      async.each(results['constructVideosIdsStrings'], function (ids, nextIds) {
+        google.youtube('v3').videos.list({
+          part: 'id, snippet, contentDetails',
+          id: ids,
+          auth: oauth2Client,
+        }, function (err, videos) {
+          if (err) {
+            console.log('Error while trying to find videos', err);
+            return nextIds();
+          }
+
+          videosDetails = videosDetails.concat(
+            videos.items.map(video => {
+              return {
+                id: video.id,
+                duration: iso8601ToStringDuration(video.contentDetails.duration),
+                thumbnail: video.snippet.thumbnails.medium.url,
+                title: video.snippet.title,
+                channel: video.snippet.channelTitle,
+                publishedAt: new Date(video.snippet.publishedAt)
+              }
+            })
+          );
+
+          return nextIds();
+        });
+      }, function (err) {
+        next(err, videosDetails);
+      });
+
+    }],
+
+    orderLastUploadedVideos: ['getVideosDetails', function (next, results) {
+      next(null, results['getVideosDetails'].sort((firstVideo, secondVideo) => {
+        return secondVideo.publishedAt.getTime() - firstVideo.publishedAt.getTime();
+      }));
     }]
 
   }, function (err, results) {
     if (err) return cb(err);
 
-    cb(null, results['getLastUploadedVideos']);
+    cb(null, results['orderLastUploadedVideos']);
   });
 };
+
+
+
+function iso8601ToStringDuration(rawDuration) {
+  return constructDurationString(parse(rawDuration));
+
+  // From ISO8601-duration npm
+  // https://github.com/tolu/ISO8601-duration/blob/master/src/index.js
+  function parse(durationString) {
+    const numbers = '\\d+(?:[\\.,]\\d{0,3})?';
+    const weekPattern = `(${numbers}W)`;
+    const datePattern = `(${numbers}Y)?(${numbers}M)?(${numbers}D)?`;
+    const timePattern = `T(${numbers}H)?(${numbers}M)?(${numbers}S)?`;
+
+    const iso8601 = `P(?:${weekPattern}|${datePattern}(?:${timePattern})?)`;
+    const pattern = new RegExp(iso8601);
+    const objMap = ['weeks', 'years', 'months', 'days', 'hours', 'minutes', 'seconds'];
+
+    return durationString.match(pattern).slice(1).reduce((prev, next, idx) => {
+      prev[objMap[idx]] = parseFloat(next) || 0;
+      return prev;
+    }, {});
+  }
+
+  function constructDurationString(durationObject) {
+    let duration = '';
+    let flag = false;
+
+    if (flag || durationObject.hours) {
+      duration += leftpad(durationObject.hours) + ':';
+      flag = true;
+    }
+
+    if (flag || durationObject.minutes) {
+      duration += leftpad(durationObject.minutes) + ':';
+    } else {
+      duration += '0:';
+    }
+
+    duration += leftpad(durationObject.seconds, 2, 0);
+
+    return duration;
+  }
+
+  // The famous npm leftpad module-function
+  // https://github.com/camwest/left-pad/blob/master/index.js
+  function leftpad(str, len, ch) {
+    str = String(str);
+
+    var i = -1;
+
+    if (!ch && ch !== 0) ch = ' ';
+
+    len = len - str.length;
+
+    while (++i < len) {
+      str = ch + str;
+    }
+
+    return str;
+  }
+}

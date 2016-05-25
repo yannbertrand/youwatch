@@ -1,96 +1,126 @@
-const Socket = io('http://localhost:9000');
+const jQuery = require('jquery');
+const React = require('react');
+const ReactDOM = require('react-dom');
+const Timer = require('./javascript/utils/timer.react.js');
+const CurrentPlaylist = require('./javascript/pages/current-playlist.react.js');
+const SubscriptionsPage = require('./javascript/pages/subscriptions.react.js');
+const ConfigurationPage = require('./javascript/pages/configuration.react.js');
+const AuthentificationPage = require('./javascript/pages/authentification.react.js');
+const YouTubeIframeLoader = require('youtube-iframe');
 
-const Video = React.createClass({
+
+window.Tether = require('tether');
+// window.lazysizes = require('lazysizes');
+require('bootstrap');
+
+const Socket = io('http://localhost:@@PORT');
+const mainElement = document.getElementById('main');
+
+const SidebarItem = React.createClass({
+  handleClick: function(event){
+    event.preventDefault();
+    this.props.handleClick();
+  },
   render: function () {
     return (
-      <article className="video col-md-3 col-sm-6 col-xs-12">
-        <img className="thumbnail" src={this.props.thumbnail} />
-        <header>{this.props.title} <small>{this.props.channel}</small></header>
-      </article>
+      <li className="nav-item">
+        <a href="#" className={this.props.isCurrent? 'nav-link active' : 'nav-link'}
+           onClick={this.handleClick}>
+          <i className={'fa fa-fw ' + this.props.icon}></i>
+        </a>
+      </li>
     );
   }
 });
 
-const VideoGrid = React.createClass({
-  render: function () {
-    let videoNodes = this.props.videos.map((video) => {
-      return (
-        <Video
-          key={video.id}
-          thumbnail={video.thumbnail}
-          title={video.title}
-          channel={video.channel} />
-      )
-    });
-
-    return (
-      <section id="videos-grid" className="row">
-        {videoNodes}
-      </section>
-    );
-  }
-});
-
-const SubscriptionPage = React.createClass({
-  loadSubscriptions: function () {
-    // ToDo
-    Socket.emit('subscriptions/list');
-    Socket.on('subscriptions/list', (subscriptions) => {
-      this.setState({ videos: subscriptions })
-    });
-  },
-  getInitialState: function () { return { videos: [] }; },
-  componentDidMount: function () {
-    this.loadSubscriptions();
+const Sidebar = React.createClass({
+  handleClick: function (pageName) {
+    this.props.changePage(pageName);
   },
   render: function () {
-    if (this.state.videos.length) {
-      return (
-        <div>
-          <h3>Your subscriptions</h3>
-          <VideoGrid videos={this.state.videos} />
-        </div>
+    let pages = [];
+    for (let pageName in this.props.pages) {
+      pages.push(
+        <SidebarItem
+          key={this.props.pages[pageName].key}
+          icon={this.props.pages[pageName].icon}
+          isCurrent={this.props.currentPageName === pageName}
+          handleClick={this.handleClick.bind(this, pageName)}
+        />
       );
     }
-    
+
     return (
-      <div>
-        <h1>You are connected</h1>
-        <h3>Let us load your data...</h3>
+      <div id="sidebar">
+        <ul className="nav nav-pills nav-stacked">
+          {pages}
+        </ul>
       </div>
     );
   }
 });
 
+const App = React.createClass({
+  shouldComponentUpdate: function (nextProps, nextState) {
+    return nextState.currentPageName !== this.state.currentPageName;
+  },
+  getInitialState: function () {
+    return {
+      pages: {
+        subscriptions:
+          { key: 'Subscriptions', icon: 'fa-th', page: <SubscriptionsPage /> },
+        configuration:
+          { key: 'Configuration', icon: 'fa-cog', page: <ConfigurationPage /> }
+      },
+      currentPageName: 'subscriptions'
+    };
+  },
+  changePage: function (pageName) {
+    this.setState({ currentPageName: pageName });
+  },
+  render: function () {
+    return (
+      <div>
+        <Sidebar
+          pages={this.state.pages}
+          currentPageName={this.state.currentPageName}
+          changePage={this.changePage}
+        />
 
-var openAuthWindow = function (_btn) {
-  _btn.toElement.disabled = true;
+        <div id="content">
+          {this.state.pages[this.state.currentPageName].page}
+        </div>
+      </div>
+    );
+  }
+})
 
-  document.getElementById('status').innerHTML = 'Loading...';
+YouTubeIframeLoader.load(function(YT) {
 
-  Socket.emit('youtube/auth');
-}
+});
+
+Socket.on('internet/notconnected', function () {
+  ReactDOM.render(
+    <NoInternetPage />,
+    mainElement
+  );
+});
 
 Socket.on('youtube/notauthenticated', function () {
   ReactDOM.render(
-    (
-      <div>
-        <button id="open-auth-window" class="btn btn-primary btn-lg" onclick="openAuthWindow()">Connect</button><br />
-        <span id="status"></span>
-      </div>
-    ),
-    document.getElementById('main')
+    <AuthentificationPage />,
+    mainElement
   );
 });
 
 Socket.on('youtube/callback', function (token) {
   ReactDOM.render(
-    <SubscriptionPage />,
-    document.getElementById('main')
+    <App />,
+    mainElement
   );
-
-  gapi.auth.setToken(token);
-  gapi.client.load('youtube', 'v3');
 });
 
+Socket.on('app/reloading', function (page) {
+  // ToDo go on page
+});
 
