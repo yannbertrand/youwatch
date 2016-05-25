@@ -1,3 +1,18 @@
+const jQuery = require('jquery');
+const React = require('react');
+const ReactDOM = require('react-dom');
+const Timer = require('./javascript/utils/timer.react.js');
+const CurrentPlaylist = require('./javascript/pages/current-playlist.react.js');
+const SubscriptionsPage = require('./javascript/pages/subscriptions.react.js');
+const ConfigurationPage = require('./javascript/pages/configuration.react.js');
+const AuthentificationPage = require('./javascript/pages/authentification.react.js');
+const YouTubeIframeLoader = require('youtube-iframe');
+
+
+window.Tether = require('tether');
+// window.lazysizes = require('lazysizes');
+require('bootstrap');
+
 const Socket = io('http://localhost:@@PORT');
 const mainElement = document.getElementById('main');
 
@@ -80,14 +95,16 @@ const App = React.createClass({
   }
 })
 
-/* Subscriptions Page */
+YouTubeIframeLoader.load(function(YT) {
+
+});
 
 Socket.on('internet/notconnected', function () {
   ReactDOM.render(
     <NoInternetPage />,
     mainElement
   );
-})
+});
 
 Socket.on('youtube/notauthenticated', function () {
   ReactDOM.render(
@@ -106,3 +123,4 @@ Socket.on('youtube/callback', function (token) {
 Socket.on('app/reloading', function (page) {
   // ToDo go on page
 });
+

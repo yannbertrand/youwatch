@@ -29,3 +29,5 @@ const Timer = React.createClass({
     return <p>Done!</p>;
   }
 });
+
+module.exports = Timer;

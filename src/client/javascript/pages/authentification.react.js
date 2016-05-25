@@ -28,3 +28,5 @@ const AuthentificationPage = React.createClass({
     );
   }
 });
+
+module.exports = AuthentificationPage;

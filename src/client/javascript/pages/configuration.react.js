@@ -3,3 +3,5 @@ const ConfigurationPage = React.createClass({
     return <div><h1>Configuration</h1></div>;
   }
 });
+
+module.exports = ConfigurationPage;

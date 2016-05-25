@@ -132,3 +132,5 @@ const CurrentPlaylist = React.createClass({
     );
   }
 });
+
+module.exports = CurrentPlaylist;
