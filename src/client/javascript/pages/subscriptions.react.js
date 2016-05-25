@@ -96,3 +96,5 @@ const SubscriptionsPage = React.createClass({
     );
   }
 });
+
+module.exports = SubscriptionsPage;

@@ -57,3 +57,5 @@ const NoInternetPage = React.createClass({
     );
   }
 });
+
+module.exports = NoInternetPage;
