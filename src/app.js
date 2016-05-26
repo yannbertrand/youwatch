@@ -117,6 +117,7 @@ app.on('ready', () => {
     socket.on('video/end', (id) => {
       console.log('Video ended: ', id);
       removeVideo(id);
+      playNextVideo();
     });
 
     function launchApp() {
@@ -148,20 +149,22 @@ app.on('ready', () => {
         socket.emit('video/cue', video.id);
     }
 
+    function playNextVideo() {
+      if (!playlist.length) {
+        videoPlaying = null;
+        return;
+      }
+
+      if (videoPlaying === playlist[0].id) return;
+
+      socket.emit('video/play', playlist[0].id);
+      videoPlaying = playlist[0].id;
+    }
+
     function removeVideo(id) {
       playlist.remove(id);
       socket.emit('video/remove');
       socket.emit('playlist/update', playlist);
-
-      // if (!playlist.length) {
-      //   videoPlaying = null;
-      //   return;
-      // }
-
-      // if (videoPlaying === playlist[0].id) return;
-
-      // socket.emit('video/play', playlist[0].id);
-      // videoPlaying = playlist[0].id;
     }
   });
 
