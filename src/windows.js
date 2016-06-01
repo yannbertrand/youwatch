@@ -6,10 +6,10 @@ module.exports = function (electron, _CONFIG) {
   CONFIG = _CONFIG;
 
   return {
-    openMainWindow: openMainWindow,
-    openLogInWindow: openLogInWindow,
-    closeLogInWindow: closeLogInWindow,
-    activateWithNoOpenWindows: activateWithNoOpenWindows,
+    openMainWindow,
+    openLogInWindow,
+    closeLogInWindow,
+    activateWithNoOpenWindows,
   };
 };
 
