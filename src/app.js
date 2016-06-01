@@ -2,10 +2,14 @@
 
 const CONFIG = require('./config');
 
+const Configstore = require('configstore');
+const async = require('async');
+const google = require('googleapis');
 const electron = require('electron');
 const app = electron.app;
 
-const YoutubeApi = require('./youtubeapi');
+
+const YoutubeApi = require('./youtubeapi')(Configstore, async, google, CONFIG);
 const Windows = require('./windows')(electron, CONFIG);
 const server = require('./server');
 const database = require('./database');

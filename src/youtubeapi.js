@@ -1,28 +1,37 @@
-const CONFIG = require('./config');
+let oauth2Client;
+let configStore;
+let async;
+let YouTube;
 
-const Configstore = require('configstore');
+module.exports = function (Configstore, _async, google, CONFIG) {
+  oauth2Client = new google.auth.OAuth2(
+    CONFIG.CREDENTIALS.CLIENT_ID,
+    CONFIG.CREDENTIALS.CLIENT_SECRET,
+    'http://localhost:@@PORT/youtube/callback' // redirect url
+  );
 
-const async = require('async');
-const google = require('googleapis');
-const OAuth2Client = google.auth.OAuth2;
+  configStore = new Configstore('YouWatch');
+  async = _async;
+  YouTube = google.youtube('v3');
 
-const oauth2Client = new OAuth2Client(
-  CONFIG.CREDENTIALS.CLIENT_ID,
-  CONFIG.CREDENTIALS.CLIENT_SECRET,
-  'http://localhost:@@PORT/youtube/callback' // redirect url
-);
-
-const configStore = new Configstore('YouWatch');
+  return {
+    tryStoredAccessToken,
+    getAuthUrl,
+    getToken,
+    getVideo,
+    getSubscriptions,
+  };
+};
 
 // Check if the stored access token (if existing) is still working
-module.exports.tryStoredAccessToken = function (cb) {
+function tryStoredAccessToken(cb) {
   if(!configStore.get('tokens')) {
     return cb(true);
   }
 
   oauth2Client.setCredentials(configStore.get('tokens'));
 
-  google.youtube('v3').subscriptions.list({
+  YouTube.subscriptions.list({
     part: 'id',
     mine: true,
     auth: oauth2Client,
@@ -41,7 +50,7 @@ module.exports.tryStoredAccessToken = function (cb) {
 };
 
 // retrieve the auth page url
-module.exports.getAuthUrl = function (cb) {
+function getAuthUrl(cb) {
   // generate consent page url
   var url = oauth2Client.generateAuthUrl({
     access_type: 'offline', // will return a refresh token
@@ -53,7 +62,7 @@ module.exports.getAuthUrl = function (cb) {
 };
 
 // retrieve an access token
-module.exports.getToken = function (code, cb) {
+function getToken(code, cb) {
   // request access token
   oauth2Client.getToken(code, function(err, tokens) {
     if (!err) {
@@ -64,8 +73,8 @@ module.exports.getToken = function (code, cb) {
   });
 };
 
-module.exports.getVideo = function (videoId, cb) {
-  google.youtube('v3').videos.list({
+function getVideo(videoId, cb) {
+  YouTube.videos.list({
     part: 'id, snippet',
     id: videoId,
     auth: oauth2Client,
@@ -89,7 +98,7 @@ module.exports.getVideo = function (videoId, cb) {
   });
 };
 
-module.exports.getSubscriptions = function (cb) {
+function getSubscriptions(cb) {
   async.auto({
 
     getSubscriptions: function (next) {
@@ -100,7 +109,7 @@ module.exports.getSubscriptions = function (cb) {
       async.whilst(
         () => nextPageToken,
         function (nextPage) {
-          google.youtube('v3').subscriptions.list({
+          YouTube.subscriptions.list({
             part: 'id, snippet',
             mine: true,
             maxResults: 50,
@@ -129,7 +138,7 @@ module.exports.getSubscriptions = function (cb) {
       var channelsDetails = [];
 
       async.each(results['getSubscriptions'], function (subscription, nextSubscription) {
-        google.youtube('v3').channels.list({
+        YouTube.channels.list({
           part: 'id, contentDetails',
           id: subscription.snippet.resourceId.channelId,
           auth: oauth2Client,
@@ -155,7 +164,7 @@ module.exports.getSubscriptions = function (cb) {
       async.each(results['getChannelDetails'], function (channel, nextChannel) {
         if (channel.pageInfo.totalResults <= 0) return nextChannel();
 
-        google.youtube('v3').playlistItems.list({
+        YouTube.playlistItems.list({
           part: 'id, contentDetails',
           playlistId: channel.items[0].contentDetails.relatedPlaylists.uploads,
           auth: oauth2Client,
@@ -203,7 +212,7 @@ module.exports.getSubscriptions = function (cb) {
     getVideosDetails: ['constructVideosIdsStrings', function (next, results) {
       let videosDetails = [];
       async.each(results['constructVideosIdsStrings'], function (ids, nextIds) {
-        google.youtube('v3').videos.list({
+        YouTube.videos.list({
           part: 'id, snippet, contentDetails',
           id: ids,
           auth: oauth2Client,
