@@ -35,7 +35,7 @@ function createWindow(windowName, url, width, height, isDevToolsOpen) {
   const win = new BrowserWindow({ width, height });
 
   win.loadURL(url);
-  win.on('closed', onClosed.bind(windowName));
+  win.on('closed', onClosed.bind(null, windowName));
   win.on('enter-html-full-screen', (event) => {
     // tmp
     // This event is called when the YouTube player goes fullscreen
@@ -46,7 +46,6 @@ function createWindow(windowName, url, width, height, isDevToolsOpen) {
   });
 
   win.setMinimumSize(780, 270);
-
   if (isDevToolsOpen) win.openDevTools();
 
   return win;
