@@ -25,7 +25,8 @@ require('electron-debug')();
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
   Windows.openMainWindow();
-  app.dock.setIcon('YouWatch.png');
+  if (app.dock)
+    app.dock.setIcon('YouWatch.png');
 
   server.io.on('connection', (socket) => {
     socket.on('internet/reconnect', launchApp);
