@@ -1,7 +1,7 @@
 {
   "name": "youwatch",
   "productName": "YouWatch",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "An improved YouTube desktop client",
   "license": "MIT",
   "repository": "YannBertrand/YouWatch",
@@ -20,11 +20,11 @@
     "test": "xo src/*.js",
     "clean": "rm -f ~/.config/configstore/YouWatch.json; rm -rf ~/Library/Application\\ Support/YouWatch",
     "build": "npm run build:osx && npm run build:linux && npm run build:windows",
-    "build:osx": "electron-packager . --overwrite --asar --out=build --ignore='^/build$' --prune --platform=darwin --arch=x64 --app-version=$npm_package_version && cd build/YouWatch-darwin-x64 && zip -ryXq9 ../YouWatch-osx-${npm_package_version}.zip YouWatch.app",
-    "build:linux": "electron-packager . --overwrite --out=build --ignore='^/build$' --prune --platform=linux --arch=x64 --app-version=$npm_package_version && cd build/YouWatch-linux-x64/ && zip -ryq9 ../YouWatch-linux-${npm_package_version}.zip *",
-    "build:windows": "electron-packager . --overwrite --asar --out=build --ignore='^/build$' --prune --platform=win32 --arch=ia32 --version-string.ProductName=$npm_package_productName --app-version=$npm_package_version && cd build/YouWatch-win32-ia32 && zip -ryq9 ../YouWatch-windows-${npm_package_version}.zip *"
+    "build:osx": "electron-packager . --overwrite --asar --out=build --ignore='^/(build|src|media)$' --prune --platform=darwin --arch=x64 --app-version=$npm_package_version && cd build/YouWatch-darwin-x64 && zip -ryXq9 ../YouWatch-osx-${npm_package_version}.zip YouWatch.app && cd ../ && rm -r YouWatch-darwin-x64",
+    "build:linux": "electron-packager . --overwrite --out=build --ignore='^/(build|src|media)$' --prune --platform=linux --arch=x64 --app-version=$npm_package_version && cd build/YouWatch-linux-x64/ && zip -ryq9 ../YouWatch-linux-${npm_package_version}.zip * && cd ../ && rm -r YouWatch-linux-x64",
+    "build:windows": "electron-packager . --overwrite --asar --out=build --ignore='^/(build|src|media)$' --prune --platform=win32 --arch=ia32 --version-string.ProductName=$npm_package_productName --app-version=$npm_package_version && cd build/YouWatch-win32-ia32 && zip -ryq9 ../YouWatch-windows-${npm_package_version}.zip * && cd ../ && rm -r YouWatch-win32-ia32"
   },
-  "devDependencies": {
+  "dependencies": {
     "async": "^1.5.2",
     "babel-preset-es2015": "^6.9.0",
     "babel-preset-react": "^6.5.0",
@@ -34,8 +34,8 @@
     "electron-connect": "^0.4.2",
     "electron-debug": "^1.0.0",
     "electron-dl": "^1.1.0",
-    "electron-packager": "^7.0.2",
-    "electron-prebuilt": "^1.1.3",
+    "electron-packager": "^7.0.3",
+    "electron-prebuilt": "^1.2.1",
     "googleapis": "^7.1.0",
     "gulp": "^3.9.1",
     "gulp-babel": "^6.1.2",
@@ -45,7 +45,7 @@
     "hapi": "^13.4.1",
     "is-online": "^5.1.1",
     "jquery": "^2.2.4",
-    "lazysizes": "^2.0.0-rc2",
+    "lazysizes": "^2.0.0",
     "react": "^15.1.0",
     "react-dom": "^15.1.0",
     "socket.io": "^1.4.6",

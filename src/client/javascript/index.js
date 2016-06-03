@@ -95,9 +95,8 @@ const App = React.createClass({
   }
 })
 
-YouTubeIframeLoader.load(function(YT) {
-
-});
+let YT;
+YouTubeIframeLoader.load(_YT => YT = _YT);
 
 Socket.on('internet/notconnected', function () {
   ReactDOM.render(

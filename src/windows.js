@@ -6,10 +6,10 @@ module.exports = function (electron, _CONFIG) {
   CONFIG = _CONFIG;
 
   return {
-    openMainWindow: openMainWindow,
-    openLogInWindow: openLogInWindow,
-    closeLogInWindow: closeLogInWindow,
-    activateWithNoOpenWindows: activateWithNoOpenWindows,
+    openMainWindow,
+    openLogInWindow,
+    closeLogInWindow,
+    activateWithNoOpenWindows,
   };
 };
 
@@ -35,16 +35,7 @@ function createWindow(windowName, url, width, height, isDevToolsOpen) {
   const win = new BrowserWindow({ width, height });
 
   win.loadURL(url);
-  win.on('closed', onClosed.bind(windowName));
-  win.on('enter-html-full-screen', (event) => {
-    // tmp
-    // This event is called when the YouTube player goes fullscreen
-    // It should only fullscreen the webview, but it does fullscreen the app
-    setTimeout(function () {
-      win.setFullScreen(false);
-    }, 1000);
-  });
-
+  win.on('closed', onClosed.bind(null, windowName));
   win.setMinimumSize(780, 270);
 
   if (isDevToolsOpen) win.openDevTools();
