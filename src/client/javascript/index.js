@@ -1,7 +1,6 @@
 const jQuery = require('jquery');
 const React = require('react');
 const ReactDOM = require('react-dom');
-const Timer = require('./javascript/utils/timer.react.js');
 const CurrentPlaylist = require('./javascript/pages/current-playlist.react.js');
 const SubscriptionsPage = require('./javascript/pages/subscriptions.react.js');
 const ConfigurationPage = require('./javascript/pages/configuration.react.js');
