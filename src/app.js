@@ -14,7 +14,6 @@ const Windows = require('./windows')(electron, CONFIG);
 const server = require('./server');
 const database = require('./database');
 
-const isOnline = require('is-online');
 const youtubeRegex = require('youtube-regex');
 
 // adds debug features like hotkeys for triggering dev tools and reload
