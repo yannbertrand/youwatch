@@ -18,7 +18,7 @@
   "scripts": {
     "start": "gulp",
     "test": "xo src/*.js",
-    "clean": "rm -f ~/.config/configstore/YouWatch.json; rm -rf ~/Library/Application\\ Support/YouWatch",
+    "clean": "rm -rf dist; rm -f ~/.config/configstore/YouWatch.json; rm -rf ~/Library/Application\\ Support/YouWatch",
     "build": "npm run build:osx && npm run build:linux && npm run build:windows",
     "build:osx": "electron-packager . --overwrite --asar --out=build --ignore='^/(build|src|media)$' --prune --platform=darwin --arch=x64 --app-version=$npm_package_version && cd build/YouWatch-darwin-x64 && zip -ryXq9 ../YouWatch-osx-${npm_package_version}.zip YouWatch.app && cd ../ && rm -r YouWatch-darwin-x64",
     "build:linux": "electron-packager . --overwrite --out=build --ignore='^/(build|src|media)$' --prune --platform=linux --arch=x64 --app-version=$npm_package_version && cd build/YouWatch-linux-x64/ && zip -ryq9 ../YouWatch-linux-${npm_package_version}.zip * && cd ../ && rm -r YouWatch-linux-x64",
