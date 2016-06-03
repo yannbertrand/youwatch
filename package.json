@@ -20,9 +20,9 @@
     "test": "xo src/*.js",
     "clean": "rm -f ~/.config/configstore/YouWatch.json; rm -rf ~/Library/Application\\ Support/YouWatch",
     "build": "npm run build:osx && npm run build:linux && npm run build:windows",
-    "build:osx": "electron-packager . --overwrite --asar --out=build --ignore='^/(build|src|media)$' --prune --platform=darwin --arch=x64 --app-version=$npm_package_version && cd build/YouWatch-darwin-x64 && zip -ryXq9 ../YouWatch-osx-${npm_package_version}.zip YouWatch.app",
-    "build:linux": "electron-packager . --overwrite --out=build --ignore='^/(build|src|media)$' --prune --platform=linux --arch=x64 --app-version=$npm_package_version && cd build/YouWatch-linux-x64/ && zip -ryq9 ../YouWatch-linux-${npm_package_version}.zip *",
-    "build:windows": "electron-packager . --overwrite --asar --out=build --ignore='^/(build|src|media)$' --prune --platform=win32 --arch=ia32 --version-string.ProductName=$npm_package_productName --app-version=$npm_package_version && cd build/YouWatch-win32-ia32 && zip -ryq9 ../YouWatch-windows-${npm_package_version}.zip *"
+    "build:osx": "electron-packager . --overwrite --asar --out=build --ignore='^/(build|src|media)$' --prune --platform=darwin --arch=x64 --app-version=$npm_package_version && cd build/YouWatch-darwin-x64 && zip -ryXq9 ../YouWatch-osx-${npm_package_version}.zip YouWatch.app && cd ../ && rm -r YouWatch-darwin-x64",
+    "build:linux": "electron-packager . --overwrite --out=build --ignore='^/(build|src|media)$' --prune --platform=linux --arch=x64 --app-version=$npm_package_version && cd build/YouWatch-linux-x64/ && zip -ryq9 ../YouWatch-linux-${npm_package_version}.zip * && cd ../ && rm -r YouWatch-linux-x64",
+    "build:windows": "electron-packager . --overwrite --asar --out=build --ignore='^/(build|src|media)$' --prune --platform=win32 --arch=ia32 --version-string.ProductName=$npm_package_productName --app-version=$npm_package_version && cd build/YouWatch-win32-ia32 && zip -ryq9 ../YouWatch-windows-${npm_package_version}.zip * && cd ../ && rm -r YouWatch-win32-ia32"
   },
   "dependencies": {
     "async": "^1.5.2",
