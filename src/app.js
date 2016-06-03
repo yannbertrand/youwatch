@@ -27,13 +27,10 @@ app.on('ready', () => {
   Windows.openMainWindow();
 
   server.io.on('connection', (socket) => {
-    socket.on('internet/reconnect', launchApp);
-
     let subscriptions = [];
     let playlist = require('./playlist');
 
     let videoPlaying = null;
-    launchApp();
 
     socket.on('youtube/auth', () => {
       socket.emit('youtube/waiting');
@@ -124,21 +121,15 @@ app.on('ready', () => {
       playNextVideo();
     });
 
-    function launchApp() {
-      if (isOnline((err, online) => {
-        if (err || !online) {
-          return socket.emit('internet/notconnected');
+    socket.on('app/authenticate', () => {
+      YoutubeApi.tryStoredAccessToken((noValidAccessToken, token) => {
+        if (noValidAccessToken) {
+          socket.emit('youtube/notauthenticated');
+        } else {
+          socket.emit('youtube/callback', token);
         }
-        
-        YoutubeApi.tryStoredAccessToken((noValidAccessToken, token) => {
-          if (noValidAccessToken) {
-            socket.emit('youtube/notauthenticated');
-          } else {
-            socket.emit('youtube/callback', token);
-          }
-        });
-      }));
-    }
+      });
+    });
 
     function playVideo(video) {
       console.log('Play video: ', video.id);
