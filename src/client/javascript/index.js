@@ -1,11 +1,11 @@
 const jQuery = require('jquery');
 const React = require('react');
 const ReactDOM = require('react-dom');
-const Timer = require('./javascript/utils/timer.react.js');
 const CurrentPlaylist = require('./javascript/pages/current-playlist.react.js');
 const SubscriptionsPage = require('./javascript/pages/subscriptions.react.js');
 const ConfigurationPage = require('./javascript/pages/configuration.react.js');
 const AuthentificationPage = require('./javascript/pages/authentification.react.js');
+const NoInternetPage = require('./javascript/pages/no-internet.react.js');
 const YouTubeIframeLoader = require('youtube-iframe');
 
 
@@ -98,28 +98,38 @@ const App = React.createClass({
 let YT;
 YouTubeIframeLoader.load(_YT => YT = _YT);
 
-Socket.on('internet/notconnected', function () {
-  ReactDOM.render(
-    <NoInternetPage />,
-    mainElement
-  );
-});
+window.addEventListener('offline', renderOfflineMode);
+window.addEventListener('online', tryStoredAccessToken);
+Socket.on('youtube/notauthenticated', renderAuthentication);
+Socket.on('youtube/callback', renderApp);
 
-Socket.on('youtube/notauthenticated', function () {
+if (navigator.onLine) {
+  tryStoredAccessToken();
+} else {
+  switchToOfflineMode();
+}
+
+function tryStoredAccessToken() {
+  Socket.emit('app/authenticate');
+}
+
+function renderAuthentication() {
   ReactDOM.render(
     <AuthentificationPage />,
     mainElement
   );
-});
+}
 
-Socket.on('youtube/callback', function (token) {
+function renderApp(token) {
   ReactDOM.render(
     <App />,
     mainElement
   );
-});
+}
 
-Socket.on('app/reloading', function (page) {
-  // ToDo go on page
-});
-
+function renderOfflineMode() {
+  ReactDOM.render(
+    <NoInternetPage />,
+    mainElement
+  );
+}
