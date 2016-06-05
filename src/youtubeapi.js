@@ -1,6 +1,8 @@
 const Configstore = require('configstore');
 const async = require('async');
 const Google = require('googleapis');
+const Datastore = require('nedb');
+const db = require('./database')(Datastore);
 
 const CONFIG = require('./config');
 
@@ -94,6 +96,87 @@ function getVideo(videoId, cb) {
     });
   });
 };
+
+function refreshSubscriptions(cb) {
+  let pageToken = true;
+  let newSubscriptions = [];
+
+  console.info('START: refreshSubscriptions');
+
+  async.whilst(
+
+    () => pageToken,
+
+    function (nextPage) {
+      YouTube.subscriptions.list({
+        part: 'id, snippet',
+        mine: true,
+        maxResults: 50,
+        order: 'alphabetical',
+        pageToken: pageToken || null,
+        auth: oauth2Client,
+      }, function (err, subscriptionsPage) {
+        if (err) {
+          let error = `Error while trying to find a subscription page`;
+          if (pageToken !== true) {
+            error += ` (${pageToken})`;
+          }
+          console.error(error, err);
+
+          return nextPage(); // In fact retrying the same page
+        }
+
+        pageToken = subscriptionsPage.nextPageToken || false;
+        insertSubscriptions(subscriptionsPage.items, function (err, someNewSubscriptions) {
+          newSubscriptions = newSubscriptions.concat(someNewSubscriptions);
+          nextPage();
+        });
+      });
+    },
+
+    function (err) {
+      console.info('END: refreshSubscriptions');
+      cb(err, newSubscriptions);
+    }
+
+  );
+}
+
+function insertSubscriptions(subscriptions, cb) {
+  let someNewSubscriptions = [];
+
+  console.info('START: insertSubscriptions');
+
+  async.each(subscriptions, function (subscription, nextSubscription) {
+
+    db.findOne({
+      kind: 'youtube#subscription',
+      id: subscription.id,
+    }, function (err, result) {
+      if (err) {
+        console.error(err);
+        return nextSubscription();
+      }
+
+      if (!result) {
+        let dbSubscription = {
+          kind: 'youtube#subscription',
+          id: subscription.id,
+          channelId: subscription.snippet.channelId,
+        };
+
+        someNewSubscriptions.push(dbSubscription);
+        db.insert(dbSubscription, nextSubscription);
+      } else {
+        nextSubscription();
+      }
+    });
+
+  }, function (err) {
+    console.info('END: insertSubscriptions');
+    return cb (err, someNewSubscriptions);
+  });
+}
 
 function getSubscriptions(cb) {
   try {

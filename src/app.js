@@ -3,12 +3,11 @@
 const electron = require('electron');
 const app = electron.app;
 
-
 const VideoManager = require('./videomanager');
 const YoutubeApi = require('./youtubeapi');
 const Windows = require('./windows')(electron);
+
 const server = require('./server');
-const database = require('./database');
 
 const youtubeRegex = require('youtube-regex');
 
@@ -39,14 +38,18 @@ app.on('ready', () => {
       if (subscriptions.length)
         return socket.emit('subscriptions/list', subscriptions);
       
-      YoutubeApi.getSubscriptions((err, _subscriptions) => {
-        if (err) {
-          console.error(err);
-        } else {
-          subscriptions = _subscriptions;
-          socket.emit('subscriptions/list', subscriptions);
-        }
+      YoutubeApi.refreshSubscriptions((err, result) => {
+        console.log(err, result);
       });
+
+      // YoutubeApi.getSubscriptions((err, _subscriptions) => {
+      //   if (err) {
+      //     console.error(err);
+      //   } else {
+      //     subscriptions = _subscriptions;
+      //     socket.emit('subscriptions/list', subscriptions);
+      //   }
+      // });
     });
 
     // Video
