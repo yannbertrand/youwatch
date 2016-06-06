@@ -5,6 +5,8 @@ const Datastore = require('nedb');
 const db = require('./database')(Datastore);
 
 const CONFIG = require('./config');
+const Subscription = require('./resources/subscription')(_async, YouTube, oauth2Client, db);
+const Channel = require('./resources/channel')(_async, YouTube, oauth2Client, db);
 
 const configStore = new Configstore('YouWatch');
 const YouTube = Google.youtube('v3');
@@ -97,181 +99,10 @@ function getVideo(videoId, cb) {
   });
 };
 
-function refreshSubscriptions(cb) {
-  let pageToken = true;
-  let newSubscriptions = [];
-
-  console.info('START: refreshSubscriptions');
-
-  async.whilst(
-
-    () => pageToken,
-
-    function (nextPage) {
-      YouTube.subscriptions.list({
-        part: 'id, snippet',
-        mine: true,
-        maxResults: 50,
-        order: 'alphabetical',
-        pageToken: pageToken || null,
-        auth: oauth2Client,
-      }, function (err, subscriptionsPage) {
-        if (err) {
-          let error = `Error while trying to find a subscription page`;
-          if (pageToken !== true) {
-            error += ` (${pageToken})`;
-          }
-          console.error(error, err);
-
-          return nextPage(); // In fact retrying the same page
-        }
-
-        pageToken = subscriptionsPage.nextPageToken || false;
-        insertSubscriptions(subscriptionsPage.items, function (err, someNewSubscriptions) {
-          newSubscriptions = newSubscriptions.concat(someNewSubscriptions);
-          nextPage();
-        });
-      });
-    },
-
-    function (err) {
-      console.info('END: refreshSubscriptions');
-      cb(err, newSubscriptions);
-    }
-
-  );
-}
-
-function insertSubscriptions(subscriptions, cb) {
-  let someNewSubscriptions = [];
-
-  console.info('START: insertSubscriptions');
-
-  async.each(subscriptions, function (subscription, nextSubscription) {
-
-    db.findOne({
-      kind: 'youtube#subscription',
-      id: subscription.id,
-    }, function (err, result) {
-      if (err) {
-        console.error(err);
-        return nextSubscription();
-      }
-
-      if (!result) {
-        let dbSubscription = {
-          kind: 'youtube#subscription',
-          id: subscription.id,
-          channelId: subscription.snippet.resourceId.channelId,
-        };
-
-        someNewSubscriptions.push(dbSubscription);
-        db.insert(dbSubscription, nextSubscription);
-      } else {
-        nextSubscription();
-      }
-    });
-
-  }, function (err) {
-    console.info('END: insertSubscriptions');
-    return cb (err, someNewSubscriptions);
-  });
-}
 
 
-function refreshChannels(cb) {
-  let pageToken = true;
-  let newChannels = [];
 
-  console.info('START: refreshChannels');
 
-  db.find({ kind: 'youtube#subscription' }, function (err, subscriptions) {
-    if (err) {
-      console.error(err);
-    }
-
-    async.each(subscriptions, function (subscription, nextSubscription) {
-      YouTube.channels.list({
-        part: 'id, snippet, contentDetails',
-        id: subscription.channelId,
-        auth: oauth2Client,
-      }, function (err, channel) {
-        if (err) {
-          console.error('Error while trying to get channel ' + subscription.channelId, err);
-          return nextSubscription();
-        }
-
-        if (channel && channel.items && channel.items.length) {
-          insertChannel(channel.items[0], function (err, newChannel) {
-            if (newChannel) {
-              newChannels.push(newChannel);
-            }
-            nextSubscription();
-          });
-        } else {
-          nextSubscription();
-        }
-      });
-    }, function (err) {
-      console.info('END: refreshChannels');
-      cb(err, newChannels);
-    });
-  });
-}
-
-function insertChannel(channel, cb) {
-  console.info('START: insertChannels');
-
-  db.findOne({
-    kind: 'youtube#channel',
-    id: channel.id,
-  }, function (err, result) {
-    if (err) {
-      console.error(err);
-      return callback();
-    }
-
-    let dbChannel = {
-      kind: 'youtube#channel',
-      id: channel.id,
-      title: channel.snippet.title,
-      description: channel.snippet.description,
-      thumbnails: channel.snippet.thumbnails,
-      playlists: channel.contentDetails.relatedPlaylists,
-    };
-
-    if (!result) {
-      db.insert(dbChannel, callback);
-    } else {
-      let $set = {};
-
-      if (result.title !== channel.snippet.title)
-        $set.title = channel.snippet.title;
-      if (result.description !== channel.snippet.description)
-        $set.description = channel.snippet.description;
-      if (JSON.stringify(result.thumbnails) !== JSON.stringify(channel.snippet.thumbnails))
-        $set.thumbnails = channel.snippet.thumbnails;
-      if (JSON.stringify(result.playlists) !== JSON.stringify(channel.snippet.playlists))
-        $set.playlists = channel.snippet.playlists;
-
-      if (Object.keys($set).length) {
-        db.update({
-          kind: 'youtube#channel',
-          id: channel.id,
-        }, {
-          $set: $set
-        }, callback);
-      } else {
-        callback();
-      }
-    }
-  });
-
-  function callback(err, channel) {
-    console.info('END: insertChannels');
-    cb(err, channel);
-  }
-}
 
 function getSubscriptions(cb) {
   try {
