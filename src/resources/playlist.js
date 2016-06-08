@@ -23,6 +23,7 @@ function refreshPlaylists(channels, cb) {
   let pageToken = true;
   let newPlaylists = [];
   let updatedPlaylists = [];
+  let deletedPlaylists = [];
 
   console.info('START: refreshPlaylists');
 
@@ -48,11 +49,15 @@ function refreshPlaylists(channels, cb) {
       }
 
       if (playlists && playlists.items && playlists.items.length) {
-        upsertPlaylists(playlists.items, function (err, newChannelPlaylists, updatedChannelPlaylists) {
-          if (newChannelPlaylists) {
-            newPlaylists.push(...newChannelPlaylists);
-          } else if (updatedChannelPlaylists) {
+        upsertPlaylists(playlists.items, function (err, createdChannelPlaylists, updatedChannelPlaylists, deletedChannelPlaylists) {
+          if (createdChannelPlaylists) {
+            newPlaylists.push(...createdChannelPlaylists);
+          }
+          if (updatedChannelPlaylists) {
             updatedPlaylists.push(...updatedChannelPlaylists);
+          }
+          if (deletedChannelPlaylists) {
+            deletedPlaylists.push(...deletedChannelPlaylists);
           }
           nextChannel();
         });
@@ -64,76 +69,186 @@ function refreshPlaylists(channels, cb) {
 
   function sendNewAndUpdatedPlaylists(err) {
     console.info('END: refreshPlaylists');
-    cb(err, newPlaylists, updatedPlaylists);
+    cb(err, newPlaylists, updatedPlaylists, deletedPlaylists);
   }
 }
 
 function upsertPlaylists(playlists, cb) {
-  let someNewPlaylists = [];
-  let someUpdatedPlaylists = [];
+  let createdChannelPlaylists = [];
+  let updatedChannelPlaylists = [];
+  let deletedChannelPlaylists = [];
 
   console.info('START: upsertPlaylists');
 
-  async.each(playlists, findPlaylist, sendNewAndUpdatedPlaylists);
-
-
-
-  function findPlaylist(playlist, nextPlaylist) {
-    let request = {
-      kind: 'youtube#playlist',
-      id: playlist.id,
+  let $or = playlists.map(playlist => {
+    return {
+      id: playlist.id
     };
+  });
 
-    db.findOne(request, gotPlaylist);
+  db.find({
+    kind: 'youtube#playlist',
+    $or: $or,
+  }, gotPlaylists);
 
-    function gotPlaylist(err, result) {
-      if (err) {
-        console.error(err);
-        return pushCreatedPlaylist(err);
+  function gotPlaylists(err, results) {
+    if (err) {
+      console.error(err);
+      return sendNewAndUpdatedPlaylists(err);
+    }
+
+    async.parallel([
+      createUnexistingPlaylists,
+      updateExistingPlaylists,
+      deletePlaylists,
+    ], sendNewAndUpdatedPlaylists);
+
+    function createUnexistingPlaylists(done) {
+      if (results.length >= playlists.length) return done();
+
+      let resultsIds = results.map(result => result.id);
+      let unexistingPlaylists = playlists.filter(playlist => !resultsIds.includes(playlist.id));
+
+      unexistingPlaylists = unexistingPlaylists.map(playlist => {
+        return {
+          kind: 'youtube#playlist',
+          id: playlist.id,
+          channelId: playlist.snippet.channelId,
+          title: playlist.snippet.title,
+          description: playlist.snippet.description,
+          thumbnails: playlist.snippet.thumbnails,
+        };
+      });
+
+      db.insert(unexistingPlaylists, pushCreatedPlaylists);
+
+      function pushCreatedPlaylists(err, createdPlaylists) {
+        createdChannelPlaylists.push(...createdPlaylists);
+        return done(err);
       }
+    }
 
-      let dbPlaylist = {
-        kind: 'youtube#playlist',
-        id: playlist.id,
-        title: playlist.snippet.title,
-        description: playlist.snippet.description,
-        thumbnails: playlist.snippet.thumbnails,
-      };
+    function updateExistingPlaylists(done) {
+      async.each(results, updatePlaylist, pushUpdatedPlaylists);
 
-      if (!result) {
-        db.insert(dbPlaylist, pushCreatedPlaylist);
-      } else {
+      function updatePlaylist(result, nextResult) {
+        let correspondingPlaylist = playlists.filter(playlist => playlist.id === result.id)[0];
+
         let $set = {};
 
-        if (result.title !== playlist.snippet.title)
-          $set.title = playlist.snippet.title;
-        if (result.description !== playlist.snippet.description)
-          $set.description = playlist.snippet.description;
-        if (JSON.stringify(result.thumbnails) !== JSON.stringify(playlist.snippet.thumbnails))
-          $set.thumbnails = playlist.snippet.thumbnails;
+        if (result.title !== correspondingPlaylist.snippet.title)
+          $set.title = correspondingPlaylist.snippet.title;
+        if (result.description !== correspondingPlaylist.snippet.description)
+          $set.description = correspondingPlaylist.snippet.description;
+        if (JSON.stringify(result.thumbnails) !== JSON.stringify(correspondingPlaylist.snippet.thumbnails))
+          $set.thumbnails = correspondingPlaylist.snippet.thumbnails;
 
         if (Object.keys($set).length) {
-          db.update(request, { $set }, { upsert: true }, pushUpdatedPlaylist);
+          db.update({
+            kind: 'youtube#playlist',
+            id: result.id,
+          }, { $set }, { upsert: true }, pushUpdatedPlaylist);
         } else {
-          pushCreatedPlaylist();
+          nextResult();
+        }
+
+        function pushUpdatedPlaylist(err, updatedPlaylist) {
+          updatedChannelPlaylists.push(updatedPlaylist);
+          nextResult(err);
         }
       }
 
-      function pushCreatedPlaylist(err, playlist) {
-        someNewPlaylists.push(playlist);
-        nextPlaylist(err);
+      function pushUpdatedPlaylists(err) {
+        return done(err);
       }
+    }
 
-      function pushUpdatedPlaylist(err, playlist) {
-        someUpdatedPlaylists.push(playlist);
-        nextPlaylist(err);
+    function deletePlaylists(done) {
+      if (results.filter(result => result.channelId === 'UCrt_PUTF9LdJyuDfXweHwuQ').length)
+        console.log('deletePlaylists', results, playlists);
+      if (results.length <= playlists.length) return done();
+
+      let playlistsIds = playlists.map(playlist => playlist.id);
+      let deletedPlaylists = results
+        .filter(result => !playlistsIds.includes(result.id))
+        .map(deletedResult => { return { id: deletedResult.id }; });
+
+      console.log(deletedPlaylists);
+
+      db.remove(deletedPlaylists, { multi: true }, pushDeletedPlaylists);
+
+      function pushDeletedPlaylists(err, deletedPlaylists) {
+        deletedChannelPlaylists.push(...deletedPlaylists);
+        return done(err);
       }
+    }
+
+    function sendNewAndUpdatedPlaylists(err) {
+      console.info('END: upsertPlaylists');
+      return cb(err, createdChannelPlaylists, updatedChannelPlaylists, deletedChannelPlaylists);
     }
   }
 
-  function sendNewAndUpdatedPlaylists(err) {
-    console.info('END: upsertPlaylists');
-    return cb (err, someNewPlaylists, someUpdatedPlaylists);
-  }
+  // async.each(playlists, findPlaylist, sendNewAndUpdatedPlaylists);
+
+
+
+  // function findPlaylist(playlist, nextPlaylist) {
+  //   let request = {
+  //     kind: 'youtube#playlist',
+  //     id: playlist.id,
+  //   };
+
+  //   db.findOne(request, gotPlaylist);
+
+  //   function gotPlaylist(err, result) {
+  //     if (err) {
+  //       console.error(err);
+  //       return pushCreatedPlaylist(err);
+  //     }
+
+  //     let dbPlaylist = {
+  //       kind: 'youtube#playlist',
+  //       id: playlist.id,
+  //       title: playlist.snippet.title,
+  //       description: playlist.snippet.description,
+  //       thumbnails: playlist.snippet.thumbnails,
+  //     };
+
+  //     if (!result) {
+  //       db.insert(dbPlaylist, pushCreatedPlaylist);
+  //     } else {
+  //       let $set = {};
+
+  //       if (result.title !== playlist.snippet.title)
+  //         $set.title = playlist.snippet.title;
+  //       if (result.description !== playlist.snippet.description)
+  //         $set.description = playlist.snippet.description;
+  //       if (JSON.stringify(result.thumbnails) !== JSON.stringify(playlist.snippet.thumbnails))
+  //         $set.thumbnails = playlist.snippet.thumbnails;
+
+  //       if (Object.keys($set).length) {
+  //         db.update(request, { $set }, { upsert: true }, pushUpdatedPlaylist);
+  //       } else {
+  //         pushCreatedPlaylist();
+  //       }
+  //     }
+
+  //     function pushCreatedPlaylist(err, playlist) {
+  //       createdChannelPlaylists.push(playlist);
+  //       nextPlaylist(err);
+  //     }
+
+  //     function pushUpdatedPlaylist(err, playlist) {
+  //       updatedChannelPlaylists.push(playlist);
+  //       nextPlaylist(err);
+  //     }
+  //   }
+  // }
+
+  // function sendNewAndUpdatedPlaylists(err) {
+  //   console.info('END: upsertPlaylists');
+  //   return cb (err, createdChannelPlaylists, updatedChannelPlaylists);
+  // }
 }
 

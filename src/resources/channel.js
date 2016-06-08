@@ -51,7 +51,8 @@ function refreshChannels(subscriptions, cb) {
         upsertChannel(channel.items[0], function (err, newChannel, updatedChannel) {
           if (newChannel) {
             newChannels.push(newChannel);
-          } else if (updatedChannel) {
+          }
+          if (updatedChannel) {
             updatedChannels.push(updatedChannel);
           }
           nextSubscription();
