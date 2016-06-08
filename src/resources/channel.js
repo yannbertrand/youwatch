@@ -14,60 +14,52 @@ module.exports = function (_async, _YouTube, _oauth2Client, _db) {
   };
 };
 
-function refreshChannels(cb) {
+function refreshChannels(subscriptions, cb) {
   let pageToken = true;
   let newChannels = [];
   let updatedChannels = [];
 
   console.info('START: refreshChannels');
 
-  db.find({ kind: 'youtube#subscription' }, gotSubscriptions);
+  async.each(subscriptions, refreshChannel, sendNewAndUpdatedChannels);
 
 
 
-  function gotSubscriptions(err, subscriptions) {
-    if (err) {
-      console.error(err);
+  function refreshChannel(subscription, nextSubscription) {
+    YouTube.channels.list(concoctRequest(subscription), gotChannel);
+
+    function concoctRequest(subscription) {
+      return {
+        part: 'id, snippet, contentDetails',
+        id: subscription.channelId,
+        auth: oauth2Client,
+      };
     }
 
-    async.each(subscriptions, refreshChannel, sendNewAndUpdatedChannels);
-
-    function refreshChannel(subscription, nextSubscription) {
-      YouTube.channels.list(concoctRequest(subscription), gotChannel);
-
-      function concoctRequest(subscription) {
-        return {
-          part: 'id, snippet, contentDetails',
-          id: subscription.channelId,
-          auth: oauth2Client,
-        };
+    function gotChannel(err, channel) {
+      if (err) {
+        console.error('Error while trying to get channel ' + subscription.channelId, err);
+        return nextSubscription();
       }
 
-      function gotChannel(err, channel) {
-        if (err) {
-          console.error('Error while trying to get channel ' + subscription.channelId, err);
-          return nextSubscription();
-        }
-
-        if (channel && channel.items && channel.items.length) {
-          upsertChannel(channel.items[0], function (err, newChannel, updatedChannel) {
-            if (newChannel) {
-              newChannels.push(newChannel);
-            } else if (updatedChannel) {
-              updatedChannels.push(updatedChannel);
-            }
-            nextSubscription();
-          });
-        } else {
+      if (channel && channel.items && channel.items.length) {
+        upsertChannel(channel.items[0], function (err, newChannel, updatedChannel) {
+          if (newChannel) {
+            newChannels.push(newChannel);
+          } else if (updatedChannel) {
+            updatedChannels.push(updatedChannel);
+          }
           nextSubscription();
-        }
+        });
+      } else {
+        nextSubscription();
       }
     }
+  }
 
-    function sendNewAndUpdatedChannels(err) {
-      console.info('END: refreshChannels');
-      cb(err, newChannels, updatedChannels);
-    }
+  function sendNewAndUpdatedChannels(err) {
+    console.info('END: refreshChannels');
+    cb(err, newChannels, updatedChannels);
   }
 }
 

@@ -40,7 +40,7 @@ app.on('ready', () => {
       
       YoutubeApi.refreshSubscriptions((errSub, newSubscriptions, allSubscriptions) => {
         console.log(errSub, newSubscriptions.length);
-        YoutubeApi.refreshChannels((errChan, newChannels, updatedChannels) => {
+        YoutubeApi.refreshChannels(allSubscriptions, (errChan, newChannels, updatedChannels) => {
           console.log(errChan, newChannels.length, updatedChannels.length);
         });
       });
