@@ -42,6 +42,12 @@ app.on('ready', () => {
         console.log(errSub, newSubscriptions.length);
         YoutubeApi.refreshChannels(allSubscriptions, (errChan, newChannels, updatedChannels) => {
           console.log(errChan, newChannels.length, updatedChannels.length);
+          YoutubeApi.findAllChannels((errChan2, channels) => {
+            console.log(errChan2, channels.length);
+            YoutubeApi.refreshPlaylists(channels, (errPlaylist, newPlaylists, updatedPlaylists) => {
+              console.log(errPlaylist, newPlaylists.length, updatedPlaylists.length);
+            });
+          });
         });
       });
 

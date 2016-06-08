@@ -10,9 +10,14 @@ module.exports = function (_async, _YouTube, _oauth2Client, _db) {
   db = _db;
 
   return {
+    findAllSubscriptions,
     refreshSubscriptions,
   };
 };
+
+function findAllSubscriptions(cb) {
+  db.find({ kind: 'youtube#subscription' }, cb);
+}
 
 function refreshSubscriptions(cb) {
   let pageToken = true;

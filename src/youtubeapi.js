@@ -22,6 +22,12 @@ module.exports = {
   getToken,
   getVideo,
   getSubscriptions,
+  findAllSubscriptions: Subscription.findAllSubscriptions,
+  refreshSubscriptions: Subscription.refreshSubscriptions,
+  findAllChannels: Channel.findAllChannels,
+  refreshChannels: Channel.refreshChannels,
+  findAllPlaylists: Playlist.findAllPlaylists,
+  refreshPlaylists: Playlist.refreshPlaylists,
 };
 
 // Check if the stored access token (if existing) is still working

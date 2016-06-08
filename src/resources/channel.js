@@ -10,9 +10,14 @@ module.exports = function (_async, _YouTube, _oauth2Client, _db) {
   db = _db;
 
   return {
+    findAllChannels,
     refreshChannels,
   };
 };
+
+function findAllChannels(cb) {
+  db.find({ kind: 'youtube#channel' }, cb);
+}
 
 function refreshChannels(subscriptions, cb) {
   let pageToken = true;
@@ -21,11 +26,11 @@ function refreshChannels(subscriptions, cb) {
 
   console.info('START: refreshChannels');
 
-  async.each(subscriptions, refreshChannel, sendNewAndUpdatedChannels);
+  async.each(subscriptions, refreshSubscriptionChannel, sendNewAndUpdatedChannels);
 
 
 
-  function refreshChannel(subscription, nextSubscription) {
+  function refreshSubscriptionChannel(subscription, nextSubscription) {
     YouTube.channels.list(concoctRequest(subscription), gotChannel);
 
     function concoctRequest(subscription) {
@@ -87,7 +92,6 @@ function upsertChannel(channel, cb) {
       title: channel.snippet.title,
       description: channel.snippet.description,
       thumbnails: channel.snippet.thumbnails,
-      playlists: channel.contentDetails.relatedPlaylists,
     };
 
     if (!result) {
@@ -101,8 +105,6 @@ function upsertChannel(channel, cb) {
         $set.description = channel.snippet.description;
       if (JSON.stringify(result.thumbnails) !== JSON.stringify(channel.snippet.thumbnails))
         $set.thumbnails = channel.snippet.thumbnails;
-      if (JSON.stringify(result.playlists) !== JSON.stringify(channel.contentDetails.relatedPlaylists))
-        $set.playlists = channel.contentDetails.relatedPlaylists;
 
       if (Object.keys($set).length) {
         db.update(request, { $set }, { upsert: true }, sendUpdatedChannels);
