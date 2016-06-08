@@ -38,9 +38,10 @@ app.on('ready', () => {
       if (subscriptions.length)
         return socket.emit('subscriptions/list', subscriptions);
       
-      YoutubeApi.refreshSubscriptions((errSub, newSubscriptions) => {
+      YoutubeApi.refreshSubscriptions((errSub, newSubscriptions, allSubscriptions) => {
+        console.log(errSub, newSubscriptions.length);
         YoutubeApi.refreshChannels((errChan, newChannels, updatedChannels) => {
-          console.log(errChan, newChannels, updatedChannels);
+          console.log(errChan, newChannels.length, updatedChannels.length);
         });
       });
 

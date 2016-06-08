@@ -17,6 +17,7 @@ module.exports = function (_async, _YouTube, _oauth2Client, _db) {
 function refreshSubscriptions(cb) {
   let pageToken = true;
   let newSubscriptions = [];
+  let allSubscriptions = [];
 
   console.info('START: refreshSubscriptions');
 
@@ -52,8 +53,9 @@ function refreshSubscriptions(cb) {
       }
 
       pageToken = subscriptionsPage.nextPageToken || false;
-      insertSubscriptions(subscriptionsPage.items, function (err, someNewSubscriptions) {
-        newSubscriptions = newSubscriptions.concat(someNewSubscriptions);
+      insertSubscriptions(subscriptionsPage.items, function (err, someNewSubscriptions, allSubscriptionsPage) {
+        newSubscriptions.push(...someNewSubscriptions);
+        allSubscriptions.push(...allSubscriptionsPage);
         nextPage();
       });
 
@@ -69,12 +71,13 @@ function refreshSubscriptions(cb) {
 
   function sendNewSubscriptions(err) {
     console.info('END: refreshSubscriptions');
-    cb(err, newSubscriptions);
+    cb(err, newSubscriptions, allSubscriptions);
   }
 }
 
 function insertSubscriptions(subscriptions, cb) {
   let someNewSubscriptions = [];
+  let allSubscriptionsPage = [];
 
   console.info('START: insertSubscriptions');
 
@@ -95,6 +98,7 @@ function insertSubscriptions(subscriptions, cb) {
       if (!result) {
         insertInDb(subscription);
       } else {
+        allSubscriptionsPage.push(result);
         nextSubscription();
       }
     });
@@ -107,12 +111,13 @@ function insertSubscriptions(subscriptions, cb) {
       };
 
       someNewSubscriptions.push(dbSubscription);
+      allSubscriptionsPage.push(dbSubscription);
       db.insert(dbSubscription, nextSubscription);
     }
   }
 
   function sendNewSubscriptions(err) {
     console.info('END: insertSubscriptions');
-    return cb (err, someNewSubscriptions);
+    return cb (err, someNewSubscriptions, allSubscriptionsPage);
   }
 }
