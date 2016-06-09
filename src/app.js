@@ -37,20 +37,62 @@ app.on('ready', () => {
     socket.on('subscriptions/list', () => {
       if (subscriptions.length)
         return socket.emit('subscriptions/list', subscriptions);
-      
-      YoutubeApi.refreshSubscriptions((errSub, newSubscriptions, allSubscriptions) => {
-        console.log(errSub, newSubscriptions.length);
-        YoutubeApi.refreshChannels(allSubscriptions, (errChan, newChannels, updatedChannels) => {
-          console.log(errChan, newChannels.length, updatedChannels.length);
-          YoutubeApi.findAllChannels((errChan2, channels) => {
-            console.log(errChan2, channels.length);
-            let uploadsPlaylists = channels.map(channel => channel.relatedPlaylists.uploads);
-            YoutubeApi.refreshPlaylistItems(uploadsPlaylists, (errPI, createdPlaylistItems, updatedPlaylistItems) => {
-              console.log(errPI, createdPlaylistItems.length);
-            });
-          });
-        });
+
+      async.waterfall([
+
+        function (next) {
+          YoutubeApi.refreshSubscriptions(next);
+        },
+
+        log.bind(this, ' new subscriptions'),
+
+        function (created, next) {
+          YoutubeApi.findAllSubscriptions(next);
+        },
+
+        log.bind(this, ' subscriptions found'),
+
+        function (all, next) {
+          YoutubeApi.refreshChannels(all, next);
+        },
+
+        log.bind(this, ' created channels', ' updated channels'),
+
+        function (created, updated, next) {
+          YoutubeApi.findAllChannels(next);
+        },
+
+        log.bind(this, ' channels found'),
+
+        function (channels, next) {
+          let uploadsPlaylists = channels.map(channel => channel.relatedPlaylists.uploads);
+          YoutubeApi.refreshPlaylistItems(uploadsPlaylists, next);
+        },
+
+        log.bind(this, ' created playlist items'),
+
+      ], function (err) {
+        if (err)
+          return console.error('Error', err);
+
+        console.log('Done');
       });
+
+      function log() {
+        switch (arguments.length) {
+          case 3:
+            console.log(arguments[1].length + arguments[0]);
+
+            return arguments[2](null, arguments[1]);
+          case 5:
+            console.log(arguments[2].length + arguments[0]);
+            console.log(arguments[3].length + arguments[1]);
+
+            return arguments[4](null, arguments[2], arguments[3]);
+          default:
+            console.error('not implemented');
+        }
+      }
 
       // YoutubeApi.getSubscriptions((err, _subscriptions) => {
       //   if (err) {
