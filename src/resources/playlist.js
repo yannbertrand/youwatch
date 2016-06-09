@@ -31,10 +31,8 @@ function findAllPlaylists(cb) {
 }
 
 function refreshPlaylists(channels, cb) {
-  let pageToken = true;
   let newPlaylists = [];
   let updatedPlaylists = [];
-  let deletedPlaylists = [];
 
   console.info('START: refreshPlaylists');
 
@@ -60,15 +58,12 @@ function refreshPlaylists(channels, cb) {
       }
 
       if (playlists && playlists.items && playlists.items.length) {
-        upsertPlaylists(playlists.items, function (err, createdChannelPlaylists, updatedChannelPlaylists, deletedChannelPlaylists) {
+        upsertPlaylists(playlists.items, function (err, createdChannelPlaylists, updatedChannelPlaylists) {
           if (createdChannelPlaylists) {
             newPlaylists.push(...createdChannelPlaylists);
           }
           if (updatedChannelPlaylists) {
             updatedPlaylists.push(...updatedChannelPlaylists);
-          }
-          if (deletedChannelPlaylists) {
-            deletedPlaylists.push(...deletedChannelPlaylists);
           }
           nextChannel();
         });
@@ -87,7 +82,6 @@ function refreshPlaylists(channels, cb) {
 function upsertPlaylists(playlists, cb) {
   let createdChannelPlaylists = [];
   let updatedChannelPlaylists = [];
-  let deletedChannelPlaylists = [];
 
   console.info('START: upsertPlaylists');
 
@@ -175,7 +169,7 @@ function upsertPlaylists(playlists, cb) {
 
     function sendNewAndUpdatedPlaylists(err) {
       console.info('END: upsertPlaylists');
-      return cb(err, createdChannelPlaylists, updatedChannelPlaylists, deletedChannelPlaylists);
+      return cb(err, createdChannelPlaylists, updatedChannelPlaylists);
     }
   }
 }
