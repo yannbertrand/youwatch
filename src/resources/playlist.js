@@ -11,9 +11,20 @@ module.exports = function (_async, _YouTube, _oauth2Client, _db) {
 
   return {
     findAllPlaylists,
+    findAllRelatedPlaylists,
     refreshPlaylists,
   };
 };
+
+function findAllRelatedPlaylists(cb) {
+  db.find({ kind: 'youtube#channel' }, function (err, channels) {
+    if (err) return cb(err);
+
+    return cb(null, channels.map(channel => {
+      return { [channel.id]: channel.relatedPlaylists };
+    }));
+  });
+}
 
 function findAllPlaylists(cb) {
   db.find({ kind: 'youtube#playlist' }, cb);
