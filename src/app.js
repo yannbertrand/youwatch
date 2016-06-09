@@ -40,23 +40,18 @@ app.on('ready', () => {
 
       async.waterfall([
 
-        call.bind(this, YoutubeApi.refreshSubscriptions),
-        log.bind(this, ' new subscriptions'),
+        call.bind(this, YoutubeApi.refreshSubscriptions, [' new subscriptions']),
         forgetParameters,
 
-        call.bind(this, YoutubeApi.findAllSubscriptions),
-        log.bind(this, ' subscriptions found'),
+        call.bind(this, YoutubeApi.findAllSubscriptions, [' subscriptions found']),
 
-        call.bind(this, YoutubeApi.refreshChannels),
-        log.bind(this, ' created channels', ' updated channels'),
+        call.bind(this, YoutubeApi.refreshChannels, [' created channels', ' updated channels']),
         forgetParameters,
 
-        call.bind(this, YoutubeApi.findAllChannels),
-        log.bind(this, ' channels found'),
+        call.bind(this, YoutubeApi.findAllChannels, [' channels found']),
 
         prepareUploadsPlaylists,
-        call.bind(this, YoutubeApi.refreshPlaylistItems),
-        log.bind(this, ' created playlist items'),
+        call.bind(this, YoutubeApi.refreshPlaylistItems, [' created playlist items']),
 
       ], function (err) {
         if (err)
@@ -70,8 +65,23 @@ app.on('ready', () => {
       }
 
       function call() {
-        let _arguments = Array.prototype.slice.call(arguments, 1);
+        let messages = arguments[1];
+        let callback = arguments[arguments.length - 1];
+        let _arguments = [];
+
+        if (arguments.length === 4)
+          _arguments.push(arguments[2]);
+
+        _arguments.push(logResult);
+
         arguments[0].apply(null, _arguments);
+
+        function logResult() {
+          Array.prototype.splice.call(arguments, 0, 1, ...messages);
+          Array.prototype.push.call(arguments, callback);
+
+          log.apply(null, arguments);
+        }
       }
 
       function forgetParameters() {
