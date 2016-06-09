@@ -40,35 +40,22 @@ app.on('ready', () => {
 
       async.waterfall([
 
-        function (next) {
-          YoutubeApi.refreshSubscriptions(next);
-        },
-
+        call.bind(this, YoutubeApi.refreshSubscriptions),
         log.bind(this, ' new subscriptions'),
+        forgetParameters,
 
-        function (created, next) {
-          YoutubeApi.findAllSubscriptions(next);
-        },
-
+        call.bind(this, YoutubeApi.findAllSubscriptions),
         log.bind(this, ' subscriptions found'),
 
-        function (all, next) {
-          YoutubeApi.refreshChannels(all, next);
-        },
-
+        call.bind(this, YoutubeApi.refreshChannels),
         log.bind(this, ' created channels', ' updated channels'),
+        forgetParameters,
 
-        function (created, updated, next) {
-          YoutubeApi.findAllChannels(next);
-        },
-
+        call.bind(this, YoutubeApi.findAllChannels),
         log.bind(this, ' channels found'),
 
-        function (channels, next) {
-          let uploadsPlaylists = channels.map(channel => channel.relatedPlaylists.uploads);
-          YoutubeApi.refreshPlaylistItems(uploadsPlaylists, next);
-        },
-
+        prepareUploadsPlaylists,
+        call.bind(this, YoutubeApi.refreshPlaylistItems),
         log.bind(this, ' created playlist items'),
 
       ], function (err) {
@@ -77,6 +64,19 @@ app.on('ready', () => {
 
         console.log('Done');
       });
+
+      function prepareUploadsPlaylists(channels, next) {
+        next(null, channels.map(channel => channel.relatedPlaylists.uploads));
+      }
+
+      function call() {
+        let _arguments = Array.prototype.slice.call(arguments, 1);
+        arguments[0].apply(null, _arguments);
+      }
+
+      function forgetParameters() {
+        return arguments[arguments.length - 1]();
+      }
 
       function log() {
         switch (arguments.length) {

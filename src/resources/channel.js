@@ -24,7 +24,7 @@ function refreshChannels(subscriptions, callback) {
   let newChannels = [];
   let updatedChannels = [];
 
-  console.info('START: refreshChannels');
+  // console.info('START: refreshChannels');
 
   async.each(subscriptions, refreshSubscriptionChannel, sendNewAndUpdatedChannels);
 
@@ -48,7 +48,7 @@ function refreshChannels(subscriptions, callback) {
   }
 
   function sendNewAndUpdatedChannels(err) {
-    console.info('END: refreshChannels');
+    // console.info('END: refreshChannels');
     callback(err, newChannels, updatedChannels);
   }
 }
