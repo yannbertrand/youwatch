@@ -93,6 +93,7 @@ function upsertChannel(channel, cb) {
       title: channel.snippet.title,
       description: channel.snippet.description,
       thumbnails: channel.snippet.thumbnails,
+      relatedPlaylists: channel.contentDetails.relatedPlaylists,
     };
 
     if (!result) {
@@ -106,6 +107,8 @@ function upsertChannel(channel, cb) {
         $set.description = channel.snippet.description;
       if (JSON.stringify(result.thumbnails) !== JSON.stringify(channel.snippet.thumbnails))
         $set.thumbnails = channel.snippet.thumbnails;
+      if (JSON.stringify(result.relatedPlaylists) !== JSON.stringify(channel.contentDetails.relatedPlaylists))
+        $set.relatedPlaylists = channel.contentDetails.relatedPlaylists;
 
       if (Object.keys($set).length) {
         db.update(request, { $set }, { upsert: true }, sendUpdatedChannels);
