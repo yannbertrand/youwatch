@@ -75,7 +75,7 @@ function refreshPlaylists(channels, cb) {
 
   function sendNewAndUpdatedPlaylists(err) {
     console.info('END: refreshPlaylists');
-    cb(err, newPlaylists, updatedPlaylists, deletedPlaylists);
+    cb(err, newPlaylists, updatedPlaylists);
   }
 }
 
