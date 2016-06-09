@@ -38,15 +38,19 @@ app.on('ready', () => {
       if (subscriptions.length)
         return socket.emit('subscriptions/list', subscriptions);
       
-      YoutubeApi.refreshSubscriptions((errSub, newSubscriptions, allSubscriptions) => {
-        console.log(errSub, newSubscriptions.length);
-        YoutubeApi.refreshChannels(allSubscriptions, (errChan, newChannels, updatedChannels) => {
-          console.log(errChan, newChannels.length, updatedChannels.length);
-          YoutubeApi.findAllRelatedPlaylists((errPlaylist, playlists) => {
-            console.log(errPlaylist, playlists, playlists.length);
+      // YoutubeApi.refreshSubscriptions((errSub, newSubscriptions, allSubscriptions) => {
+      //   console.log(errSub, newSubscriptions.length);
+      //   YoutubeApi.refreshChannels(allSubscriptions, (errChan, newChannels, updatedChannels) => {
+      //     console.log(errChan, newChannels.length, updatedChannels.length);
+          YoutubeApi.findAllChannels((errChan2, channels) => {
+            console.log(errChan2, channels.length);
+            let uploadsPlaylists = channels.map(channel => channel.relatedPlaylists.uploads);
+            YoutubeApi.refreshPlaylistItems(uploadsPlaylists, (errPI, createdPlaylistItems, updatedPlaylistItems) => {
+              console.log(errPI, createdPlaylistItems);
+            });
           });
-        });
-      });
+      //   });
+      // });
 
       // YoutubeApi.getSubscriptions((err, _subscriptions) => {
       //   if (err) {
