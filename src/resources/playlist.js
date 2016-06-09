@@ -100,7 +100,6 @@ function upsertPlaylists(playlists, cb) {
     async.parallel([
       createUnexistingPlaylists,
       updateExistingPlaylists,
-      deletePlaylists,
     ], sendNewAndUpdatedPlaylists);
 
     function createUnexistingPlaylists(done) {
@@ -159,22 +158,6 @@ function upsertPlaylists(playlists, cb) {
       }
 
       function pushUpdatedPlaylists(err) {
-        return done(err);
-      }
-    }
-
-    function deletePlaylists(done) {
-      if (results.length <= playlists.length) return done();
-
-      let playlistsIds = playlists.map(playlist => playlist.id);
-      let deletedPlaylists = results
-        .filter(result => !playlistsIds.includes(result.id))
-        .map(deletedResult => { return { id: deletedResult.id }; });
-
-      db.remove(deletedPlaylists, { multi: true }, pushDeletedPlaylists);
-
-      function pushDeletedPlaylists(err, deletedPlaylists) {
-        deletedChannelPlaylists.push(...deletedPlaylists);
         return done(err);
       }
     }
