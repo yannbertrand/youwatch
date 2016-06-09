@@ -31,7 +31,7 @@ function findAllPlaylists(cb) {
 }
 
 function refreshPlaylists(channels, cb) {
-  let newPlaylists = [];
+  let createdPlaylists = [];
   let updatedPlaylists = [];
 
   console.info('START: refreshPlaylists');
@@ -60,7 +60,7 @@ function refreshPlaylists(channels, cb) {
       if (playlists && playlists.items && playlists.items.length) {
         upsertPlaylists(playlists.items, function (err, createdChannelPlaylists, updatedChannelPlaylists) {
           if (createdChannelPlaylists) {
-            newPlaylists.push(...createdChannelPlaylists);
+            createdPlaylists.push(...createdChannelPlaylists);
           }
           if (updatedChannelPlaylists) {
             updatedPlaylists.push(...updatedChannelPlaylists);
@@ -75,7 +75,7 @@ function refreshPlaylists(channels, cb) {
 
   function sendNewAndUpdatedPlaylists(err) {
     console.info('END: refreshPlaylists');
-    cb(err, newPlaylists, updatedPlaylists);
+    cb(err, createdPlaylists, updatedPlaylists);
   }
 }
 
