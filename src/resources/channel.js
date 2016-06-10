@@ -29,11 +29,11 @@ function refreshChannels(subscriptions, callback) {
   async.each(subscriptions, refreshSubscriptionChannel, sendNewAndUpdatedChannels);
 
   function refreshSubscriptionChannel(subscription, nextSubscription) {
-    YouTube.channels.list(concoctRequest(subscription), handleError(gotChannel));
+    YouTube.channels.list(concoctRequest(subscription), handleError(gotChannel, callback));
 
     function gotChannel(channel) {
       if (channel && channel.items && channel.items.length) {
-        upsertChannel(channel.items[0], handleError(upsertedChannel));
+        upsertChannel(channel.items[0], handleError(upsertedChannel, callback));
       } else {
         nextSubscription();
       }
@@ -69,7 +69,7 @@ function upsertChannel(channel, callback) {
     id: channel.id,
   };
 
-  db.findOne(request, handleError(gotChannel));
+  db.findOne(request, handleError(gotChannel, callback));
 
   function gotChannel(result) {
     let dbChannel = {
@@ -114,7 +114,7 @@ function upsertChannel(channel, callback) {
   }
 }
 
-function handleError(next) {
+function handleError(next, callback) {
   return function (err) {
     if (err) {
       console.error(err);

@@ -16,92 +16,77 @@ module.exports = function (_async, _YouTube, _oauth2Client, _db) {
   };
 };
 
-function findAllRelatedPlaylists(cb) {
+function findAllRelatedPlaylists(callback) {
   db.find({ kind: 'youtube#channel' }, function (err, channels) {
-    if (err) return cb(err);
+    if (err) return callback(err);
 
-    return cb(null, channels.map(channel => {
+    return callback(null, channels.map(channel => {
       return { [channel.id]: channel.relatedPlaylists };
     }));
   });
 }
 
-function findAllPlaylists(cb) {
-  db.find({ kind: 'youtube#playlist' }, cb);
+function findAllPlaylists(callback) {
+  db.find({ kind: 'youtube#playlist' }, callback);
 }
 
-function refreshPlaylists(channels, cb) {
+function refreshPlaylists(channels, callback) {
   let createdPlaylists = [];
   let updatedPlaylists = [];
 
-  console.info('START: refreshPlaylists');
+  // console.info('START: refreshPlaylists');
 
   async.each(channels, refreshChannelPlaylists, sendNewAndUpdatedPlaylists);
 
-
-
   function refreshChannelPlaylists(channel, nextChannel) {
-    YouTube.playlists.list(concoctRequest(channel), gotPlaylists);
+    YouTube.playlists.list(concoctRequest(channel), handleError(gotPlaylists, callback));
 
-    function concoctRequest(channel) {
-      return {
-        part: 'id, snippet',
-        channelId: channel.id,
-        auth: oauth2Client,
-      };
-    }
-
-    function gotPlaylists(err, playlists) {
-      if (err) {
-        console.error('Error while trying to get playlists of channel ' + channel.id, err);
-        return nextChannel(err);
-      }
-
+    function gotPlaylists(playlists) {
       if (playlists && playlists.items && playlists.items.length) {
-        upsertPlaylists(playlists.items, function (err, createdChannelPlaylists, updatedChannelPlaylists) {
-          if (createdChannelPlaylists) {
-            createdPlaylists.push(...createdChannelPlaylists);
-          }
-          if (updatedChannelPlaylists) {
-            updatedPlaylists.push(...updatedChannelPlaylists);
-          }
-          nextChannel();
-        });
+        upsertPlaylists(playlists.items, handleError(upsertedPlaylist, callback));
       } else {
         nextChannel();
       }
     }
+
+    function upsertedPlaylist(createdChannelPlaylists, updatedChannelPlaylists) {
+      if (createdChannelPlaylists) createdPlaylists.push(...createdChannelPlaylists);
+      if (updatedChannelPlaylists) updatedPlaylists.push(...updatedChannelPlaylists);
+
+      nextChannel();
+    }
   }
 
   function sendNewAndUpdatedPlaylists(err) {
-    console.info('END: refreshPlaylists');
-    cb(err, createdPlaylists, updatedPlaylists);
+    // console.info('END: refreshPlaylists');
+    callback(err, createdPlaylists, updatedPlaylists);
   }
 }
 
-function upsertPlaylists(playlists, cb) {
+function concoctRequest(channel) {
+  return {
+    part: 'id, snippet',
+    channelId: channel.id,
+    auth: oauth2Client,
+  };
+}
+
+function upsertPlaylists(playlists, callback) {
   let createdChannelPlaylists = [];
   let updatedChannelPlaylists = [];
 
-  console.info('START: upsertPlaylists');
+  // console.info('START: upsertPlaylists');
 
   let $or = playlists.map(playlist => {
-    return {
-      id: playlist.id
-    };
+    return { id: playlist.id };
   });
 
   db.find({
     kind: 'youtube#playlist',
     $or: $or,
-  }, gotPlaylists);
+  }, handleError(gotPlaylists, callback));
 
-  function gotPlaylists(err, results) {
-    if (err) {
-      console.error(err);
-      return sendNewAndUpdatedPlaylists(err);
-    }
-
+  function gotPlaylists(results) {
     async.parallel([
       createUnexistingPlaylists,
       updateExistingPlaylists,
@@ -111,24 +96,24 @@ function upsertPlaylists(playlists, cb) {
       if (results.length >= playlists.length) return done();
 
       let resultsIds = results.map(result => result.id);
-      let unexistingPlaylists = playlists.filter(playlist => !resultsIds.includes(playlist.id));
+      let unexistingPlaylists = playlists
+        .filter(playlist => !resultsIds.includes(playlist.id))
+        .map(playlist => {
+          return {
+            kind: 'youtube#playlist',
+            id: playlist.id,
+            channelId: playlist.snippet.channelId,
+            title: playlist.snippet.title,
+            description: playlist.snippet.description,
+            thumbnails: playlist.snippet.thumbnails,
+          };
+        });
 
-      unexistingPlaylists = unexistingPlaylists.map(playlist => {
-        return {
-          kind: 'youtube#playlist',
-          id: playlist.id,
-          channelId: playlist.snippet.channelId,
-          title: playlist.snippet.title,
-          description: playlist.snippet.description,
-          thumbnails: playlist.snippet.thumbnails,
-        };
-      });
+      db.insert(unexistingPlaylists, handleError(pushCreatedPlaylists, callback));
 
-      db.insert(unexistingPlaylists, pushCreatedPlaylists);
-
-      function pushCreatedPlaylists(err, createdPlaylists) {
+      function pushCreatedPlaylists(createdPlaylists) {
         createdChannelPlaylists.push(...createdPlaylists);
-        return done(err);
+        return done();
       }
     }
 
@@ -151,14 +136,14 @@ function upsertPlaylists(playlists, cb) {
           db.update({
             kind: 'youtube#playlist',
             id: result.id,
-          }, { $set }, { upsert: true }, pushUpdatedPlaylist);
+          }, { $set }, { upsert: true }, handleError(pushUpdatedPlaylist, callback));
         } else {
           nextResult();
         }
 
-        function pushUpdatedPlaylist(err, updatedPlaylist) {
+        function pushUpdatedPlaylist(updatedPlaylist) {
           updatedChannelPlaylists.push(updatedPlaylist);
-          nextResult(err);
+          nextResult();
         }
       }
 
@@ -168,9 +153,20 @@ function upsertPlaylists(playlists, cb) {
     }
 
     function sendNewAndUpdatedPlaylists(err) {
-      console.info('END: upsertPlaylists');
-      return cb(err, createdChannelPlaylists, updatedChannelPlaylists);
+      // console.info('END: upsertPlaylists');
+      return callback(err, createdChannelPlaylists, updatedChannelPlaylists);
     }
   }
 }
 
+function handleError(next, callback) {
+  return function (err) {
+    if (err) {
+      console.error(err);
+      return callback(err);
+    }
+
+    let _arguments = Array.prototype.slice.call(arguments, 1);
+    next.apply(null, _arguments);
+  };
+}

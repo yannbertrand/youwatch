@@ -34,13 +34,13 @@ function refreshSubscriptions(callback) {
   function getASubscriptionPage(nextPage) {
     YouTube.subscriptions.list(
       concoctRequest(pageToken),
-      handleError(gotASubscriptionPage)
+      handleError(gotASubscriptionPage, callback)
     );
 
     function gotASubscriptionPage(subscriptionsPage) {
       pageToken = subscriptionsPage.nextPageToken || false;
       
-      insertSubscriptions(subscriptionsPage.items, handleError(subscriptionsInserted));
+      insertSubscriptions(subscriptionsPage.items, handleError(subscriptionsInserted, callback));
     }
 
     function subscriptionsInserted(someNewSubscriptions) {
@@ -78,7 +78,7 @@ function insertSubscriptions(subscriptions, callback) {
     db.findOne({
       kind: 'youtube#subscription',
       id: subscription.id,
-    }, handleError(foundSubscription));
+    }, handleError(foundSubscription, callback));
 
     function foundSubscription(result) {
       if (!result) {
@@ -107,7 +107,7 @@ function insertSubscriptions(subscriptions, callback) {
   }
 }
 
-function handleError(next) {
+function handleError(next, callback) {
   return function (err) {
     if (err) {
       console.error(err);

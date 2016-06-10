@@ -15,106 +15,106 @@ module.exports = function (_async, _YouTube, _oauth2Client, _db) {
   };
 };
 
-function findAllPlaylistItems(cb) {
-  db.find({ kind: 'youtube#playlistItem' }, cb);
+function findAllPlaylistItems(callback) {
+  db.find({ kind: 'youtube#playlistItem' }, callback);
 }
 
-function refreshPlaylistItems(playlists, cb) {
+function refreshPlaylistItems(playlists, callback) {
   let createdPlaylistItems = [];
 
-  console.info('START: refreshPlaylistItems');
+  // console.info('START: refreshPlaylistItems');
 
   async.each(playlists, refreshPlaylistPlaylistItems, sendNewPlaylistItems);
 
-
-
   function refreshPlaylistPlaylistItems(playlist, nextPlaylist) {
-    YouTube.playlistItems.list(concoctRequest(playlist), gotPlaylistItems);
+    YouTube.playlistItems.list(concoctRequest(playlist), handleError(gotPlaylistItems, callback));
 
-    function concoctRequest(playlist) {
-      return {
-        part: 'id, snippet, contentDetails',
-        playlistId: playlist,
-        auth: oauth2Client,
-      };
-    }
-
-    function gotPlaylistItems(err, playlistItems) {
-      if (err) {
-        console.error('Error while trying to get playlist items of playlist ' + playlist.id, err);
-        return nextPlaylist(err);
-      }
-
+    function gotPlaylistItems(playlistItems) {
       if (playlistItems && playlistItems.items && playlistItems.items.length) {
-        upsertPlaylistItems(playlistItems.items, function (err, createdPlaylistPlaylistItems) {
-          if (createdPlaylistPlaylistItems) {
-            createdPlaylistItems.push(...createdPlaylistPlaylistItems);
-          }
-          nextPlaylist();
-        });
+        upsertPlaylistItems(playlistItems.items, handleError(upsertedPlaylistItem, callback));
       } else {
         nextPlaylist();
       }
     }
+
+    function upsertedPlaylistItem(createdPlaylistPlaylistItems) {
+      if (createdPlaylistPlaylistItems)
+        createdPlaylistItems.push(...createdPlaylistPlaylistItems);
+
+      nextPlaylist();
+    }
   }
 
   function sendNewPlaylistItems(err) {
-    console.info('END: refreshPlaylistItems');
-    cb(err, createdPlaylistItems);
+    // console.info('END: refreshPlaylistItems');
+    callback(err, createdPlaylistItems);
   }
 }
 
-function upsertPlaylistItems(playlistItems, cb) {
+function concoctRequest(playlist) {
+  return {
+    part: 'id, snippet, contentDetails',
+    playlistId: playlist,
+    auth: oauth2Client,
+  };
+}
+
+function upsertPlaylistItems(playlistItems, callback) {
   let createdPlaylistPlaylistItems = [];
 
-  console.info('START: upsertPlaylistItems');
+  // console.info('START: upsertPlaylistItems');
 
   let $or = playlistItems.map(playlistItem => {
-    return {
-      id: playlistItem.id
-    };
+    return { id: playlistItem.id };
   });
 
   db.find({
     kind: 'youtube#playlistItem',
     $or: $or,
-  }, gotPlaylistItems);
+  }, handleError(gotPlaylistItems, callback));
 
-  function gotPlaylistItems(err, results) {
-    if (err) {
-      console.error(err);
-      return sendNewPlaylistItems(err);
-    }
-
+  function gotPlaylistItems(results) {
     createUnexistingPlaylistItems(sendNewPlaylistItems);
 
     function createUnexistingPlaylistItems(done) {
       if (results.length >= playlistItems.length) return done();
 
       let resultsIds = results.map(result => result.id);
-      let unexistingPlaylistItems = playlistItems.filter(playlistItem => !resultsIds.includes(playlistItem.id));
+      let unexistingPlaylistItems = playlistItems
+        .filter(playlistItem => !resultsIds.includes(playlistItem.id))
+        .map(playlistItem => {
+          return {
+            kind: 'youtube#playlistItem',
+            id: playlistItem.id,
+            channelId: playlistItem.snippet.channelId,
+            playlistId: playlistItem.snippet.playlistId,
+            videoId: playlistItem.contentDetails.videoId,
+          };
+        });
 
-      unexistingPlaylistItems = unexistingPlaylistItems.map(playlistItem => {
-        return {
-          kind: 'youtube#playlistItem',
-          id: playlistItem.id,
-          channelId: playlistItem.snippet.channelId,
-          playlistId: playlistItem.snippet.playlistId,
-          videoId: playlistItem.contentDetails.videoId,
-        };
-      });
+      db.insert(unexistingPlaylistItems, handleError(pushCreatedPlaylistItems, callback));
 
-      db.insert(unexistingPlaylistItems, pushCreatedPlaylistItems);
-
-      function pushCreatedPlaylistItems(err, createdPlaylistItems) {
+      function pushCreatedPlaylistItems(createdPlaylistItems) {
         createdPlaylistPlaylistItems.push(...createdPlaylistItems);
-        return done(err);
+        return done();
       }
     }
 
     function sendNewPlaylistItems(err) {
-      console.info('END: upsertPlaylistItems');
-      return cb(err, createdPlaylistPlaylistItems);
+      // console.info('END: upsertPlaylistItems');
+      return callback(err, createdPlaylistPlaylistItems);
     }
   }
+}
+
+function handleError(next, callback) {
+  return function (err) {
+    if (err) {
+      console.error(err);
+      return callback(err);
+    }
+
+    let _arguments = Array.prototype.slice.call(arguments, 1);
+    next.apply(null, _arguments);
+  };
 }
