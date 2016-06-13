@@ -9,6 +9,7 @@ const Subscription = require('./resources/subscription')(_async, YouTube, oauth2
 const Channel = require('./resources/channel')(_async, YouTube, oauth2Client, db);
 const Playlist = require('./resources/playlist')(_async, YouTube, oauth2Client, db);
 const PlaylistItem = require('./resources/playlist-item')(_async, YouTube, oauth2Client, db);
+const Video = require('./resources/video')(_async, YouTube, oauth2Client, db);
 
 const configStore = new Configstore('YouWatch');
 const YouTube = Google.youtube('v3');
@@ -32,6 +33,7 @@ module.exports = {
   findAllRelatedPlaylists: Playlist.findAllRelatedPlaylists,
   refreshPlaylists: Playlist.refreshPlaylists,
   refreshPlaylistItems: PlaylistItem.refreshPlaylistItems,
+  refreshVideos: Video.refreshVideos,
 };
 
 // Check if the stored access token (if existing) is still working

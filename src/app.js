@@ -40,18 +40,22 @@ app.on('ready', () => {
 
       async.waterfall([
 
-        call.bind(this, YoutubeApi.refreshSubscriptions, [' new subscriptions']),
-        forgetParameters,
+        // call.bind(this, YoutubeApi.refreshSubscriptions, [' new subscriptions']),
+        // forgetParameters,
 
-        call.bind(this, YoutubeApi.findAllSubscriptions, [' subscriptions found']),
+        // call.bind(this, YoutubeApi.findAllSubscriptions, [' subscriptions found']),
 
-        call.bind(this, YoutubeApi.refreshChannels, [' created channels', ' updated channels']),
-        forgetParameters,
+        // call.bind(this, YoutubeApi.refreshChannels, [' created channels', ' updated channels']),
+        // forgetParameters,
 
         call.bind(this, YoutubeApi.findAllChannels, [' channels found']),
 
         prepareUploadsPlaylists,
-        call.bind(this, YoutubeApi.refreshPlaylistItems, [' created playlist items']),
+        call.bind(this, YoutubeApi.refreshPlaylistItems, [' created playlist items', ' updated playlist items']),
+
+        call.bind(this, YoutubeApi.findAllPlaylistItems, [' playlist items found']),
+
+        call.bind(this, YoutubeApi.refreshVideos, [' created videos', ' updated videos']),
 
       ], function (err) {
         if (err)
