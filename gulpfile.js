@@ -26,7 +26,6 @@ const replaceOptions = {
   ]
 };
 
-
 /**
  * Electron tasks
  */
