@@ -1,12 +1,14 @@
 const Video = React.createClass({
-  cueVideo: function () {
+  addVideo: function () {
     if (this.props.id) {
-      Socket.emit('video/cue', this.props);
+      window.dispatchEvent(new CustomEvent('playlist.addVideo', { video: this.props }));
+      Socket.emit('video/next', this.props);
     }
   },
-  setNextVideo: function () {
+  cueVideo: function () {
     if (this.props.id) {
-      Socket.emit('video/next', this.props);
+      window.dispatchEvent(new CustomEvent('playlist.cueVideo', { video: this.props }));
+      Socket.emit('video/cue', this.props);
     }
   },
   render: function () {
@@ -22,7 +24,7 @@ const Video = React.createClass({
                   onClick={this.cueVideo}
                   title="Cue this video">+</button>
           <h5>
-            <a onClick={this.setNextVideo} title={this.props.title}>
+            <a onClick={this.addVideo} title={this.props.title}>
               {this.props.title}
             </a>
           </h5>
