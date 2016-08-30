@@ -1,7 +1,10 @@
+let isVideoPlaying = false;
+
 const Player = React.createClass({
   onStateChange: function (event) {
     switch (event.data) {
       case YT.PlayerState.PLAYING:
+        isVideoPlaying = true;
         Socket.emit('video/start', this.state.player.getVideoData()['video_id']);
         break;
       case YT.PlayerState.PAUSED:
@@ -11,6 +14,7 @@ const Player = React.createClass({
         Socket.emit('video/buffer', this.state.player.getVideoData()['video_id']);
         break;
       case YT.PlayerState.ENDED:
+        isVideoPlaying = false;
         Socket.emit('video/end', this.state.player.getVideoData()['video_id']);
         break;
     };
@@ -97,8 +101,38 @@ const Playlist = React.createClass({
     return { videos: [] };
   },
   componentDidMount: function () {
-    Socket.on('playlist/update', (playlist) => {
-      this.setState({ videos: playlist });
+    // ToDo - retrieve playlist from backend
+
+    window.addEventListener('playlist.addVideo', event => {
+      this.addVideo(event.video);
+    });
+
+    window.addEventListener('playlist.cueVideo', event => {
+      this.cueVideo(event.video);
+    });
+  },
+  addVideo: function (video) {
+    // Add the video in first position if no video playing
+    // Else add it in second position
+
+    this.setState(state => {
+      if (isVideoPlaying) {
+        state.videos.splice(1, 0, video);
+      } else {
+        state.videos.splice(0, 0, video);
+      }
+
+
+      return state;
+    });
+  },
+  cueVideo: function (video) {
+    // Add the video in last position
+
+    this.setState(state => {
+      state.videos.push(video);
+
+      return state;
     });
   },
   render: function () {
