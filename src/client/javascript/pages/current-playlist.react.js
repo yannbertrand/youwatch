@@ -27,8 +27,6 @@ const Player = React.createClass({
       };
     });
 
-    console.log(this.state.player);
-
     this.state.player.cueVideoById(id);
   },
   playVideo: function (id) {
@@ -104,11 +102,11 @@ const Playlist = React.createClass({
     // ToDo - retrieve playlist from backend
 
     window.addEventListener('playlist.addVideo', event => {
-      this.addVideo(event.video);
+      this.addVideo(event.detail.video);
     });
 
     window.addEventListener('playlist.cueVideo', event => {
-      this.cueVideo(event.video);
+      this.cueVideo(event.detail.video);
     });
   },
   addVideo: function (video) {
@@ -121,7 +119,6 @@ const Playlist = React.createClass({
       } else {
         state.videos.splice(0, 0, video);
       }
-
 
       return state;
     });

@@ -29,8 +29,6 @@ app.on('ready', () => {
     let subscriptions = [];
     let playlist = require('./playlist');
 
-    let videoPlaying = null;
-
     socket.on('youtube/auth', () => {
       socket.emit('youtube/waiting');
 
@@ -57,7 +55,6 @@ app.on('ready', () => {
     // Video
     socket.on('video/start', (id) => {
       console.log('Video started: ', id);
-      videoPlaying = id;
     });
 
     socket.on('video/pause', (id) => {
@@ -66,35 +63,6 @@ app.on('ready', () => {
 
     socket.on('video/buffer', (id) => {
       console.log('Video buffering: ', id);
-    });
-
-    /* This method is called to play a video immediately */
-    socket.on('video/play', playVideo);
-
-    /* Put a video on the end of the playlist */
-    socket.on('video/cue', (video) => {
-      console.log('Cueing video: ', video.id);
-      if (!playlist.length)
-        socket.emit('video/cue', video.id);
-
-      if (!playlist.contains(video.id)) {
-        console.log('Pushing a video into the playlist (' + video.id + ')');
-        playlist.push(video);
-        socket.emit('playlist/update', playlist);
-      }
-    });
-
-    /* Set a video as next to play */
-    socket.on('video/next', (video) => {
-      console.log('Set next video: ', video.id);
-      if (!playlist.length)
-        socket.emit('video/cue', video.id);
-
-      if (!playlist.contains(video.id)) {
-        playlist.setNext(video);
-      }
-
-      socket.emit('playlist/update', playlist);
     });
 
     /* When something is pasted, if it is a YouTube video, play it */
@@ -109,17 +77,6 @@ app.on('ready', () => {
       });
     });
 
-    socket.on('video/remove', (id) => {
-      console.log('Remove video: ', id);
-      removeVideo(id);
-    })
-
-    socket.on('video/end', (id) => {
-      console.log('Video ended: ', id);
-      removeVideo(id);
-      playNextVideo();
-    });
-
     socket.on('app/authenticate', () => {
       YoutubeApi.tryStoredAccessToken((noValidAccessToken, token) => {
         if (noValidAccessToken) {
@@ -129,37 +86,6 @@ app.on('ready', () => {
         }
       });
     });
-
-    function playVideo(video) {
-      console.log('Play video: ', video.id);
-
-      playlist.playNow(video);
-      socket.emit('playlist/update', playlist);
-
-      if (videoPlaying) {
-        socket.emit('video/play', video.id);
-      }
-      else
-        socket.emit('video/cue', video.id);
-    }
-
-    function playNextVideo() {
-      if (!playlist.length) {
-        videoPlaying = null;
-        return;
-      }
-
-      if (videoPlaying === playlist[0].id) return;
-
-      socket.emit('video/play', playlist[0].id);
-      videoPlaying = playlist[0].id;
-    }
-
-    function removeVideo(id) {
-      playlist.remove(id);
-      socket.emit('video/remove');
-      socket.emit('playlist/update', playlist);
-    }
   });
 
   server.hapi.route({
