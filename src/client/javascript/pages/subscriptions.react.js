@@ -1,13 +1,13 @@
 const Video = React.createClass({
   addVideo: function () {
     if (this.props.id) {
-      window.dispatchEvent(new CustomEvent('playlist.addVideo', { video: this.props }));
+      window.dispatchEvent(new CustomEvent('playlist.addVideo', { detail: { video: this.props } }));
       Socket.emit('video/next', this.props);
     }
   },
   cueVideo: function () {
     if (this.props.id) {
-      window.dispatchEvent(new CustomEvent('playlist.cueVideo', { video: this.props }));
+      window.dispatchEvent(new CustomEvent('playlist.cueVideo', { detail: { video: this.props } }));
       Socket.emit('video/cue', this.props);
     }
   },
