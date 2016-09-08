@@ -27,7 +27,6 @@ app.on('ready', () => {
 
   server.io.on('connection', (socket) => {
     let subscriptions = [];
-    let playlist = require('./playlist');
 
     socket.on('youtube/auth', () => {
       socket.emit('youtube/waiting');
