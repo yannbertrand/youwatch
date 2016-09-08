@@ -1,4 +1,5 @@
 const jQuery = require('jquery');
+const _ = require('lodash');
 const React = require('react');
 const ReactDOM = require('react-dom');
 const CurrentPlaylist = require('./javascript/pages/current-playlist.react.js');
