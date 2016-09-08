@@ -101,17 +101,21 @@ const Playlist = React.createClass({
   componentDidMount: function () {
     // ToDo - retrieve playlist from backend
 
-    window.addEventListener('playlist.addVideo', event => {
-      this.addVideo(event.detail.video);
-    });
-
-    window.addEventListener('playlist.cueVideo', event => {
-      this.cueVideo(event.detail.video);
-    });
+    window.addEventListener('playlist.addVideo', this.addVideo);
+    window.addEventListener('playlist.cueVideo', this.cueVideo);
   },
-  addVideo: function (video) {
+  componentWillUnmount: function () {
+    window.removeEventListener('playlist.addVideo', this.addVideo, false);
+    window.removeEventListener('playlist.cueVideo', this.cueVideo, false);
+  },
+  addVideo: function (event) {
     // Add the video in first position if no video playing
     // Else add it in second position
+
+    let video = event.detail.video;
+
+    if (this.isInPlaylist(video))
+      return;
 
     this.setState(state => {
       if (isVideoPlaying) {
@@ -123,14 +127,21 @@ const Playlist = React.createClass({
       return state;
     });
   },
-  cueVideo: function (video) {
+  cueVideo: function (event) {
     // Add the video in last position
+    var video = event.detail.video;
+
+    if (this.isInPlaylist(video))
+      return;
 
     this.setState(state => {
       state.videos.push(video);
 
       return state;
     });
+  },
+  isInPlaylist: function (video) {
+    return _.some(this.state.videos, video);
   },
   render: function () {
     let videos = [];
