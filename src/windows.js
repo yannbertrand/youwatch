@@ -1,9 +1,9 @@
-let BrowserWindow;
-let CONFIG;
+const CONFIG = require('./config');
 
-module.exports = function (electron, _CONFIG) {
+let BrowserWindow;
+
+module.exports = function (electron) {
   BrowserWindow = electron.BrowserWindow;
-  CONFIG = _CONFIG;
 
   return {
     openMainWindow,

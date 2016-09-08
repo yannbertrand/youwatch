@@ -1,16 +1,12 @@
 'use strict';
 
-const CONFIG = require('./config');
-
-const Configstore = require('configstore');
-const async = require('async');
-const google = require('googleapis');
 const electron = require('electron');
 const app = electron.app;
 
 
-const YoutubeApi = require('./youtubeapi')(Configstore, async, google, CONFIG);
-const Windows = require('./windows')(electron, CONFIG);
+const VideoManager = require('./videomanager');
+const YoutubeApi = require('./youtubeapi');
+const Windows = require('./windows')(electron);
 const server = require('./server');
 const database = require('./database');
 
@@ -24,6 +20,8 @@ require('electron-debug')();
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
   Windows.openMainWindow();
+
+  VideoManager.refresh();
 
   server.io.on('connection', (socket) => {
     let subscriptions = [];

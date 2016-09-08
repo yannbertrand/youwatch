@@ -1,26 +1,23 @@
-let oauth2Client;
-let configStore;
-let async;
-let YouTube;
+const Configstore = require('configstore');
+const async = require('async');
+const Google = require('googleapis');
 
-module.exports = function (Configstore, _async, google, CONFIG) {
-  oauth2Client = new google.auth.OAuth2(
-    CONFIG.CREDENTIALS.CLIENT_ID,
-    CONFIG.CREDENTIALS.CLIENT_SECRET,
-    'http://localhost:@@PORT/youtube/callback' // redirect url
-  );
+const CONFIG = require('./config');
 
-  configStore = new Configstore('YouWatch');
-  async = _async;
-  YouTube = google.youtube('v3');
+const configStore = new Configstore('YouWatch');
+const YouTube = Google.youtube('v3');
+const oauth2Client = new Google.auth.OAuth2(
+  CONFIG.CREDENTIALS.CLIENT_ID,
+  CONFIG.CREDENTIALS.CLIENT_SECRET,
+  'http://localhost:@@PORT/youtube/callback' // redirect url
+);
 
-  return {
-    tryStoredAccessToken,
-    getAuthUrl,
-    getToken,
-    getVideo,
-    getSubscriptions,
-  };
+module.exports = {
+  tryStoredAccessToken,
+  getAuthUrl,
+  getToken,
+  getVideo,
+  getSubscriptions,
 };
 
 // Check if the stored access token (if existing) is still working
