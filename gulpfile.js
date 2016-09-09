@@ -44,12 +44,15 @@ gulp.task('electron:start', ['check-port', 'transpile', 'copy'], function() {
 });
 
 gulp.task('electron:restart', ['transpile', 'copy'], function() {
-  electron.stop();
+  // electron.stop();
   electron.restart();
 });
 
+gulp.task('electron:reload', ['copy'], electron.reload);
+
 gulp.task('watch', ['electron:start'], function () {
-  gulp.watch(['src/**/*'], ['transpile', 'copy', 'electron:restart']);
+  gulp.watch(['src/**/*.js'], [/*'transpile', 'copy', */'electron:restart']);
+  gulp.watch(['src/**/*.{html,css}'], ['electron:reload']);
 });
 
 gulp.task('transpile', function (cb) {
