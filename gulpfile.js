@@ -17,45 +17,37 @@ var replaceOptions = {
   ]
 };
 
-var isPortUsed = function (port, cb) {
+var isPortUsed = function (port, callback) {
   tcpPortUsed
     .check(port, '127.0.0.1')
     .then(function (inUse) {
-      cb(null, inUse);
+      callback(null, inUse);
     }, function (err) {
-      cb(err);
+      callback(err);
   });
 };
 
-gulp.task('check-port', function (cb) {
+gulp.task('check-port', function (callback) {
   isPortUsed(CONFIG.PORT, function (err, portInUse) {
-    if (err) {
-      return cb('An unknown error occured');
-    }
+    if (err)
+      return callback('An unknown error occured');
     if (portInUse)
-      return cb('The port ' + CONFIG.PORT + ' is already in use');
+      return callback('The port ' + CONFIG.PORT + ' is already in use');
   
-    cb();
+    callback();
   });
 });
 
-gulp.task('electron:start', ['check-port', 'transpile', 'copy'], function() {
-  electron.start();
+gulp.task('electron:start', ['transpile', 'copy'], () => electron.start());
+
+gulp.task('watch', function () {
+  gulp.watch(['src/**/*.js', '!src/client/*'], ['transpile', electron.restart]);
+
+  gulp.watch(['src/client/**/*.{html,css}'], ['copy', electron.reload]);
+  gulp.watch(['src/client/**/*.js'], ['transpile', electron.reload]);
 });
 
-gulp.task('electron:restart', ['transpile', 'copy'], function() {
-  // electron.stop();
-  electron.restart();
-});
-
-gulp.task('electron:reload', ['copy'], electron.reload);
-
-gulp.task('watch', ['electron:start'], function () {
-  gulp.watch(['src/**/*.js'], [/*'transpile', 'copy', */'electron:restart']);
-  gulp.watch(['src/**/*.{html,css}'], ['electron:reload']);
-});
-
-gulp.task('transpile', function (cb) {
+gulp.task('transpile', function (callback) {
   gulp.src(['src/**/*.js'])
     .pipe(cache('transpile'))
     .pipe(debug())
@@ -64,16 +56,16 @@ gulp.task('transpile', function (cb) {
       presets: ['es2015', 'react']
     }))
     .pipe(gulp.dest('dist'))
-    .on('end', cb);
+    .on('end', callback);
 });
 
-gulp.task('copy', function (cb) {
+gulp.task('copy', function (callback) {
   gulp.src(['src/**/*.*', '!src/**/*.js'])
     .pipe(cache('copy'))
     .pipe(debug())
     .pipe(replace(replaceOptions))
     .pipe(gulp.dest('dist'))
-    .on('end', cb);
+    .on('end', callback);
 });
 
 gulp.task('default', ['transpile', 'copy', 'check-port', 'electron:start', 'watch']);
