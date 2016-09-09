@@ -131,7 +131,7 @@ function getSubscriptions(cb) {
       );
     },
 
-    getChannelDetails: ['getSubscriptions', function (next, results) {
+    getChannelDetails: ['getSubscriptions', function (results, next) {
       var channelsDetails = [];
 
       async.each(results['getSubscriptions'], function (subscription, nextSubscription) {
@@ -155,7 +155,7 @@ function getSubscriptions(cb) {
       });
     }],
 
-    getLastUploadedVideos: ['getChannelDetails', function (next, results) {
+    getLastUploadedVideos: ['getChannelDetails', function (results, next) {
       var videosIds = [];
 
       async.each(results['getChannelDetails'], function (channel, nextChannel) {
@@ -184,7 +184,7 @@ function getSubscriptions(cb) {
       });
     }],
 
-    constructVideosIdsStrings: ['getLastUploadedVideos', function (next, results) {
+    constructVideosIdsStrings: ['getLastUploadedVideos', function (results, next) {
       let counter = 0;
       let idList = [];
       let currentIds = '';
@@ -206,7 +206,7 @@ function getSubscriptions(cb) {
       return next(null, idList);
     }],
 
-    getVideosDetails: ['constructVideosIdsStrings', function (next, results) {
+    getVideosDetails: ['constructVideosIdsStrings', function (results, next) {
       let videosDetails = [];
       async.each(results['constructVideosIdsStrings'], function (ids, nextIds) {
         YouTube.videos.list({
@@ -240,7 +240,7 @@ function getSubscriptions(cb) {
 
     }],
 
-    orderLastUploadedVideos: ['getVideosDetails', function (next, results) {
+    orderLastUploadedVideos: ['getVideosDetails', function (results, next) {
       next(null, results['getVideosDetails'].sort((firstVideo, secondVideo) => {
         return secondVideo.publishedAt.getTime() - firstVideo.publishedAt.getTime();
       }));
