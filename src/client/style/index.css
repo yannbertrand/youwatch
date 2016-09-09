@@ -48,6 +48,7 @@ a {
     top: 0px;
     left: 55px;
     padding: 5px;
+    overflow-x: hidden;
 }
 
 #videos-grid article.video img {
