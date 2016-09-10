@@ -71,6 +71,7 @@ const PlaylistItem = React.createClass({
   },
   remove: function () {
     if (this.props.id) {
+      window.dispatchEvent(new CustomEvent('playlist.removeVideo', { detail: { video: this.props } }));
       Socket.emit('video/remove', this.props.id);
     }
   },
@@ -103,10 +104,12 @@ const Playlist = React.createClass({
 
     window.addEventListener('playlist.addVideo', this.addVideo);
     window.addEventListener('playlist.cueVideo', this.cueVideo);
+    window.addEventListener('playlist.removeVideo', this.removeVideo);
   },
   componentWillUnmount: function () {
     window.removeEventListener('playlist.addVideo', this.addVideo, false);
     window.removeEventListener('playlist.cueVideo', this.cueVideo, false);
+    window.removeEventListener('playlist.removeVideo', this.removeVideo, false);
   },
   addVideo: function (event) {
     // Add the video in first position if no video playing
@@ -139,6 +142,18 @@ const Playlist = React.createClass({
 
       return state;
     });
+  },
+  removeVideo: function (event) {
+    var video = event.detail.video;
+
+    if (!this.isInPlaylist(video))
+      return;
+
+    this.setState(state => {
+      state.videos = _.reject(state.videos, video);
+
+      return state;
+    })
   },
   isInPlaylist: function (video) {
     return _.some(this.state.videos, video);
