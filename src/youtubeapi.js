@@ -96,6 +96,15 @@ function getVideo(videoId, cb) {
 };
 
 function getSubscriptions(cb) {
+  try {
+    let dataset = require('../dataset.json');
+
+    if (dataset && dataset.length)
+      return cb(null, dataset);
+  } catch (exception) {
+    console.info(' -> You can create a `dataset.json` file if you don\'t want to load your subscriptions');
+  }
+
   async.auto({
 
     getSubscriptions: function (next) {
