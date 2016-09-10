@@ -64,8 +64,9 @@ const Player = React.createClass({
 });
 
 const PlaylistItem = React.createClass({
-  play: function () {
+  raise: function () {
     if (this.props.id) {
+      window.dispatchEvent(new CustomEvent('playlist.raiseVideo', { detail: { video: this.props } }));
       Socket.emit('video/play', this.props);
     }
   },
@@ -83,7 +84,7 @@ const PlaylistItem = React.createClass({
                   onClick={this.remove}
                   title="Remove this video">x</button>
           <h5>
-            <a onClick={this.play} title={this.props.title}>
+            <a onClick={this.raise} title={this.props.title}>
               {this.props.title}
             </a>
           </h5>
@@ -105,11 +106,13 @@ const Playlist = React.createClass({
     window.addEventListener('playlist.addVideo', this.addVideo);
     window.addEventListener('playlist.cueVideo', this.cueVideo);
     window.addEventListener('playlist.removeVideo', this.removeVideo);
+    window.addEventListener('playlist.raiseVideo', this.raiseVideo);
   },
   componentWillUnmount: function () {
     window.removeEventListener('playlist.addVideo', this.addVideo, false);
     window.removeEventListener('playlist.cueVideo', this.cueVideo, false);
     window.removeEventListener('playlist.removeVideo', this.removeVideo, false);
+    window.removeEventListener('playlist.raiseVideo', this.raiseVideo, false);
   },
   addVideo: function (event) {
     // Add the video in first position if no video playing
@@ -153,7 +156,24 @@ const Playlist = React.createClass({
       state.videos = _.reject(state.videos, video);
 
       return state;
-    })
+    });
+  },
+  raiseVideo: function (event) {
+    var video = event.detail.video;
+
+    if (!this.isInPlaylist(video))
+      return;
+
+    this.setState(state => {
+      state.videos = _.reject(state.videos, video);
+      if (isVideoPlaying) {
+        state.videos.splice(1, 0, video);
+      } else {
+        state.videos.splice(0, 0, video);
+      }
+
+      return state;
+    });
   },
   isInPlaylist: function (video) {
     return _.some(this.state.videos, video);
