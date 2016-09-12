@@ -17,7 +17,10 @@ YouWatch is a desktop app that improves the official YouTube webapp.
 [![Electron](http://svgporn.com/logos/electron.svg)](http://electron.atom.io/) [![React](http://svgporn.com/logos/react.svg)](https://facebook.github.io/react/) [![Gulp](http://svgporn.com/logos/gulp.svg)](http://gulpjs.com/)
 
 ## Dev
-**Replace the credentials in `src/credentials.js` with yours.**
+**Replace the credentials in `src/config.js` with yours.**
+Use this command to avoid commiting the file:
+
+`$ git update-index --assume-unchanged src/config.js`
 
 ### Commands
 * Init: `$ npm install`
