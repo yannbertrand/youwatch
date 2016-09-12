@@ -51,11 +51,15 @@ gulp.task('copy', function (callback) {
     .on('end', callback);
 });
 
-gulp.task('watch', function () {
-  gulp.watch(['src/**/*.js', '!src/client/*'], ['transpile', electron.restart]);
+gulp.task('electron:restart', ['transpile'], electron.restart);
+gulp.task('electron:reload', ['copy'], electron.reload);
 
-  gulp.watch(['src/client/**/*.{html,css}'], ['copy', electron.reload]);
-  gulp.watch(['src/client/**/*.js'], ['transpile', electron.reload]);
+gulp.task('watch', function () {
+  // Restart electron when server or electron js files change
+  gulp.watch(['src/**/*.js', '!src/client/*'], ['electron:restart']);
+
+  // Reload electron when client files change
+  gulp.watch(['src/client/**/*.{html,css,js}'], ['electron:reload']);
 });
 
 gulp.task('check-port', function (callback) {
