@@ -34,7 +34,7 @@ const replaceOptions = {
  */
 gulp.task('electron:start',           ['build', 'check-port'],  () => electron.start());
 gulp.task('electron:restart',         ['transpile:server'],     () => electron.restart());
-gulp.task('electron:reload:html',     ['copy:html'],                 () => electron.reload());
+gulp.task('electron:reload:html',     ['copy:html'],            () => electron.reload());
 gulp.task('electron:reload:js',       ['transpile:client'],     () => electron.reload());
 gulp.task('electron:reload:css',      ['sass'],                 () => electron.reload());
 
@@ -42,7 +42,7 @@ gulp.task('electron:reload:css',      ['sass'],                 () => electron.r
 /**
  * Files tasks
  */
-gulp.task('transpile:server', function () {
+gulp.task('transpile:server', function (callback) {
   gulp.src(['src/**/*.js', '!src/client/*'])
     .pipe(plumber({ errorHandler: notify.onError(errorTemplate)}))
     .pipe(cache('transpile'))
@@ -52,9 +52,10 @@ gulp.task('transpile:server', function () {
       presets: ['es2015', 'react']
     }))
     .pipe(gulp.dest('dist'))
+    .on('end', callback);
 });
 
-gulp.task('transpile:client', function () {
+gulp.task('transpile:client', function (callback) {
   gulp.src(['src/client/**/*.js'])
     .pipe(plumber({ errorHandler: notify.onError(errorTemplate)}))
     .pipe(cache('transpile'))
@@ -64,9 +65,10 @@ gulp.task('transpile:client', function () {
       presets: ['es2015', 'react']
     }))
     .pipe(gulp.dest('dist/client'))
+    .on('end', callback);
 });
 
-gulp.task('sass', function () {
+gulp.task('sass', function (callback) {
   gulp.src(['src/client/style/**/*.sass'])
     .pipe(plumber({ errorHandler: notify.onError(errorTemplate)}))
     .pipe(cache('sass'))
@@ -80,25 +82,28 @@ gulp.task('sass', function () {
       ]
       }).on('error', sass.logError))
     .pipe(sourcemaps.write('./'))
-    .pipe(gulp.dest('dist/client/style'));
+    .pipe(gulp.dest('dist/client/style'))
+    .on('end', callback);
 });
 
-gulp.task('copy:html', function () {
+gulp.task('copy:html', function (callback) {
   gulp.src(['src/client/**/*.html'])
     .pipe(plumber({ errorHandler: notify.onError(errorTemplate) }))
     .pipe(cache('copy'))
     .pipe(debug())
     .pipe(replace(replaceOptions))
     .pipe(gulp.dest('dist/client/'))
+    .on('end', callback);
 });
 
-gulp.task('copy:assets', function () {
+gulp.task('copy:assets', function (callback) {
   gulp.src(['src/client/**/*', '!src/client/**/*.{js,css,sass,html}'])
     .pipe(plumber({ errorHandler: notify.onError(errorTemplate) }))
     .pipe(cache('copy'))
     .pipe(debug())
     .pipe(replace(replaceOptions))
     .pipe(gulp.dest('dist/client/'))
+    .on('end', callback);
 });
 
 gulp.task('build', ['transpile:server', 'transpile:client', 'sass', 'copy:assets', 'copy:html']);
