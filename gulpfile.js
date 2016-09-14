@@ -1,5 +1,7 @@
 const gulp        = require('gulp');
 const babel       = require('gulp-babel');
+const sass        = require('gulp-sass');
+const sourcemaps  = require('gulp-sourcemaps');
 const debug       = require('gulp-debug');
 const cache       = require('gulp-cached');
 const plumber     = require('gulp-plumber');
@@ -30,10 +32,11 @@ const replaceOptions = {
 /**
  * Electron tasks
  */
-gulp.task('electron:start', ['transpile:server', 'transpile:client', 'copy', 'check-port'], () => electron.start());
-gulp.task('electron:restart',         ['transpile:server'], () => electron.restart());
-gulp.task('electron:reload:htmlcss',  ['copy'],             () => electron.reload());
-gulp.task('electron:reload:js',       ['transpile:client'], () => electron.reload());
+gulp.task('electron:start',           ['build', 'check-port'],  () => electron.start());
+gulp.task('electron:restart',         ['transpile:server'],     () => electron.restart());
+gulp.task('electron:reload:html',     ['copy:html'],                 () => electron.reload());
+gulp.task('electron:reload:js',       ['transpile:client'],     () => electron.reload());
+gulp.task('electron:reload:css',      ['sass'],                 () => electron.reload());
 
 
 /**
@@ -60,17 +63,45 @@ gulp.task('transpile:client', function () {
     .pipe(babel({
       presets: ['es2015', 'react']
     }))
-    .pipe(gulp.dest('dist'))
+    .pipe(gulp.dest('dist/client'))
 });
 
-gulp.task('copy', function () {
-  gulp.src(['src/**/*.*', '!src/**/*.js'])
+gulp.task('sass', function () {
+  gulp.src(['src/client/style/**/*.sass'])
+    .pipe(plumber({ errorHandler: notify.onError(errorTemplate)}))
+    .pipe(cache('sass'))
+    .pipe(debug())
+    .pipe(sourcemaps.init()) // for dev purpose ...
+    .pipe(sass({
+      outputStyle: 'compressed',
+      includePaths: [
+        './node_modules/bootstrap/scss/',
+        './node_modules/font-awesome/scss/'
+      ]
+      }).on('error', sass.logError))
+    .pipe(sourcemaps.write('./'))
+    .pipe(gulp.dest('dist/client/style'));
+});
+
+gulp.task('copy:html', function () {
+  gulp.src(['src/client/**/*.html'])
     .pipe(plumber({ errorHandler: notify.onError(errorTemplate) }))
     .pipe(cache('copy'))
     .pipe(debug())
     .pipe(replace(replaceOptions))
-    .pipe(gulp.dest('dist'))
+    .pipe(gulp.dest('dist/client/'))
 });
+
+gulp.task('copy:assets', function () {
+  gulp.src(['src/client/**/*', '!src/client/**/*.{js,css,sass,html}'])
+    .pipe(plumber({ errorHandler: notify.onError(errorTemplate) }))
+    .pipe(cache('copy'))
+    .pipe(debug())
+    .pipe(replace(replaceOptions))
+    .pipe(gulp.dest('dist/client/'))
+});
+
+gulp.task('build', ['transpile:server', 'transpile:client', 'sass', 'copy:assets', 'copy:html']);
 
 
 /**
@@ -81,8 +112,9 @@ gulp.task('watch', function () {
   gulp.watch(['src/**/*.js', '!src/client/*'], ['electron:restart']);
 
   // Reload electron when client files change
-  gulp.watch(['src/client/**/*.{html,css}'], ['electron:reload:htmlcss']);
-  gulp.watch(['src/client/**/*.js'], ['electron:reload:js']);
+  gulp.watch(['src/client/**/*.html'], ['electron:reload:html']);
+  gulp.watch(['src/client/javascript/**/*.js'], ['electron:reload:js']);
+  gulp.watch(['src/client/style/**/*.sass'], ['electron:reload:css']);
 });
 
 
