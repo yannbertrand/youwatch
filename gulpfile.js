@@ -31,9 +31,9 @@ const replaceOptions = {
  * Electron tasks
  */
 gulp.task('electron:start', ['transpile:server', 'transpile:client', 'copy', 'check-port'], () => electron.start());
-gulp.task('electron:restart',         ['transpile:server'], electron.restart);
-gulp.task('electron:reload:htmlcss',  ['copy'],             electron.reload);
-gulp.task('electron:reload:js',       ['transpile:client'], electron.reload);
+gulp.task('electron:restart',         ['transpile:server'], () => electron.restart());
+gulp.task('electron:reload:htmlcss',  ['copy'],             () => electron.reload());
+gulp.task('electron:reload:js',       ['transpile:client'], () => electron.reload());
 
 
 /**
