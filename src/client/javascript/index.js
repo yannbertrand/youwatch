@@ -1,4 +1,3 @@
-const jQuery = require('jquery');
 const _ = require('lodash');
 const React = require('react');
 const ReactDOM = require('react-dom');
@@ -12,7 +11,6 @@ const YouTubeIframeLoader = require('youtube-iframe');
 
 window.Tether = require('tether');
 // window.lazysizes = require('lazysizes');
-require('bootstrap');
 
 const Socket = io('http://localhost:@@PORT');
 const mainElement = document.getElementById('main');
