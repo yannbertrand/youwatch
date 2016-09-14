@@ -7,6 +7,7 @@ const ConfigurationPage = React.createClass({
         width: width,
         height: state.height,
         showConsole: state.showConsole,
+        darkTheme : state.darkTheme,
       };
     });
   },
@@ -18,14 +19,27 @@ const ConfigurationPage = React.createClass({
         width: state.width,
         height: height,
         showConsole: state.showConsole,
+        darkTheme : state.darkTheme,
       };
     });
+  },
+  toggleDarkTheme : function(event) {
+    document.body.classList.toggle('dark')
+    this.setState(state => {
+      return {
+        width: width,
+        height: state.height,
+        showConsole: state.showConsole,
+        darkTheme : !state.darkTheme,
+      }
+    })
   },
   getInitialState: () => {
     return {
       width: 1500,
       height: 900,
       showConsole: false,
+      darkTheme : document.body.classList.contains('dark')
     };
   },
   render: function () {
@@ -51,6 +65,16 @@ const ConfigurationPage = React.createClass({
               <div className="checkbox">
                 <label>
                   <input type="checkbox" checked={this.state.value} /> Show console
+                </label>
+              </div>
+            </div>
+          </div>
+          <div className="form-group row">
+            <label className="col-sm-4">Dark Theme</label>
+            <div className="col-sm-8">
+              <div className="checkbox">
+                <label>
+                  <input type="checkbox" checked={this.state.darkTheme} onChange={this.toggleDarkTheme} /> Dark theme
                 </label>
               </div>
             </div>
