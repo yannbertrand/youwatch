@@ -1,0 +1,25 @@
+body.dark
+    background-color: $dark
+    color: $light
+
+    .jumbotron,
+    .form-control
+        background-color: lighten($dark, 10%)
+        color: $light
+
+    #current-playlist
+        background-color: $dark
+        color: $light
+
+    .btn-secondary
+        background-color: $dark
+        color: $red
+        // border-color: $red
+        &:hover
+            background-color: $black
+        &:focus
+            background-color: $black
+            color: $red
+            // border: $red
+            outline: none
+            

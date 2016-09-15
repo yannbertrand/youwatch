@@ -77,7 +77,7 @@ gulp.task('transpile:client', function (callback) {
 });
 
 gulp.task('sass', function (callback) {
-  gulp.src(['src/client/style/**/*.sass'])
+  gulp.src(['src/client/styles/**/*.sass'])
     .pipe(plumber(plumberConfig))
     .pipe(debug(debugConfig('sass')))
     .pipe(sourcemaps.init())
@@ -89,7 +89,7 @@ gulp.task('sass', function (callback) {
       ]
       }).on('error', sass.logError))
     .pipe(sourcemaps.write('./'))
-    .pipe(gulp.dest('dist/client/style'))
+    .pipe(gulp.dest('dist/client/styles'))
     .on('end', callback);
 });
 
@@ -126,7 +126,7 @@ gulp.task('watch', function () {
   // Reload electron when client files change
   gulp.watch(['src/client/**/*.html'], ['electron:reload:html']);
   gulp.watch(['src/client/javascript/**/*.js'], ['electron:reload:js']);
-  gulp.watch(['src/client/style/**/*.sass'], ['electron:reload:css']);
+  gulp.watch(['src/client/styles/**/*.sass'], ['electron:reload:css']);
 });
 
 
