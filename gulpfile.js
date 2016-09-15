@@ -8,17 +8,25 @@ const plumber     = require('gulp-plumber');
 const replace     = require('gulp-replace-task');
 const notify      = require("gulp-notify");
 const electron    = require('electron-connect').server.create();
-const async       = require('async');
 const tcpPortUsed = require('tcp-port-used');
 const CONFIG      = require('./src/config');
 
 /**
  * Settings
  */
-const errorTemplate = {
-  title:    "Gulp error!",
-  message:  "<%= error.message %>",
+const plumberConfig = {
+  errorHandler: notify.onError({
+    title:    "Gulp error!",
+    message:  "<%= error.message %>",
+  })
 };
+
+const debugConfig = (taskName) => {
+  return {
+    title: 'Task \'' + taskName + '\' -'
+  };
+};
+
 const replaceOptions = {
   patterns: [
     {
@@ -44,9 +52,9 @@ gulp.task('electron:reload:css',      ['sass'],                 () => electron.r
  */
 gulp.task('transpile:server', function (callback) {
   gulp.src(['src/**/*.js', '!src/client/*'])
-    .pipe(plumber({ errorHandler: notify.onError(errorTemplate)}))
+    .pipe(plumber(plumberConfig))
     .pipe(cache('transpile'))
-    .pipe(debug({ title: 'Task \'transpile:server\' -' }))
+    .pipe(debug(debugConfig('transpile:server')))
     .pipe(replace(replaceOptions))
     .pipe(babel({
       presets: ['es2015', 'react']
@@ -57,9 +65,9 @@ gulp.task('transpile:server', function (callback) {
 
 gulp.task('transpile:client', function (callback) {
   gulp.src(['src/client/**/*.js'])
-    .pipe(plumber({ errorHandler: notify.onError(errorTemplate)}))
+    .pipe(plumber(plumberConfig))
     .pipe(cache('transpile'))
-    .pipe(debug({ title: 'Task \'transpile:client\' -' }))
+    .pipe(debug(debugConfig('transpile:client')))
     .pipe(replace(replaceOptions))
     .pipe(babel({
       presets: ['es2015', 'react']
@@ -70,8 +78,8 @@ gulp.task('transpile:client', function (callback) {
 
 gulp.task('sass', function (callback) {
   gulp.src(['src/client/style/**/*.sass'])
-    .pipe(plumber({ errorHandler: notify.onError(errorTemplate)}))
-    .pipe(debug({ title: 'Task \'sass\' -' }))
+    .pipe(plumber(plumberConfig))
+    .pipe(debug(debugConfig('sass')))
     .pipe(sourcemaps.init())
     .pipe(sass({
       outputStyle: 'compressed',
@@ -87,9 +95,9 @@ gulp.task('sass', function (callback) {
 
 gulp.task('copy:html', function (callback) {
   gulp.src(['src/client/**/*.html'])
-    .pipe(plumber({ errorHandler: notify.onError(errorTemplate) }))
+    .pipe(plumber(plumberConfig))
     .pipe(cache('copy'))
-    .pipe(debug({ title: 'Task \'copy:html\' -' }))
+    .pipe(debug(debugConfig('copy:html')))
     .pipe(replace(replaceOptions))
     .pipe(gulp.dest('dist/client/'))
     .on('end', callback);
@@ -97,9 +105,9 @@ gulp.task('copy:html', function (callback) {
 
 gulp.task('copy:assets', function (callback) {
   gulp.src(['src/client/**/*.*', '!src/client/**/*.{js,css,sass,html}'])
-    .pipe(plumber({ errorHandler: notify.onError(errorTemplate) }))
+    .pipe(plumber(plumberConfig))
     .pipe(cache('copy'))
-    .pipe(debug({ title: 'Task \'copy:assets\' -' }))
+    .pipe(debug(debugConfig('copy:assets')))
     .pipe(replace(replaceOptions))
     .pipe(gulp.dest('dist/client/'))
     .on('end', callback);
@@ -136,6 +144,7 @@ gulp.task('default', ['electron:start', 'watch']);
 /**
  * Utils
  */
+
 gulp.task('check-port', function (callback) {
   isPortUsed(CONFIG.PORT, function (err, portInUse) {
     if (err)
