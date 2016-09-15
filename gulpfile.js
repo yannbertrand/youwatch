@@ -71,7 +71,6 @@ gulp.task('transpile:client', function (callback) {
 gulp.task('sass', function (callback) {
   gulp.src(['src/client/style/**/*.sass'])
     .pipe(plumber({ errorHandler: notify.onError(errorTemplate)}))
-    .pipe(cache('sass'))
     .pipe(debug({ title: 'Task \'sass\' -' }))
     .pipe(sourcemaps.init())
     .pipe(sass({
