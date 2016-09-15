@@ -1,7 +1,13 @@
 body.dark
-    background-color: #333
-    color: #bbb
+    background-color: $dark
+    color: $light
 
+    .jumbotron,
+    .form-control
+        background-color: lighten($dark, 10%)
+        color: $light
+
+    #current-playlist,
     .btn-secondary
-        background-color: #444
-        color: #bbb
+        background-color: $dark
+        color: $light
