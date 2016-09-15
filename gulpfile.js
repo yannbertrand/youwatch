@@ -46,7 +46,7 @@ gulp.task('transpile:server', function (callback) {
   gulp.src(['src/**/*.js', '!src/client/*'])
     .pipe(plumber({ errorHandler: notify.onError(errorTemplate)}))
     .pipe(cache('transpile'))
-    .pipe(debug())
+    .pipe(debug({ title: 'Task \'transpile:server\' -' }))
     .pipe(replace(replaceOptions))
     .pipe(babel({
       presets: ['es2015', 'react']
@@ -59,7 +59,7 @@ gulp.task('transpile:client', function (callback) {
   gulp.src(['src/client/**/*.js'])
     .pipe(plumber({ errorHandler: notify.onError(errorTemplate)}))
     .pipe(cache('transpile'))
-    .pipe(debug())
+    .pipe(debug({ title: 'Task \'transpile:client\' -' }))
     .pipe(replace(replaceOptions))
     .pipe(babel({
       presets: ['es2015', 'react']
@@ -72,7 +72,7 @@ gulp.task('sass', function (callback) {
   gulp.src(['src/client/style/**/*.sass'])
     .pipe(plumber({ errorHandler: notify.onError(errorTemplate)}))
     .pipe(cache('sass'))
-    .pipe(debug())
+    .pipe(debug({ title: 'Task \'sass\' -' }))
     .pipe(sourcemaps.init())
     .pipe(sass({
       outputStyle: 'compressed',
@@ -90,7 +90,7 @@ gulp.task('copy:html', function (callback) {
   gulp.src(['src/client/**/*.html'])
     .pipe(plumber({ errorHandler: notify.onError(errorTemplate) }))
     .pipe(cache('copy'))
-    .pipe(debug())
+    .pipe(debug({ title: 'Task \'copy:html\' -' }))
     .pipe(replace(replaceOptions))
     .pipe(gulp.dest('dist/client/'))
     .on('end', callback);
@@ -100,7 +100,7 @@ gulp.task('copy:assets', function (callback) {
   gulp.src(['src/client/**/*.*', '!src/client/**/*.{js,css,sass,html}'])
     .pipe(plumber({ errorHandler: notify.onError(errorTemplate) }))
     .pipe(cache('copy'))
-    .pipe(debug())
+    .pipe(debug({ title: 'Task \'copy:assets\' -' }))
     .pipe(replace(replaceOptions))
     .pipe(gulp.dest('dist/client/'))
     .on('end', callback);
