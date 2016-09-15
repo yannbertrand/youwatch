@@ -73,7 +73,7 @@ gulp.task('sass', function (callback) {
     .pipe(plumber({ errorHandler: notify.onError(errorTemplate)}))
     .pipe(cache('sass'))
     .pipe(debug())
-    .pipe(sourcemaps.init()) // for dev purpose ...
+    .pipe(sourcemaps.init())
     .pipe(sass({
       outputStyle: 'compressed',
       includePaths: [
@@ -97,7 +97,7 @@ gulp.task('copy:html', function (callback) {
 });
 
 gulp.task('copy:assets', function (callback) {
-  gulp.src(['src/client/**/*', '!src/client/**/*.{js,css,sass,html}'])
+  gulp.src(['src/client/**/*.*', '!src/client/**/*.{js,css,sass,html}'])
     .pipe(plumber({ errorHandler: notify.onError(errorTemplate) }))
     .pipe(cache('copy'))
     .pipe(debug())
