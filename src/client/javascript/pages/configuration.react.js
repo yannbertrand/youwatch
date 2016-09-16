@@ -27,7 +27,7 @@ const ConfigurationPage = React.createClass({
     document.body.classList.toggle('dark')
     this.setState(state => {
       return {
-        width: width,
+        width: state.width,
         height: state.height,
         showConsole: state.showConsole,
         darkTheme : !state.darkTheme,
