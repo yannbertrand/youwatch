@@ -8,13 +8,12 @@ a
 
 .ratio-container
   position: relative
-  &:after
-    content: ''
-    display: block
-    height: 0
-    width: 100%
-    // 320:180 = 56.25% = 180/320 * 100
-    padding-bottom: 56.25%
+  display: block
+  height: 0
+  width: 100%
+  // 320:180 = 56.25% = 180/320 * 100
+  padding-top: (9 / 16) * 100%
+  overflow: hidden
   > *
     position: absolute
     top: 0
@@ -26,9 +25,11 @@ a
 
 #content
   position: absolute
-  top: 0px
-  left: 55px
-  padding: 5px
+  top: 0
+  left: 0
+  width: 100%
+  padding-left: 55px
+  // padding: 5px
   overflow-x: hidden
 
 
