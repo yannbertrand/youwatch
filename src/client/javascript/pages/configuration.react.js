@@ -8,6 +8,7 @@ const ConfigurationPage = React.createClass({
         height: state.height,
         showConsole: state.showConsole,
         darkTheme : state.darkTheme,
+        layout: state.layout,
       };
     });
   },
@@ -20,18 +21,47 @@ const ConfigurationPage = React.createClass({
         height: height,
         showConsole: state.showConsole,
         darkTheme : state.darkTheme,
+        layout: state.layout,
       };
     });
   },
   toggleDarkTheme : function(event) {
-    document.body.classList.toggle('dark')
+    var darkTheme = document.body.classList.toggle('dark')
+
     this.setState(state => {
       return {
         width: state.width,
         height: state.height,
         showConsole: state.showConsole,
-        darkTheme : !state.darkTheme,
+        darkTheme : darkTheme,
+        layout: state.layout,
       }
+    })
+  },
+  changeLayout: function(event) {
+    let layout = event.target.value;
+
+    if(layout == 1){
+      document.body.classList.add('layout-overlay');
+      document.body.classList.remove('layout-sticker');
+    }
+    else if(layout == 2){
+      document.body.classList.remove('layout-overlay');
+      document.body.classList.add('layout-sticker');
+    }
+    else{
+      document.body.classList.remove('layout-overlay');
+      document.body.classList.remove('layout-sticker');
+    }
+
+    this.setState(state => {
+      return {
+        width: state.width,
+        height: state.height,
+        showConsole: state.showConsole,
+        darkTheme : state.darkTheme,
+        layout: layout,
+      };
     })
   },
   getInitialState: () => {
@@ -39,7 +69,8 @@ const ConfigurationPage = React.createClass({
       width: 1500,
       height: 900,
       showConsole: false,
-      darkTheme : document.body.classList.contains('dark')
+      darkTheme : document.body.classList.contains('dark'),
+      layout: document.body.classList.contains('layout-overlay') ? 1 : (document.body.classList.contains('layout-sticker') ? 2 : 0),
     };
   },
   render: function () {
@@ -76,6 +107,18 @@ const ConfigurationPage = React.createClass({
                 <label>
                   <input type="checkbox" checked={this.state.darkTheme} onChange={this.toggleDarkTheme} /> Dark theme
                 </label>
+              </div>
+            </div>
+          </div>
+          <div className="form-group row">
+            <label className="col-sm-4">Layout</label>
+            <div className="col-sm-8">
+              <div className="select">
+                <select className="form-control" value={this.state.layout} onChange={this.changeLayout} >
+                  <option value="0">Youtube</option>  
+                  <option value="1">Overlay</option>  
+                  <option value="2">Sticker</option>
+                </select>
               </div>
             </div>
           </div>
