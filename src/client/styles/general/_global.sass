@@ -23,6 +23,7 @@ a
     height: 100%
     display: block
 
+
 #content
   position: absolute
   top: 0px
@@ -30,80 +31,4 @@ a
   padding: 5px
   overflow-x: hidden
 
-#videos-grid article.video
-  img
-    width: 100%
-    height: 100%
-    &.blur-up
-      -webkit-filter: blur(5px)
-      filter: blur(5px)
-      transition: filter 400ms, -webkit-filter 400ms
-      &.lazyloaded
-        -webkit-filter: blur(0)
-        filter: blur(0)
-  span.duration
-    padding: 0 4px
-    font-weight: 500
-    font-size: 11px
-    background-color: #000
-    color: #fff
-    height: 14px
-    line-height: 14px
-    opacity: .75
-    vertical-align: top
-    display: inline-block
-    position: absolute
-    right: 18px
-    margin-top: -16px
-  header
-    margin-top: 2px
-    h5, h6
-      text-overflow: ellipsis
-      overflow: hidden
-      white-space: nowrap
-    h5
-      color: $brand-primary
 
-#current-playlist #playlist .playlist-item
-  h5, h6
-    text-overflow: ellipsis
-    overflow: hidden
-    white-space: nowrap
-
-#videos-grid article.video header h5, #current-playlist #playlist .playlist-item h5
-  font-size: 0.9em
-  margin-bottom: .25rem
-
-#videos-grid article.video header h6, #current-playlist #playlist .playlist-item h6
-  font-size: 0.7em
-
-#videos-grid article.video header button.cue
-  float: right
-
-#current-playlist
-  #playlist
-    .playlist-item
-      button.remove
-        float: right
-      margin-top: 1.5em
-      padding: 10px
-    position: absolute
-    top: 0px
-    left: 0px
-    width: 300px
-    height: 100%
-    overflow: auto
-  position: fixed
-  bottom: 0px
-  right: 0px
-  width: 780px
-  height: 270px
-  background-color: white
-  box-shadow: -6px -4px 15px -2px rgba(0, 0, 0, 0.75)
-  #player
-    position: absolute
-    top: 0px
-    left: 300px
-    width: 480px
-    height: 100%
-    background-color: black

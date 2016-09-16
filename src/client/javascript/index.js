@@ -26,6 +26,9 @@ const SidebarItem = React.createClass({
         <a href="#" className={this.props.isCurrent? 'nav-link active' : 'nav-link'}
            onClick={this.handleClick}>
           <i className={'fa fa-fw ' + this.props.icon}></i>
+          <span className="key-name">
+            {this.props.keyName}
+          </span>
         </a>
       </li>
     );
@@ -42,6 +45,7 @@ const Sidebar = React.createClass({
       pages.push(
         <SidebarItem
           key={this.props.pages[pageName].key}
+          keyName={this.props.pages[pageName].key}
           icon={this.props.pages[pageName].icon}
           isCurrent={this.props.currentPageName === pageName}
           handleClick={this.handleClick.bind(this, pageName)}

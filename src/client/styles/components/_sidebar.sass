@@ -4,9 +4,21 @@
   left: 0px
   width: 55px
   height: 100%
-  overflow-x: none
-  overflow-y: auto
+  overflow: hidden
+  white-space: nowrap
   z-index: 1
-  background-color: $light
-  .nav.nav-pills .nav-link.active
-    border-radius: 0 .25rem .25rem 0
+  background-color: $white
+  border-right: 1px solid darken($white, 5%)
+  transition: width .15s
+
+  &:hover,
+  .nav-item
+    width: 220px
+
+    .key-name
+      display: inline-block
+      padding-left: 1.2rem
+
+
+  .nav.nav-pills .nav-link
+    border-radius: 0
