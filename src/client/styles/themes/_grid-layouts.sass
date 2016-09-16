@@ -1,0 +1,47 @@
+// overlay
+body.layout-overlay
+	#videos-grid 
+		article.video
+			padding: 0
+
+			header
+				margin-top: 0
+				position: absolute
+				top: 0
+				left: 0
+				padding: 5px
+				height: 100%
+				width: 100%
+				background-color: rgba($white, .8)
+				text-shadow: 0 0 2px $white
+				opacity: 0
+				transition: opacity .3s
+
+				&:hover
+				  opacity: 1
+
+
+// sticker
+body.layout-sticker
+	#videos-grid 
+		article.video
+			padding: 0
+
+			header
+				position: absolute
+				bottom: 0
+				left: 0
+				padding: 5px
+				margin-bottom: 5px
+				max-width: 75%
+				background-color: rgba($white, .8)
+				box-shadow: 0 0 1rem rgba($black, .3)
+
+				button.cue
+					// float: none
+					display: none
+			&:hover
+				header
+					button.cue
+						display: block
+
