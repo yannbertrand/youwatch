@@ -1,4 +1,11 @@
 const Video = React.createClass({
+  getInitialState: function () {
+    const isDarkTheme = document.body.classList.contains('dark');
+
+    return {
+      loaderUrl: isDarkTheme? 'images/loader_dark.gif' : 'images/loader_white.gif'
+    };
+  },
   addVideo: function () {
     if (this.props.id) {
       window.dispatchEvent(new CustomEvent('playlist.addVideo', { detail: { video: this.props } }));
@@ -15,7 +22,7 @@ const Video = React.createClass({
     return (
       <article className="video col-xl-2 col-lg-3 col-md-4 col-sm-6 col-xs-12">
         <div className="ratio-container">
-          <img className="thumbnail lazyload blur-up" data-sizes="auto" data-src={this.props.thumbnail} src="images/loader.gif" />
+          <img className="thumbnail lazyload blur-up" data-sizes="auto" data-src={this.props.thumbnail} src={this.state.loaderUrl} />
         </div>
         <span className="duration">{this.props.duration}</span>
 

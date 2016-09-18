@@ -41,15 +41,15 @@ const ConfigurationPage = React.createClass({
   changeLayout: function(event) {
     let layout = event.target.value;
 
-    if(layout == 1){
+    if(layout == 'overlay') {
       document.body.classList.add('layout-overlay');
       document.body.classList.remove('layout-sticker');
     }
-    else if(layout == 2){
+    else if(layout == 'sticker') {
       document.body.classList.remove('layout-overlay');
       document.body.classList.add('layout-sticker');
     }
-    else{
+    else {
       document.body.classList.remove('layout-overlay');
       document.body.classList.remove('layout-sticker');
     }
@@ -115,9 +115,9 @@ const ConfigurationPage = React.createClass({
             <div className="col-sm-8">
               <div className="select">
                 <select className="form-control" value={this.state.layout} onChange={this.changeLayout} >
-                  <option value="0">Youtube</option>  
-                  <option value="1">Overlay</option>  
-                  <option value="2">Sticker</option>
+                  <option value="youtube">Youtube</option>  
+                  <option value="overlay">Overlay</option>  
+                  <option value="sticker">Sticker</option>
                 </select>
               </div>
             </div>
