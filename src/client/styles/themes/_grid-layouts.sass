@@ -4,6 +4,13 @@ body.layout-overlay
 		article.video
 			padding: 0
 
+			button.mark-watched
+				z-index: 1
+				left: 4px
+
+				&:hover~header
+					opacity: 1
+
 			button.cue
 				z-index: 1
 				right: 4px
@@ -36,6 +43,9 @@ body.layout-sticker
 	#videos-grid 
 		article.video
 			padding: 0
+
+			button.mark-watched
+				left: 4px
 
 			button.cue
 				right: 4px
