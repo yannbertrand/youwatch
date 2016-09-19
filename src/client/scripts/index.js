@@ -1,11 +1,11 @@
 const _ = require('lodash');
 const React = require('react');
 const ReactDOM = require('react-dom');
-const CurrentPlaylist = require('./javascript/pages/current-playlist.react.js');
-const SubscriptionsPage = require('./javascript/pages/subscriptions.react.js');
-const ConfigurationPage = require('./javascript/pages/configuration.react.js');
-const AuthentificationPage = require('./javascript/pages/authentification.react.js');
-const NoInternetPage = require('./javascript/pages/no-internet.react.js');
+const CurrentPlaylist = require('./scripts/pages/current-playlist.react.js');
+const SubscriptionsPage = require('./scripts/pages/subscriptions.react.js');
+const ConfigurationPage = require('./scripts/pages/configuration.react.js');
+const AuthentificationPage = require('./scripts/pages/authentification.react.js');
+const NoInternetPage = require('./scripts/pages/no-internet.react.js');
 const YouTubeIframeLoader = require('youtube-iframe');
 
 
