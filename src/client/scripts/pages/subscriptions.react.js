@@ -12,6 +12,9 @@ const Video = React.createClass({
       Socket.emit('video/next', this.props);
     }
   },
+  markVideoAsWatched: function () {
+    console.log('ToDo: markVideoAsWatched');
+  },
   cueVideo: function () {
     if (this.props.id) {
       window.dispatchEvent(new CustomEvent('playlist.cueVideo', { detail: { video: this.props } }));
@@ -25,6 +28,10 @@ const Video = React.createClass({
           <img className="thumbnail lazyload blur-up" data-sizes="auto" data-src={this.props.thumbnail} src={this.state.loaderUrl} />
         </div>
         <span className="duration">{this.props.duration}</span>
+        <button className="mark-watched btn btn-secondary btn-sm cue"
+                onClick={this.markVideoAsWatched}
+                disabled
+                title="Mark as watched">x</button>
         <button className="cue btn btn-secondary btn-sm cue"
                 onClick={this.cueVideo}
                 title="Cue this video">+</button>
