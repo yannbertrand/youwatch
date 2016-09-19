@@ -125,7 +125,7 @@ gulp.task('watch', function () {
 
   // Reload electron when client files change
   gulp.watch(['src/client/**/*.html'], ['electron:reload:html']);
-  gulp.watch(['src/client/javascript/**/*.js'], ['electron:reload:js']);
+  gulp.watch(['src/client/scripts/**/*.js'], ['electron:reload:js']);
   gulp.watch(['src/client/styles/**/*.sass'], ['electron:reload:css']);
 });
 
