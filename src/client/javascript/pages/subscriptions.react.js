@@ -25,11 +25,10 @@ const Video = React.createClass({
           <img className="thumbnail lazyload blur-up" data-sizes="auto" data-src={this.props.thumbnail} src={this.state.loaderUrl} />
         </div>
         <span className="duration">{this.props.duration}</span>
-
+        <button className="cue btn btn-secondary btn-sm cue"
+                onClick={this.cueVideo}
+                title="Cue this video">+</button>
         <header>
-          <button className="btn btn-secondary btn-sm cue"
-                  onClick={this.cueVideo}
-                  title="Cue this video">+</button>
           <h5>
             <a onClick={this.addVideo} title={this.props.title}>
               {this.props.title}
