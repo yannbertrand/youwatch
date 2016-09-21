@@ -95,10 +95,12 @@ const SubscriptionsPage = React.createClass({
   render: function () {
     if (this.state.loading) {
       return (
-        <div className="jumbotron">
-          <h1 className="display-3">Let us load your data</h1>
-          <p className="lead">You are connected to the YouTube API</p>
-          <p>It may take a while</p>
+        <div className="text-page">
+          <div className="jumbotron">
+            <h1 className="display-3">Let us load your data</h1>
+            <p className="lead">You are connected to the YouTube API</p>
+            <p>It may take a while</p>
+          </div>
         </div>
       );
     }

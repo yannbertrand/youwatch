@@ -75,7 +75,7 @@ const ConfigurationPage = React.createClass({
   },
   render: function () {
     return (
-      <div>
+      <div className="text-page">
         <h1>Configuration</h1>
         <form>
           <div className="form-group row">
