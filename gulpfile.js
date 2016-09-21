@@ -121,7 +121,7 @@ gulp.task('build', ['transpile:server', 'transpile:client', 'sass', 'copy:assets
  */
 gulp.task('watch', function () {
   // Restart electron when server or electron js files change
-  gulp.watch(['src/*.js', 'src/providers/*.js'], ['electron:restart']);
+  gulp.watch(['src/**/*.js', '!src/client/**/*.js'], ['electron:restart']);
 
   // Reload electron when client files change
   gulp.watch(['src/client/**/*.html'], ['electron:reload:html']);
