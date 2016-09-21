@@ -10,7 +10,7 @@ const YouTubeIframeLoader = require('youtube-iframe');
 
 
 window.Tether = require('tether');
-// window.lazysizes = require('lazysizes');
+window.lazysizes = require('lazysizes');
 
 const Socket = io('http://localhost:@@PORT');
 const mainElement = document.getElementById('main');
