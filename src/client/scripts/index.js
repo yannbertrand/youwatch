@@ -26,8 +26,8 @@ const SidebarItem = React.createClass({
         <a href="#" className={this.props.isCurrent? 'nav-link active' : 'nav-link'}
            onClick={this.handleClick}>
           <i className={'fa fa-fw ' + this.props.icon}></i>
-          <span className="key-name">
-            {this.props.keyName}
+          <span className="page-name">
+            {this.props.pageName}
           </span>
         </a>
       </li>
@@ -44,8 +44,8 @@ const Sidebar = React.createClass({
     for (let pageName in this.props.pages) {
       pages.push(
         <SidebarItem
-          key={this.props.pages[pageName].key}
-          keyName={this.props.pages[pageName].key}
+          key={pageName}
+          pageName={this.props.pages[pageName].name}
           icon={this.props.pages[pageName].icon}
           isCurrent={this.props.currentPageName === pageName}
           handleClick={this.handleClick.bind(this, pageName)}
@@ -71,9 +71,9 @@ const App = React.createClass({
     return {
       pages: {
         subscriptions:
-          { key: 'Subscriptions', icon: 'fa-th', page: <SubscriptionsPage /> },
+          { name: 'Subscriptions', icon: 'fa-th', page: <SubscriptionsPage /> },
         configuration:
-          { key: 'Configuration', icon: 'fa-cog', page: <ConfigurationPage /> }
+          { name: 'Configuration', icon: 'fa-cog', page: <ConfigurationPage /> }
       },
       currentPageName: 'subscriptions'
     };
