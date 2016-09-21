@@ -70,7 +70,7 @@ const ConfigurationPage = React.createClass({
       height: 900,
       showConsole: false,
       darkTheme : document.body.classList.contains('dark'),
-      layout: document.body.classList.contains('layout-overlay') ? 1 : (document.body.classList.contains('layout-sticker') ? 2 : 0),
+      layout: document.body.classList.contains('layout-overlay') ? 'overlay' : (document.body.classList.contains('layout-sticker') ? 'sticker' : 'youtube'),
     };
   },
   render: function () {
