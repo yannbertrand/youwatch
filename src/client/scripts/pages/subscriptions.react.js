@@ -31,7 +31,7 @@ const Video = React.createClass({
         <button className="mark-watched btn btn-secondary btn-sm cue"
                 onClick={this.markVideoAsWatched}
                 disabled
-                title="Mark as watched">x</button>
+                title="Mark as watched">&times;</button>
         <button className="cue btn btn-secondary btn-sm cue"
                 onClick={this.cueVideo}
                 title="Cue this video">+</button>
