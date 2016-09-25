@@ -38,6 +38,8 @@ function createWindow(windowName, url, width, height, isDevToolsOpen) {
   win.on('closed', onClosed.bind(null, windowName));
   win.setMinimumSize(780, 270);
 
+  win.setAutoHideMenuBar(true);
+
   if (isDevToolsOpen) win.openDevTools();
 
   return win;
