@@ -37,6 +37,7 @@ function closeLogInWindow() {
 
 function createWindow(windowName, url, width, height, icon, isDevToolsOpen) {
   const win = new BrowserWindow({
+    title: app.getName(),
     width,
     height,
     icon,
