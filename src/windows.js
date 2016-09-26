@@ -44,6 +44,7 @@ function createWindow(windowName, url, width, height, icon, isDevToolsOpen) {
     autoHideMenuBar: true,
     minWidth: 780,
     minHeight: 270,
+    backgroundColor: '#ffffff',
     webPreferences: {
       devTools: isDevToolsOpen,
     },
