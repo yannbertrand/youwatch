@@ -122,11 +122,6 @@ const ConfigurationPage = React.createClass({
               </div>
             </div>
           </div>
-          <div className="form-group row">
-            <div className="col-sm-offset-4 col-sm-8">
-              <button type="submit" className="btn btn-primary" disabled>Save</button>
-            </div>
-          </div>
         </form>
       </div>
     );
