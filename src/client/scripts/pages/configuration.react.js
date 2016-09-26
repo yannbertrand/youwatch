@@ -1,14 +1,8 @@
 const ConfigurationPage = React.createClass({
   toggleDarkTheme : function(event) {
-    var darkTheme = document.body.classList.toggle('dark')
+    var darkTheme = document.body.classList.toggle('dark');
 
-    this.setState(state => {
-      return {
-        showConsole: state.showConsole,
-        darkTheme : darkTheme,
-        layout: state.layout,
-      };
-    });
+    this.setState({ darkTheme });
   },
   changeLayout: function(event) {
     let layout = event.target.value;
@@ -26,13 +20,7 @@ const ConfigurationPage = React.createClass({
       document.body.classList.remove('layout-sticker');
     }
 
-    this.setState(state => {
-      return {
-        showConsole: state.showConsole,
-        darkTheme : state.darkTheme,
-        layout: layout,
-      };
-    });
+    this.setState({ layout: layout });
   },
   getInitialState: () => {
     return {
