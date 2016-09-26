@@ -1,3 +1,5 @@
+const app = require('electron').app;
+
 const CONFIG = require('./config');
 
 let BrowserWindow;
@@ -34,15 +36,20 @@ function closeLogInWindow() {
 }
 
 function createWindow(windowName, url, width, height, icon, isDevToolsOpen) {
-  const win = new BrowserWindow({ width, height, icon });
+  const win = new BrowserWindow({
+    width,
+    height,
+    icon,
+    autoHideMenuBar: true,
+    minWidth: 780,
+    minHeight: 270,
+    webPreferences: {
+      devTools: isDevToolsOpen,
+    },
+  });
 
   win.loadURL(url);
   win.on('closed', onClosed.bind(null, windowName));
-  win.setMinimumSize(780, 270);
-
-  win.setAutoHideMenuBar(true);
-
-  if (isDevToolsOpen) win.openDevTools();
 
   return win;
 }
