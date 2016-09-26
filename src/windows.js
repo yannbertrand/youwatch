@@ -16,6 +16,8 @@ module.exports = function (electron) {
 const MAIN_WINDOW = 'main';
 const AUTH_WINDOW = 'auth';
 
+const ICON = __dirname + '/../YouWatch.png';
+
 let windows = {};
 
 function openMainWindow() {
@@ -31,8 +33,8 @@ function closeLogInWindow() {
   windows[AUTH_WINDOW].close();
 }
 
-function createWindow(windowName, url, width, height, isDevToolsOpen) {
-  const win = new BrowserWindow({ width, height });
+function createWindow(windowName, url, width, height, icon, isDevToolsOpen) {
+  const win = new BrowserWindow({ width, height, icon });
 
   win.loadURL(url);
   win.on('closed', onClosed.bind(null, windowName));
@@ -53,6 +55,7 @@ function createMainWindow() {
     url,
     CONFIG.MAIN_WINDOW.WIDTH,
     CONFIG.MAIN_WINDOW.HEIGHT,
+    ICON,
     CONFIG.MAIN_WINDOW.IS_DEV_TOOLS_OPEN
   );
 }
@@ -63,6 +66,7 @@ function createLogInWindow(url) {
     url,
     CONFIG.AUTH_WINDOW.WIDTH,
     CONFIG.AUTH_WINDOW.HEIGHT,
+    ICON,
     CONFIG.AUTH_WINDOW.IS_DEV_TOOLS_OPEN
   );
 }
