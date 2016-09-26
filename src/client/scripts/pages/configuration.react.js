@@ -1,3 +1,5 @@
+const Switch = require('../components/switch.react.js')
+
 const ConfigurationPage = React.createClass({
   toggleDarkTheme: function () {
     const darkTheme = document.body.classList.toggle('dark');
@@ -13,19 +15,17 @@ const ConfigurationPage = React.createClass({
       case 'overlay':
         document.body.classList.add('layout-overlay');
         document.body.classList.remove('layout-sticker');
-        localStorage.setItem('layout', 'overlay');
         break;
       case 'sticker':
         document.body.classList.remove('layout-overlay');
         document.body.classList.add('layout-sticker');
-        localStorage.setItem('layout', 'sticker');
         break;
       default:
         document.body.classList.remove('layout-overlay');
         document.body.classList.remove('layout-sticker');
-        localStorage.setItem('layout', 'youtube');
     };
 
+    localStorage.setItem('layout', layout);
     this.setState({ layout: layout });
   },
   getInitialState: () => {
@@ -43,11 +43,13 @@ const ConfigurationPage = React.createClass({
           <div className="form-group row">
             <label className="col-sm-4">Dark Theme</label>
             <div className="col-sm-8">
-              <div className="checkbox">
-                <label>
-                  <input type="checkbox" checked={this.state.darkTheme} onChange={this.toggleDarkTheme} /> Dark theme
-                </label>
-              </div>
+              <Switch isChecked={this.state.darkTheme}
+                      onChange={this.toggleDarkTheme}
+                      size="lg"
+                      textOn="I"
+                      textOff="O"
+                      shape="square"
+                       />
             </div>
           </div>
           <div className="form-group row">
