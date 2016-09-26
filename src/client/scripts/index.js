@@ -106,6 +106,8 @@ window.addEventListener('online', tryStoredAccessToken);
 Socket.on('youtube/notauthenticated', renderAuthentication);
 Socket.on('youtube/callback', renderApp);
 
+loadConfig();
+
 if (navigator.onLine) {
   tryStoredAccessToken();
 } else {
@@ -135,4 +137,41 @@ function renderOfflineMode() {
     <NoInternetPage />,
     mainElement
   );
+}
+
+function loadConfig() {
+  const darkTheme = localStorage.getItem('darkTheme');
+  const layout = localStorage.getItem('layout');
+
+  if (darkTheme) {
+    if (darkTheme === '1')
+      document.body.classList.add('dark');
+  } else
+    localStorage.setItem('darkTheme', castBooleanToString(isDarkThemeActive()));
+
+  if (layout) {
+    if (layout === 'overlay') {
+      document.body.classList.add('layout-overlay');
+    } else if (layout === 'sticker') {
+      document.body.classList.add('layout-sticker');
+    }
+  } else
+    localStorage.setItem('layout', getActiveLayout());
+}
+
+function isDarkThemeActive() {
+  return document.body.classList.contains('dark');
+}
+
+function getActiveLayout() {
+  if (document.body.classList.contains('layout-overlay'))
+    return 'overlay';
+  if (document.body.classList.contains('layout-sticker'))
+    return 'sticker';
+
+  return 'youtube';
+}
+
+function castBooleanToString(boolean) {
+  return boolean? '1': '0';
 }
