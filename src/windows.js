@@ -44,15 +44,13 @@ function createWindow(windowName, url, width, height, icon, isDevToolsOpen) {
     autoHideMenuBar: true,
     minWidth: 780,
     minHeight: 270,
-    backgroundColor: '#ffffff',
-    webPreferences: {
-      devTools: isDevToolsOpen,
-    },
   });
 
-  if (process.platform === 'darwin') {
+  if (process.platform === 'darwin')
     app.dock.setIcon(icon);
-  }
+
+  if (require('electron-is-dev'))
+    win.openDevTools();
 
   win.loadURL(url);
   win.on('closed', onClosed.bind(null, windowName));

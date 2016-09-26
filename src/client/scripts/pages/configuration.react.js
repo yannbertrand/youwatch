@@ -41,16 +41,6 @@ const ConfigurationPage = React.createClass({
         <h1>Configuration</h1>
         <form>
           <div className="form-group row">
-            <label className="col-sm-4">Console</label>
-            <div className="col-sm-8">
-              <div className="checkbox">
-                <label>
-                  <input type="checkbox" checked={this.state.value} /> Show console
-                </label>
-              </div>
-            </div>
-          </div>
-          <div className="form-group row">
             <label className="col-sm-4">Dark Theme</label>
             <div className="col-sm-8">
               <div className="checkbox">
