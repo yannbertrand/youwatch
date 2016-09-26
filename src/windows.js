@@ -48,6 +48,10 @@ function createWindow(windowName, url, width, height, icon, isDevToolsOpen) {
     },
   });
 
+  if (process.platform === 'darwin') {
+    app.dock.setIcon(icon);
+  }
+
   win.loadURL(url);
   win.on('closed', onClosed.bind(null, windowName));
 
