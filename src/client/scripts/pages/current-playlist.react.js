@@ -73,7 +73,7 @@ const PlaylistItem = React.createClass({
           <button className="btn btn-secondary btn-sm remove"
                   onClick={this.remove}
                   title="Remove this video"
-                  disabled>x</button>
+                  disabled>&times;</button>
           <h5>
             <a onClick={this.raise} title={this.props.title}>
               {this.props.title}

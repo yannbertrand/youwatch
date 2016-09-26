@@ -1,9 +1,19 @@
 const Video = React.createClass({
+  getInitialState: function () {
+    const isDarkTheme = document.body.classList.contains('dark');
+
+    return {
+      loaderUrl: isDarkTheme? 'images/loader_dark.gif' : 'images/loader_white.gif'
+    };
+  },
   addVideo: function () {
     if (this.props.id) {
       window.dispatchEvent(new CustomEvent('playlist.addVideo', { detail: { video: this.props } }));
       Socket.emit('video/next', this.props);
     }
+  },
+  markVideoAsWatched: function () {
+    console.log('ToDo: markVideoAsWatched');
   },
   cueVideo: function () {
     if (this.props.id) {
@@ -15,14 +25,17 @@ const Video = React.createClass({
     return (
       <article className="video col-xl-2 col-lg-3 col-md-4 col-sm-6 col-xs-12">
         <div className="ratio-container">
-          <img className="thumbnail lazyload blur-up" data-sizes="auto" data-src={this.props.thumbnail} src="images/loader.gif" />
+          <img className="thumbnail lazyload blur-up" data-sizes="auto" data-src={this.props.thumbnail} src={this.state.loaderUrl} />
         </div>
         <span className="duration">{this.props.duration}</span>
-
+        <button className="mark-watched btn btn-secondary btn-sm cue"
+                onClick={this.markVideoAsWatched}
+                disabled
+                title="Mark as watched">&times;</button>
+        <button className="cue btn btn-secondary btn-sm cue"
+                onClick={this.cueVideo}
+                title="Cue this video">+</button>
         <header>
-          <button className="btn btn-secondary btn-sm cue"
-                  onClick={this.cueVideo}
-                  title="Cue this video">+</button>
           <h5>
             <a onClick={this.addVideo} title={this.props.title}>
               {this.props.title}
@@ -82,10 +95,12 @@ const SubscriptionsPage = React.createClass({
   render: function () {
     if (this.state.loading) {
       return (
-        <div className="jumbotron">
-          <h1 className="display-3">Let us load your data</h1>
-          <p className="lead">You are connected to the YouTube API</p>
-          <p>It may take a while</p>
+        <div className="text-page">
+          <div className="jumbotron">
+            <h1 className="display-3">Let us load your data</h1>
+            <p className="lead">You are connected to the YouTube API</p>
+            <p>It may take a while</p>
+          </div>
         </div>
       );
     }

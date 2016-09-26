@@ -1,0 +1,36 @@
+body.dark
+	background-color: $dark
+	color: $light
+
+	.jumbotron,
+	.form-control
+		background-color: lighten($dark, 10%)
+		color: $light
+
+	#current-playlist,
+	#sidebar
+		background-color: $dark
+		color: $light
+
+	#sidebar
+		border-right: 1px solid darken($dark, 5%)
+
+	.btn-secondary
+		background-color: $dark
+		color: $red
+		// border-color: $red
+		&:hover
+			background-color: $black
+		&:focus
+			background-color: $black
+			color: $red
+			// border: $red
+			outline: none
+			
+	&.layout-overlay,
+	&.layout-sticker
+		#videos-grid 
+			article.video
+				header
+					background-color: rgba($black, .8)
+					text-shadow: 0 0 2px $black
