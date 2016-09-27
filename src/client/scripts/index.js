@@ -1,17 +1,16 @@
-const jQuery = require('jquery');
+const _ = require('lodash');
 const React = require('react');
 const ReactDOM = require('react-dom');
-const CurrentPlaylist = require('./javascript/pages/current-playlist.react.js');
-const SubscriptionsPage = require('./javascript/pages/subscriptions.react.js');
-const ConfigurationPage = require('./javascript/pages/configuration.react.js');
-const AuthentificationPage = require('./javascript/pages/authentification.react.js');
-const NoInternetPage = require('./javascript/pages/no-internet.react.js');
+const CurrentPlaylist = require('./scripts/pages/current-playlist.react.js');
+const SubscriptionsPage = require('./scripts/pages/subscriptions.react.js');
+const ConfigurationPage = require('./scripts/pages/configuration.react.js');
+const AuthentificationPage = require('./scripts/pages/authentification.react.js');
+const NoInternetPage = require('./scripts/pages/no-internet.react.js');
 const YouTubeIframeLoader = require('youtube-iframe');
 
 
 window.Tether = require('tether');
-// window.lazysizes = require('lazysizes');
-require('bootstrap');
+window.lazysizes = require('lazysizes');
 
 const Socket = io('http://localhost:@@PORT');
 const mainElement = document.getElementById('main');
@@ -27,6 +26,9 @@ const SidebarItem = React.createClass({
         <a href="#" className={this.props.isCurrent? 'nav-link active' : 'nav-link'}
            onClick={this.handleClick}>
           <i className={'fa fa-fw ' + this.props.icon}></i>
+          <span className="page-name">
+            {this.props.pageName}
+          </span>
         </a>
       </li>
     );
@@ -42,7 +44,8 @@ const Sidebar = React.createClass({
     for (let pageName in this.props.pages) {
       pages.push(
         <SidebarItem
-          key={this.props.pages[pageName].key}
+          key={pageName}
+          pageName={this.props.pages[pageName].name}
           icon={this.props.pages[pageName].icon}
           isCurrent={this.props.currentPageName === pageName}
           handleClick={this.handleClick.bind(this, pageName)}
@@ -68,9 +71,9 @@ const App = React.createClass({
     return {
       pages: {
         subscriptions:
-          { key: 'Subscriptions', icon: 'fa-th', page: <SubscriptionsPage /> },
+          { name: 'Subscriptions', icon: 'fa-th', page: <SubscriptionsPage /> },
         configuration:
-          { key: 'Configuration', icon: 'fa-cog', page: <ConfigurationPage /> }
+          { name: 'Configuration', icon: 'fa-cog', page: <ConfigurationPage /> }
       },
       currentPageName: 'subscriptions'
     };
@@ -103,6 +106,8 @@ window.addEventListener('online', tryStoredAccessToken);
 Socket.on('youtube/notauthenticated', renderAuthentication);
 Socket.on('youtube/callback', renderApp);
 
+loadConfig();
+
 if (navigator.onLine) {
   tryStoredAccessToken();
 } else {
@@ -132,4 +137,41 @@ function renderOfflineMode() {
     <NoInternetPage />,
     mainElement
   );
+}
+
+function loadConfig() {
+  const darkTheme = localStorage.getItem('darkTheme');
+  const layout = localStorage.getItem('layout');
+
+  if (darkTheme) {
+    if (darkTheme === '1')
+      document.body.classList.add('dark');
+  } else
+    localStorage.setItem('darkTheme', castBooleanToString(isDarkThemeActive()));
+
+  if (layout) {
+    if (layout === 'overlay') {
+      document.body.classList.add('layout-overlay');
+    } else if (layout === 'sticker') {
+      document.body.classList.add('layout-sticker');
+    }
+  } else
+    localStorage.setItem('layout', getActiveLayout());
+}
+
+function isDarkThemeActive() {
+  return document.body.classList.contains('dark');
+}
+
+function getActiveLayout() {
+  if (document.body.classList.contains('layout-overlay'))
+    return 'overlay';
+  if (document.body.classList.contains('layout-sticker'))
+    return 'sticker';
+
+  return 'youtube';
+}
+
+function castBooleanToString(boolean) {
+  return boolean? '1': '0';
 }

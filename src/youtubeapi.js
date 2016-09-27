@@ -1,26 +1,23 @@
-let oauth2Client;
-let configStore;
-let async;
-let YouTube;
+const Configstore = require('configstore');
+const async = require('async');
+const Google = require('googleapis');
 
-module.exports = function (Configstore, _async, google, CONFIG) {
-  oauth2Client = new google.auth.OAuth2(
-    CONFIG.CREDENTIALS.CLIENT_ID,
-    CONFIG.CREDENTIALS.CLIENT_SECRET,
-    'http://localhost:@@PORT/youtube/callback' // redirect url
-  );
+const CONFIG = require('./config');
 
-  configStore = new Configstore('YouWatch');
-  async = _async;
-  YouTube = google.youtube('v3');
+const configStore = new Configstore('YouWatch');
+const YouTube = Google.youtube('v3');
+const oauth2Client = new Google.auth.OAuth2(
+  CONFIG.CREDENTIALS.CLIENT_ID,
+  CONFIG.CREDENTIALS.CLIENT_SECRET,
+  'http://localhost:@@PORT/youtube/callback' // redirect url
+);
 
-  return {
-    tryStoredAccessToken,
-    getAuthUrl,
-    getToken,
-    getVideo,
-    getSubscriptions,
-  };
+module.exports = {
+  tryStoredAccessToken,
+  getAuthUrl,
+  getToken,
+  getVideo,
+  getSubscriptions,
 };
 
 // Check if the stored access token (if existing) is still working
@@ -99,6 +96,15 @@ function getVideo(videoId, cb) {
 };
 
 function getSubscriptions(cb) {
+  try {
+    let dataset = require('../dataset.json');
+
+    if (dataset && dataset.length)
+      return cb(null, dataset);
+  } catch (exception) {
+    console.info(' -> You can create a `dataset.json` file if you don\'t want to load your subscriptions');
+  }
+
   async.auto({
 
     getSubscriptions: function (next) {
@@ -134,7 +140,7 @@ function getSubscriptions(cb) {
       );
     },
 
-    getChannelDetails: ['getSubscriptions', function (next, results) {
+    getChannelDetails: ['getSubscriptions', function (results, next) {
       var channelsDetails = [];
 
       async.each(results['getSubscriptions'], function (subscription, nextSubscription) {
@@ -158,7 +164,7 @@ function getSubscriptions(cb) {
       });
     }],
 
-    getLastUploadedVideos: ['getChannelDetails', function (next, results) {
+    getLastUploadedVideos: ['getChannelDetails', function (results, next) {
       var videosIds = [];
 
       async.each(results['getChannelDetails'], function (channel, nextChannel) {
@@ -187,7 +193,7 @@ function getSubscriptions(cb) {
       });
     }],
 
-    constructVideosIdsStrings: ['getLastUploadedVideos', function (next, results) {
+    constructVideosIdsStrings: ['getLastUploadedVideos', function (results, next) {
       let counter = 0;
       let idList = [];
       let currentIds = '';
@@ -209,7 +215,7 @@ function getSubscriptions(cb) {
       return next(null, idList);
     }],
 
-    getVideosDetails: ['constructVideosIdsStrings', function (next, results) {
+    getVideosDetails: ['constructVideosIdsStrings', function (results, next) {
       let videosDetails = [];
       async.each(results['constructVideosIdsStrings'], function (ids, nextIds) {
         YouTube.videos.list({
@@ -243,7 +249,7 @@ function getSubscriptions(cb) {
 
     }],
 
-    orderLastUploadedVideos: ['getVideosDetails', function (next, results) {
+    orderLastUploadedVideos: ['getVideosDetails', function (results, next) {
       next(null, results['getVideosDetails'].sort((firstVideo, secondVideo) => {
         return secondVideo.publishedAt.getTime() - firstVideo.publishedAt.getTime();
       }));

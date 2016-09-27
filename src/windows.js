@@ -1,9 +1,11 @@
-let BrowserWindow;
-let CONFIG;
+const app = require('electron').app;
 
-module.exports = function (electron, _CONFIG) {
+const CONFIG = require('./config');
+
+let BrowserWindow;
+
+module.exports = function (electron) {
   BrowserWindow = electron.BrowserWindow;
-  CONFIG = _CONFIG;
 
   return {
     openMainWindow,
@@ -15,6 +17,8 @@ module.exports = function (electron, _CONFIG) {
 
 const MAIN_WINDOW = 'main';
 const AUTH_WINDOW = 'auth';
+
+const ICON = __dirname + '/../static/icon.png';
 
 let windows = {};
 
@@ -31,14 +35,25 @@ function closeLogInWindow() {
   windows[AUTH_WINDOW].close();
 }
 
-function createWindow(windowName, url, width, height, isDevToolsOpen) {
-  const win = new BrowserWindow({ width, height });
+function createWindow(windowName, url, width, height, icon, isDevToolsOpen) {
+  const win = new BrowserWindow({
+    title: app.getName(),
+    width,
+    height,
+    icon,
+    autoHideMenuBar: true,
+    minWidth: 780,
+    minHeight: 270,
+  });
+
+  if (process.platform === 'darwin')
+    app.dock.setIcon(icon);
+
+  if (require('electron-is-dev'))
+    win.openDevTools();
 
   win.loadURL(url);
   win.on('closed', onClosed.bind(null, windowName));
-  win.setMinimumSize(780, 270);
-
-  if (isDevToolsOpen) win.openDevTools();
 
   return win;
 }
@@ -51,6 +66,7 @@ function createMainWindow() {
     url,
     CONFIG.MAIN_WINDOW.WIDTH,
     CONFIG.MAIN_WINDOW.HEIGHT,
+    ICON,
     CONFIG.MAIN_WINDOW.IS_DEV_TOOLS_OPEN
   );
 }
@@ -61,6 +77,7 @@ function createLogInWindow(url) {
     url,
     CONFIG.AUTH_WINDOW.WIDTH,
     CONFIG.AUTH_WINDOW.HEIGHT,
+    ICON,
     CONFIG.AUTH_WINDOW.IS_DEV_TOOLS_OPEN
   );
 }

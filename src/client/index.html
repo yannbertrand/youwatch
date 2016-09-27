@@ -3,22 +3,24 @@
     <head>
         <meta charset="utf-8">
         <title>YouWatch</title>
-        <link rel="stylesheet" href="style/librairies/bootstrap.css">
-        <link rel="stylesheet" href="style/librairies/fontawesome.css">
-        <link rel="stylesheet" href="style/index.css">
+        <link rel="stylesheet" href="styles/styles.css">
     </head>
 
     <body>
         <div id="main" class="container-fluid">
-            <div class="jumbotron">
-                <h1 class="display-3">
-                    <i id="loader" class="fa fa-spinner"></i> Loading...
-                </h1>
+            <div class="text-page">
+                <div class="jumbotron">
+                    <h1 class="display-3">
+                        <i id="loader" class="fa fa-spinner fa-pulse"></i> Loading...
+                    </h1>
+                </div>
             </div>
         </div>
 
+        <!-- to remove for production -->
+        <script>require('electron-connect').client.create()</script>
+        
         <script src="http://localhost:@@PORT/socket.io/socket.io.js"></script>
-        <script src="javascript/dependencies/lazysizes.js"></script>
-        <script src="javascript/index.js"></script>
+        <script src="scripts/index.js"></script>
     </body>
 </html>
