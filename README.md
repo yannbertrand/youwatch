@@ -14,7 +14,16 @@ YouWatch is a desktop app that improves the official YouTube webapp.
 * Offline mode
 
 ## Stack
-[![Electron](http://svgporn.com/logos/electron.svg)](http://electron.atom.io/) [![React](http://svgporn.com/logos/react.svg)](https://facebook.github.io/react/) [![Gulp](http://svgporn.com/logos/gulp.svg)](http://gulpjs.com/)
+
+<center>
+<a href="http://electron.atom.io/"><img src="http://svgporn.com/logos/electron.svg" width="75%"></a>
+</center>
+
+<center>
+<a href="http://gulpjs.com/"><img src="http://svgporn.com/logos/gulp.svg" width="14%"></a>
+<a href="https://facebook.github.io/react/"><img src="http://svgporn.com/logos/react.svg" width="31%"></a>
+<a href="http://sass-lang.com/"><img src="http://svgporn.com/logos/sass.svg" width="31%"></a>
+</center>
 
 ## Dev
 **Replace the credentials in `src/config.js` with yours.**
