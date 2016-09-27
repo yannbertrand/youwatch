@@ -18,7 +18,7 @@ module.exports = function (electron) {
 const MAIN_WINDOW = 'main';
 const AUTH_WINDOW = 'auth';
 
-const ICON = __dirname + '/../YouWatch.png';
+const ICON = __dirname + '/../static/icon.png';
 
 let windows = {};
 
