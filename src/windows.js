@@ -35,7 +35,7 @@ function closeLogInWindow() {
   windows[AUTH_WINDOW].close();
 }
 
-function createWindow(windowName, url, width, height, icon, isDevToolsOpen) {
+function createWindow(windowName, url, width, height, icon) {
   const win = new BrowserWindow({
     title: app.getName(),
     width,
@@ -66,8 +66,7 @@ function createMainWindow() {
     url,
     CONFIG.MAIN_WINDOW.WIDTH,
     CONFIG.MAIN_WINDOW.HEIGHT,
-    ICON,
-    CONFIG.MAIN_WINDOW.IS_DEV_TOOLS_OPEN
+    ICON
   );
 }
 
@@ -77,8 +76,7 @@ function createLogInWindow(url) {
     url,
     CONFIG.AUTH_WINDOW.WIDTH,
     CONFIG.AUTH_WINDOW.HEIGHT,
-    ICON,
-    CONFIG.AUTH_WINDOW.IS_DEV_TOOLS_OPEN
+    ICON
   );
 }
 
