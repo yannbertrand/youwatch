@@ -1,8 +1,14 @@
+body
+  -webkit-user-select: none
+  cursor: default
+  -webkit-font-smoothing: antialiased
+
 a
   cursor: pointer
 
 .jumbotron
   margin-top: 15px
+  background-color: $white
   #loader
     width: 75px
 
@@ -11,7 +17,6 @@ a
   display: block
   height: 0
   width: 100%
-  // 320:180 = 56.25% = 180/320 * 100
   padding-top: (9 / 16) * 100%
   overflow: hidden
   > *
@@ -25,12 +30,12 @@ a
 
 #content
   position: absolute
-  top: 0
-  left: 0
-  width: 100%
-  padding-left: 55px
-  // padding: 5px
+  top: $titlebar-height
+  left: $sidebar-width
+  width: calc(100% - #{$sidebar-width})
+  height: calc(100% - #{$titlebar-height})
   overflow-x: hidden
+  overflow-y: auto
 
 .text-page
   padding: 1rem

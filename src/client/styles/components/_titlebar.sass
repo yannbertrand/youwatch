@@ -1,0 +1,87 @@
+.titlebar
+    width: 100%
+    height: $titlebar-height
+    line-height: $titlebar-height
+    position: relative
+    background-color: $white
+    border-bottom: 1px solid darken($white, 5%)
+    -webkit-app-region: drag
+    font-weight: 100
+
+
+    .titlebar--text
+        padding: 0 $titlebar-controls 0 1rem
+        
+
+    .titlebar--controls-wrapper
+        position: absolute
+        right: 2px
+        top: 0
+        bottom: 4px
+        width: 160px
+        font-size: 0
+        -webkit-app-region: no-drag
+
+        > div
+            position: relative
+            display: inline-block
+            width: (100% / 3)
+            height: 30px
+
+            &:hover
+                background-color: lighten($light, 25%)
+            
+            &.titlebar--controls-close
+                &:hover
+                    background-color: $red
+                    span
+                        border-color: $white
+
+                span
+                    position: absolute
+                    display: block
+                    border-top: 1px solid $dark
+                    height: 0
+                    width: 20px
+                    top: 50%
+                    left: 50%
+                    transform: translate(-50%, -50%) rotate(45deg)
+                    &.bar2
+                        transform: translate(-50%, -50%) rotate(-45deg)
+
+            
+            &.titlebar--controls-maximize
+                &:hover
+                    span
+                        background-color: lighten($light, 25%)
+                span
+                    position: absolute
+                    display: block
+                    background-color: $white
+                    border: 1px solid $dark
+                    height: 12px
+                    width: 12px
+                    top: 50%
+                    left: 50%
+                    transform: translate(-50%, -50%)
+                    &.bar2
+                        transform: translate(-75%, -25%)
+            
+            &.titlebar--controls-minimize
+                span
+                    position: absolute
+                    display: block
+                    border-top: 1px solid $dark
+                    height: 0
+                    width: 16px
+                    top: 15px
+                    left: 18px
+                        
+
+    &.darwin
+        .titlebar--text
+            text-align: center
+            padding: 0 $titlebar-controls-osx
+            
+        .titlebar--controls-wrapper
+            display: none

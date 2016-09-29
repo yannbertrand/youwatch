@@ -18,13 +18,11 @@ body.dark
 	.btn-secondary
 		background-color: $dark
 		color: $red
-		// border-color: $red
 		&:hover
 			background-color: $black
 		&:focus
 			background-color: $black
 			color: $red
-			// border: $red
 			outline: none
 			
 	&.layout-overlay,
@@ -34,3 +32,22 @@ body.dark
 				header
 					background-color: rgba($black, .8)
 					text-shadow: 0 0 2px $black
+	
+	.titlebar
+		background-color: $dark
+		border-bottom: 1px solid darken($dark, 5%)
+
+		.titlebar--controls-wrapper
+			> div
+				span
+					border-color: $light
+					background-color: $dark
+				&:hover
+					background-color: lighten($dark, 10%)
+					span
+						background-color: lighten($dark, 10%)
+
+				&.titlebar--controls-close
+					&:hover
+						background-color: $red
+					

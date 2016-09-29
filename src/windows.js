@@ -20,6 +20,8 @@ const AUTH_WINDOW = 'auth';
 
 const ICON = __dirname + '/../static/icon.png';
 
+const isMac = process.platform === 'darwin';
+
 let windows = {};
 
 function openMainWindow() {
@@ -44,9 +46,11 @@ function createWindow(windowName, url, width, height, icon) {
     autoHideMenuBar: true,
     minWidth: 780,
     minHeight: 270,
+    frame: isMac,
+    'title-bar-style': 'hidden-inset',
   });
 
-  if (process.platform === 'darwin')
+  if (isMac)
     app.dock.setIcon(icon);
 
   if (require('electron-is-dev'))
