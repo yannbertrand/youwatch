@@ -86,7 +86,7 @@ const App = React.createClass({
     return (
       <div>
         <Titlebar
-          darwin={process.platform === 'darwin'}
+          platform={process.platform}
           />
 
         <Sidebar
