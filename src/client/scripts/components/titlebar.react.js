@@ -12,7 +12,7 @@ const Titlebar = React.createClass({
 
     return (
       
-        <div className="titlebar" data-plateform={this.props.platform}>
+        <div className="titlebar" data-platform={this.props.platform}>
         
             <div className="titlebar--text">
                 YouWatch
