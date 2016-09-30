@@ -3,7 +3,7 @@
     height: $titlebar-height
     line-height: $titlebar-height
     position: relative
-    background-color: darken($white, 2%)
+    background-color: $white
     border-bottom: 1px solid darken($white, 5%)
     -webkit-app-region: drag
     font-weight: 100
@@ -11,14 +11,13 @@
 
     .titlebar--text
         padding: 0 $titlebar-controls 0 1rem
-        
 
     .titlebar--controls-wrapper
         position: absolute
-        right: 2px
-        top: 0
+        right: 4px
+        top: 4px
         bottom: 4px
-        width: 160px
+        width: $titlebar-controls
         font-size: 0
         -webkit-app-region: no-drag
 
@@ -42,7 +41,7 @@
                     display: block
                     border-top: 1px solid $dark
                     height: 0
-                    width: 20px
+                    width: 15px
                     top: 50%
                     left: 50%
                     transform: translate(-50%, -50%) rotate(45deg)
@@ -51,21 +50,15 @@
 
             
             &.titlebar--controls-maximize
-                &:hover
-                    span
-                        background-color: lighten($light, 25%)
                 span
                     position: absolute
                     display: block
-                    background-color: $white
                     border: 1px solid $dark
-                    height: 12px
-                    width: 12px
+                    height: 10px
+                    width: 10px
                     top: 50%
                     left: 50%
                     transform: translate(-50%, -50%)
-                    &.bar2
-                        transform: translate(-75%, -25%)
             
             &.titlebar--controls-minimize
                 span
@@ -73,9 +66,10 @@
                     display: block
                     border-top: 1px solid $dark
                     height: 0
-                    width: 16px
-                    top: 15px
-                    left: 18px
+                    width: 10px
+                    top: 50%
+                    left: 50%
+                    transform: translate(-50%, -50%)
                         
 
     &[data-platform="darwin"]

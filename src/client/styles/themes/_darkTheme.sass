@@ -9,9 +9,9 @@ body.dark
 
 	#current-playlist,
 	#sidebar
-		background-color: darken($dark, 1%)
+		background-color: $black
 		color: $light
-		border-right: 1px solid darken($dark, 5%)
+		border-right: 1px solid darken($black, 5%)
 
 	.btn-secondary
 		background-color: $dark
@@ -32,18 +32,15 @@ body.dark
 					text-shadow: 0 0 2px $black
 	
 	.titlebar
-		background-color: darken($dark, 2%)
-		border-bottom: 1px solid darken($dark, 5%)
+		background-color: $black
+		border-bottom: 1px solid darken($black, 5%)
 
 		.titlebar--controls-wrapper
 			> div
 				span
 					border-color: $light
-					background-color: $dark
 				&:hover
-					background-color: lighten($dark, 10%)
-					span
-						background-color: lighten($dark, 10%)
+					background-color: $dark
 
 				&.titlebar--controls-close
 					&:hover
