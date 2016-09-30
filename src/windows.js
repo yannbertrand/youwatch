@@ -47,7 +47,7 @@ function createWindow(windowName, url, width, height, icon) {
     minWidth: 780,
     minHeight: 270,
     frame: isMac,
-    'title-bar-style': 'hidden-inset',
+    titleBarStyle: 'hidden-inset',
   });
 
   if (isMac)
