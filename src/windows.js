@@ -44,6 +44,9 @@ function createWindow(windowName, url, width, height, icon) {
     autoHideMenuBar: true,
     minWidth: 780,
     minHeight: 270,
+    fullscreenable: false, // so that the youtube videos go fullscreen inside the window, not in the screen
+    alwaysOnTop: false,
+    hasShadow: true,
   });
 
   if (process.platform === 'darwin')
