@@ -1,13 +1,23 @@
 const {remote} = require('electron');
-const win = remote.getCurrentWindow();
 
 const Titlebar = React.createClass({
 
   render: function () {
 
-    win.toggleMaximize = () => {
-        if (!win.isMaximized()) win.maximize();
-        else win.unmaximize();
+    const w = {
+        min: () => {
+            const win = remote.getCurrentWindow()
+            win.minimize()
+        },
+        max: () => {
+            const win = remote.getCurrentWindow()
+            if (!win.isMaximized()) win.maximize()
+            else win.unmaximize()
+        },
+        quit: () => {
+            const win = remote.getCurrentWindow()
+            win.close()
+        },
     }
 
     return (
@@ -20,16 +30,16 @@ const Titlebar = React.createClass({
 
             <div className="titlebar--controls-wrapper">
 
-                <div className="titlebar--controls-minimize" onClick={win.minimize}>
+                <div className="titlebar--controls-minimize" onClick={w.min}>
                     <span></span>                  
                 </div>
 
-                <div className="titlebar--controls-maximize" onClick={win.toggleMaximize}>
+                <div className="titlebar--controls-maximize" onClick={w.max}>
                     <span></span>
                     <span className="bar2"></span>  
                 </div>
 
-                <div className="titlebar--controls-close" onClick={win.close}>
+                <div className="titlebar--controls-close" onClick={w.quit}>
                     <span></span>
                     <span className="bar2"></span>
                 </div>
