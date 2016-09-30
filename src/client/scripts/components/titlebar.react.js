@@ -20,14 +20,23 @@ const Titlebar = React.createClass({
         },
     }
 
-    return (
-      
-        <div id="titlebar" data-platform={this.props.platform}>
-        
+    let titleBarText;
+    if (this.props.platform === 'darwin') {
+        titleBarText = (<div className="titlebar--text">YouWatch</div>);
+    } else {
+        titleBarText = (
             <div className="titlebar--text">
                 <img className="titlebar--icon" src="images/icon.png" />
                 YouWatch
             </div>
+        );
+    }
+
+    return (
+      
+        <div id="titlebar" data-platform={this.props.platform}>
+        
+            {titleBarText}
 
             <div className="titlebar--controls-wrapper">
 
