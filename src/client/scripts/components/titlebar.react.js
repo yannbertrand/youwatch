@@ -53,16 +53,16 @@ const WindowsTitlebar = React.createClass({
         </div>
 
         <div className="titlebar--controls-wrapper">
-          <div className="titlebar--controls-minimize" onClick={this.minimize()}>
+          <div className="titlebar--controls-minimize" onClick={this.minimize}>
             <span></span>
           </div>
 
-          <div className="titlebar--controls-maximize" onClick={this.maximize()}>
+          <div className="titlebar--controls-maximize" onClick={this.maximize}>
             <span></span>
             <span className="bar2"></span>
           </div>
 
-          <div className="titlebar--controls-close" onClick={this.quit()}>
+          <div className="titlebar--controls-close" onClick={this.quit}>
             <span></span>
             <span className="bar2"></span>
           </div>
