@@ -22,9 +22,10 @@ const Titlebar = React.createClass({
 
     return (
       
-        <div className="titlebar" data-platform={this.props.platform}>
+        <div id="titlebar" data-platform={this.props.platform}>
         
             <div className="titlebar--text">
+                <img className="titlebar--icon" src="images/icon.png" />
                 YouWatch
             </div>
 
