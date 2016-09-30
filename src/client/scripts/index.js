@@ -15,7 +15,7 @@ window.lazysizes = require('lazysizes');
 
 const Socket = io('http://localhost:@@PORT');
 const mainElement = document.getElementById('main');
-const titlebarElement = document.getElementById('title-bar');
+const titlebarElement = document.getElementById('titlebar');
 
 const SidebarItem = React.createClass({
   handleClick: function(event){
@@ -85,8 +85,16 @@ const App = React.createClass({
   },
   render: function () {
     return (
-      <div id="content">
-        {this.state.pages[this.state.currentPageName].page}
+      <div>
+        <Sidebar
+          pages={this.state.pages}
+          currentPageName={this.state.currentPageName}
+          changePage={this.changePage}
+        />
+
+        <div id="content">
+          {this.state.pages[this.state.currentPageName].page}
+        </div>
       </div>
     );
   }
