@@ -15,6 +15,7 @@ window.lazysizes = require('lazysizes');
 
 const Socket = io('http://localhost:@@PORT');
 const mainElement = document.getElementById('main');
+const titlebarElement = document.getElementById('title-bar');
 
 const SidebarItem = React.createClass({
   handleClick: function(event){
@@ -84,20 +85,8 @@ const App = React.createClass({
   },
   render: function () {
     return (
-      <div>
-        <Titlebar
-          platform={process.platform}
-          />
-
-        <Sidebar
-          pages={this.state.pages}
-          currentPageName={this.state.currentPageName}
-          changePage={this.changePage}
-        />
-
-        <div id="content">
-          {this.state.pages[this.state.currentPageName].page}
-        </div>
+      <div id="content">
+        {this.state.pages[this.state.currentPageName].page}
       </div>
     );
   }
@@ -122,6 +111,11 @@ if (navigator.onLine) {
 function tryStoredAccessToken() {
   Socket.emit('app/authenticate');
 }
+
+ReactDOM.render(
+  <Titlebar platform={process.platform} />,
+  titlebarElement
+);
 
 function renderAuthentication() {
   ReactDOM.render(
