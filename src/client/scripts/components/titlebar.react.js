@@ -35,9 +35,35 @@ const WindowsTitlebar = React.createClass({
     this.state.window.close();
   },
 
+  openMenu(e) {
+    e.preventDefault()
+    this.state.menu.popup()
+  },
+
   getInitialState() {
+    const menuTemplate = [
+        {
+          label: 'Window',
+          submenu: [
+            {
+              label: 'Minimize', 
+              click: this.minimize
+            },
+            {
+              label: 'Maximize', 
+              click: this.maximize
+            },
+            {
+              label: 'Quit', 
+              click: this.quit
+            },
+          ]
+        },
+      ]
+
     return {
-      window: remote.getCurrentWindow()
+      window: remote.getCurrentWindow(),
+      menu : remote.Menu.buildFromTemplate(menuTemplate)
     };
   },
 
@@ -48,7 +74,7 @@ const WindowsTitlebar = React.createClass({
       <div id="titlebar" data-platform={this.props.platform}>
 
         <div className="titlebar--text">
-          <img className="titlebar--icon" src="images/icon.png" />
+          <img className="titlebar--icon" src="images/icon.png" onClick={this.openMenu} onContextMenu={this.openMenu} />
           YouWatch
         </div>
 
