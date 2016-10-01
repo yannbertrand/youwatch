@@ -15,7 +15,7 @@ window.lazysizes = require('lazysizes');
 
 const Socket = io('http://localhost:@@PORT');
 const mainElement = document.getElementById('main');
-const titlebarElement = document.getElementById('titlebar');
+const titlebarElement = document.getElementById('titlebar-container');
 
 const SidebarItem = React.createClass({
   handleClick: function(event){
