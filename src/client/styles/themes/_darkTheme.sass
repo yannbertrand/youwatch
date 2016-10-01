@@ -45,4 +45,9 @@ body.dark
 				&.titlebar--controls-close
 					&:hover
 						background-color: $red
-					
+	
+	&:not(.darwin)
+		::-webkit-scrollbar-track
+			background: $dark
+		::-webkit-scrollbar-thumb
+			background: $black

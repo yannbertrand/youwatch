@@ -6,7 +6,7 @@ const MacTitlebar = React.createClass({
 
     return (
 
-      <div id="titlebar" data-platform={this.props.platform}>
+      <div id="titlebar">
         <div className="titlebar--text">
           YouWatch
         </div>
@@ -108,7 +108,7 @@ const WindowsTitlebar = React.createClass({
 
     return (
 
-      <div id="titlebar" data-platform={this.props.platform}>
+      <div id="titlebar">
 
         <div className="titlebar--text">
           <img className="titlebar--icon" src="images/icon.png" onClick={this.openMenu} onContextMenu={this.openMenu} />
@@ -142,10 +142,10 @@ const Titlebar = React.createClass({
 
   render() {
 
-    if (this.props.platform === 'darwin')
-      return <MacTitlebar platform={this.props.platform} />;
+    if (process.platform === 'darwin')
+      return <MacTitlebar />;
     else
-      return <WindowsTitlebar platform={this.props.platform} />;
+      return <WindowsTitlebar />;
 
   },
 
