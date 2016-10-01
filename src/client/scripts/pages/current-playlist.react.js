@@ -41,13 +41,36 @@ const Player = React.createClass({
   componentDidMount: function () {
 
     document.addEventListener("webkitfullscreenchange", function () {
-      let isFullScreen = !!document.querySelector("#player:-webkit-full-screen");
-      if (isFullScreen)
-        document.body.classList.add('fullscreen');
-      else
-        document.body.classList.remove('fullscreen');
-
       const currentWindow = remote.getCurrentWindow();
+      let isFullScreen = !!document.querySelector("#player:-webkit-full-screen");
+
+      if (isFullScreen) {
+        document.body.classList.add('fullscreen');
+        currentWindow.setMinimumSize(160, 90);
+      }
+      else {
+        document.body.classList.remove('fullscreen');
+        currentWindow.setMinimumSize(880, 370);
+
+        // Resize window if too small
+        const currentSize = currentWindow.getSize();
+        let needResize = false;
+        let newWidth = currentSize[0];
+        let newHeight = currentSize[1];
+        if (newWidth < 880) {
+          needResize = true;
+          newWidth = 880;
+        }
+        if (newHeight < 370) {
+          needResize = true;
+          newHeight = 370;
+        }
+
+        if (needResize) {
+          currentWindow.setSize(newWidth, newHeight, true);
+        }
+      }
+
       currentWindow.setAlwaysOnTop(isFullScreen);
       currentWindow.setHasShadow(!isFullScreen);
       currentWindow.setVisibleOnAllWorkspaces(isFullScreen);
