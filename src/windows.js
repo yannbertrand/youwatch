@@ -38,7 +38,7 @@ function closeLogInWindow() {
 }
 
 function createWindow(windowName, url, width, height, icon) {
-  const win = new BrowserWindow({
+  const _window = new BrowserWindow({
     title: app.getName(),
     width,
     height,
@@ -54,12 +54,12 @@ function createWindow(windowName, url, width, height, icon) {
     app.dock.setIcon(icon);
 
   if (require('electron-is-dev'))
-    win.openDevTools();
+    _window.openDevTools();
 
-  win.loadURL(url);
-  win.on('closed', onClosed.bind(null, windowName));
+  _window.loadURL(url);
+  _window.on('closed', onClosed.bind(null, windowName));
 
-  return win;
+  return _window;
 }
 
 function createMainWindow() {
