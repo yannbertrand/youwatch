@@ -42,24 +42,61 @@ const WindowsTitlebar = React.createClass({
 
   getInitialState() {
     const menuTemplate = [
-        {
-          label: 'Window',
-          submenu: [
-            {
-              label: 'Minimize', 
-              click: this.minimize
-            },
-            {
-              label: 'Maximize', 
-              click: this.maximize
-            },
-            {
-              label: 'Quit', 
-              click: this.quit
-            },
-          ]
-        },
-      ]
+      {
+        label: 'File',
+        submenu: [
+          {
+            label: 'test',
+            click() {
+              alert('this is a test :)')
+            }
+          },
+          {
+            type: 'separator'
+          },
+          {
+            label: 'Quit', 
+            click: this.quit,
+            accelerator: 'Alt+F4'
+          },
+        ]
+      },
+
+      {
+        label: 'Window',
+        submenu: [
+          {
+            label: 'Minimize', 
+            click: this.minimize
+          },
+          {
+            label: 'Maximize', 
+            click: this.maximize
+          },
+        ]
+      },
+
+      {
+        label: 'More info',
+        submenu: [
+          {
+            label: 'Yann Bertrand',
+            click () { remote.shell.openExternal('http://yann-bertrand.fr/') }
+          },
+          {
+            label: 'Benjamin Caradeuc',
+            click () { remote.shell.openExternal('http://caradeuc.info/') }
+          },
+          {
+            type: 'separator'
+          },
+          {
+            label: 'GitHub repo',
+            click () { remote.shell.openExternal('https://github.com/YannBertrand/YouWatch') }
+          }
+        ]
+      }
+    ]
 
     return {
       window: remote.getCurrentWindow(),
