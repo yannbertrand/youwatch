@@ -121,7 +121,7 @@ function tryStoredAccessToken() {
 }
 
 ReactDOM.render(
-  <Titlebar platform={process.platform} />,
+  <Titlebar />,
   titlebarElement
 );
 
@@ -182,3 +182,5 @@ function getActiveLayout() {
 function castBooleanToString(boolean) {
   return boolean? '1': '0';
 }
+
+document.body.classList.add(process.platform)

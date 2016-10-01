@@ -3,6 +3,23 @@ body
   cursor: default
   -webkit-font-smoothing: antialiased
 
+  &:not(.darwin)
+    ::-webkit-scrollbar 
+      width: 8px
+
+    ::-webkit-scrollbar-track
+      border-radius: 4px
+      background: $white
+
+    ::-webkit-scrollbar-thumb
+      border-radius: 4px
+      background: $light
+    
+    ::-webkit-resizer,
+    ::-webkit-scrollbar-button,
+    ::-webkit-scrollbar-corner 
+      display: none
+
 a
   cursor: pointer
 
