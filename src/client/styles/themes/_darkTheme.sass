@@ -4,27 +4,23 @@ body.dark
 
 	.jumbotron,
 	.form-control
-		background-color: lighten($dark, 10%)
+		background-color: $black
 		color: $light
 
 	#current-playlist,
 	#sidebar
-		background-color: $dark
+		background-color: $black
 		color: $light
-
-	#sidebar
-		border-right: 1px solid darken($dark, 5%)
+		border-right: 1px solid darken($black, 5%)
 
 	.btn-secondary
 		background-color: $dark
 		color: $red
-		// border-color: $red
 		&:hover
 			background-color: $black
 		&:focus
 			background-color: $black
 			color: $red
-			// border: $red
 			outline: none
 			
 	&.layout-overlay,
@@ -34,3 +30,24 @@ body.dark
 				header
 					background-color: rgba($black, .8)
 					text-shadow: 0 0 2px $black
+	
+	#titlebar
+		background-color: $black
+		border-bottom: 1px solid darken($black, 5%)
+
+		.titlebar--controls-wrapper
+			> div
+				span
+					border-color: $light
+				&:hover
+					background-color: $dark
+
+				&.titlebar--controls-close
+					&:hover
+						background-color: $red
+	
+	&:not(.darwin)
+		::-webkit-scrollbar-track
+			background: $dark
+		::-webkit-scrollbar-thumb
+			background: $black

@@ -6,6 +6,7 @@ const SubscriptionsPage = require('./scripts/pages/subscriptions.react.js');
 const ConfigurationPage = require('./scripts/pages/configuration.react.js');
 const AuthentificationPage = require('./scripts/pages/authentification.react.js');
 const NoInternetPage = require('./scripts/pages/no-internet.react.js');
+const Titlebar = require('./scripts/components/titlebar.react.js');
 const YouTubeIframeLoader = require('youtube-iframe');
 
 
@@ -14,6 +15,7 @@ window.lazysizes = require('lazysizes');
 
 const Socket = io('http://localhost:@@PORT');
 const mainElement = document.getElementById('main');
+const titlebarElement = document.getElementById('titlebar-container');
 
 const SidebarItem = React.createClass({
   handleClick: function(event){
@@ -118,6 +120,11 @@ function tryStoredAccessToken() {
   Socket.emit('app/authenticate');
 }
 
+ReactDOM.render(
+  <Titlebar />,
+  titlebarElement
+);
+
 function renderAuthentication() {
   ReactDOM.render(
     <AuthentificationPage />,
@@ -175,3 +182,5 @@ function getActiveLayout() {
 function castBooleanToString(boolean) {
   return boolean? '1': '0';
 }
+
+document.body.classList.add(process.platform)

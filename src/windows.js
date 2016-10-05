@@ -20,6 +20,8 @@ const AUTH_WINDOW = 'auth';
 
 const ICON = __dirname + '/../static/icon.png';
 
+const isMac = process.platform === 'darwin';
+
 let windows = {};
 
 function openMainWindow() {
@@ -44,12 +46,14 @@ function createWindow(windowName, url, width, height, icon) {
     autoHideMenuBar: true,
     minWidth: 880,
     minHeight: 370,
+    frame: isMac,
+    titleBarStyle: 'hidden-inset',
     fullscreenable: false, // so that the youtube videos go fullscreen inside the window, not in the screen
     alwaysOnTop: false,
     hasShadow: true,
   });
 
-  if (process.platform === 'darwin')
+  if (isMac)
     app.dock.setIcon(icon);
 
   if (require('electron-is-dev'))
