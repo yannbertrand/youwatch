@@ -44,10 +44,13 @@ function createWindow(windowName, url, width, height, icon) {
     height,
     icon,
     autoHideMenuBar: true,
-    minWidth: 780,
-    minHeight: 270,
+    minWidth: 880,
+    minHeight: 370,
     frame: isMac,
     titleBarStyle: 'hidden-inset',
+    fullscreenable: false, // so that the youtube videos go fullscreen inside the window, not in the screen
+    alwaysOnTop: false,
+    hasShadow: true,
   });
 
   if (isMac)
