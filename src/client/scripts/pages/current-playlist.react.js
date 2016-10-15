@@ -106,21 +106,21 @@ const PlaylistItem = React.createClass({
   },
   render: function () {
     return (
-      <div>
         <div className="playlist-item">
           <button className="btn btn-secondary btn-sm remove"
                   onClick={this.remove}
-                  title="Remove this video"
-                  disabled>&times;</button>
-          <h5>
-            <a onClick={this.raise} title={this.props.title}>
-              {this.props.title}
-            </a>
-          </h5>
-          <h6>{this.props.channel}</h6>
+                  title="Remove this video">
+              &times;
+          </button>
+
+          <a onClick={this.raise} title={this.props.title}>
+            {this.props.title}
+          </a>
+
+          <p>
+            {this.props.channel}
+          </p>
         </div>
-        <hr />
-      </div>
     );
   }
 });
@@ -147,9 +147,29 @@ const Playlist = React.createClass({
   }
 });
 
+const Controls = React.createClass({
+  togglePlaylistVisibility: function(e) {
+    e.preventDefault();
+    window.dispatchEvent(new CustomEvent('playlist.toggleVisibility'));
+  },
+  render: function () {
+    return (
+      <div id="playlist-controls">
+        <button><i className="fa fa-backward"></i></button>
+        <button><i className="fa fa-repeat"></i></button>
+        <button><i className="fa fa-forward"></i></button>
+        <button onClick={ this.togglePlaylistVisibility }><i className="fa fa-list"></i></button>
+      </div>
+    );
+  }
+});
+
 const CurrentPlaylist = React.createClass({
   getInitialState: function () {
-    return { videos: [] };
+    return { 
+      videos: [],
+      playlistVisible: false,
+    };
   },
   componentDidMount: function () {
     // ToDo - retrieve playlist from backend
@@ -158,12 +178,14 @@ const CurrentPlaylist = React.createClass({
     window.addEventListener('playlist.cueVideo', this.cueVideo);
     window.addEventListener('playlist.removeVideo', this.removeVideo);
     window.addEventListener('playlist.raiseVideo', this.raiseVideo);
+    window.addEventListener('playlist.toggleVisibility', this.toggleVisibility);
   },
   componentWillUnmount: function () {
     window.removeEventListener('playlist.addVideo', this.addVideo, false);
     window.removeEventListener('playlist.cueVideo', this.cueVideo, false);
     window.removeEventListener('playlist.removeVideo', this.removeVideo, false);
     window.removeEventListener('playlist.raiseVideo', this.raiseVideo, false);
+    window.removeEventListener('playlist.toggleVisibility', this.toggleVisibility, false);    
   },
   addVideo: function (event) {
     // Add the video in first position if no video playing
@@ -235,10 +257,17 @@ const CurrentPlaylist = React.createClass({
   isInPlaylist: function (video) {
     return _.some(this.state.videos, video);
   },
+
+  toggleVisibility: function() {
+    this.state.playlistVisible = document.querySelector('#playlist').classList.toggle('visible');
+    
+  },
+
   render: function () {
     return (
       <div id="current-playlist">
         <Playlist videos={ this.state.videos } />
+        <Controls />
         <Player playlist={ _.map(this.state.videos, 'id') } />
       </div>
     );

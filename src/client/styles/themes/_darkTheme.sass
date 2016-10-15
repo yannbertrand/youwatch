@@ -13,10 +13,24 @@ body.dark
 		color: $light
 		border-right: 1px solid darken($black, 5%)
 
+	#current-playlist
+		#playlist
+			border-color: darken($black, 5%)
+			.playlist-item
+				border-color: darken($black, 5%)
+
+		#playlist-controls
+			button
+				background-color: $black
+				border-bottom-color: darken($black, 5%)
+				&:hover
+					background-color: darken($black, 5%)
+		#player
+
 	.btn-secondary
 		background-color: $dark
 		color: $red
-		&:hover
+		&:not(:disabled):hover
 			background-color: $black
 		&:focus
 			background-color: $black

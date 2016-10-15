@@ -1,47 +1,75 @@
+$playlist-width: 260px
+$player-width: 480px
+$player-height: ($player-width * 9 / 16)
+$playlist-controls-width: ( $player-height / 4 )
+
 #current-playlist
   position: fixed
-  bottom: 0px
-  right: 0px
-  width: 780px
-  height: 270px
+  bottom: 0
+  right: 0
   background-color: $white
-  box-shadow: -6px -4px 15px -2px rgba($black, 0.75)
-  z-index: 2
+  box-shadow: 0 0 10px rgba($black, .75)
+  z-index: 10
 
   #playlist
-    position: absolute
-    top: 0px
-    left: 0px
-    width: 300px
-    height: 100%
-    overflow: auto
+    float: left
+    width: $playlist-width
+    height: $player-height
+    overflow-y: auto
+    overflow-x: hidden
+    border-right: 1px solid darken($white, 5%)
+    display: none
+
+    &.visible
+      display: block
 
     .playlist-item
-      margin-top: 1.5em
-      padding: 10px
+      padding: 1.5rem .5rem .5rem
+      border-bottom: 1px solid darken($white, 5%)
 
       button.remove
         float: right
     
-      h5, h6
+      a, p
+        display: block
         text-overflow: ellipsis
         overflow: hidden
         white-space: nowrap
         
-      h5
+      a
         color: $red
         font-size: 0.9em
-        margin-bottom: 0
-        line-height: 1.5
+        font-weight: 500
 
-      h6
+      p
         color: $light
-        font-size: 0.8em
+        font-size: 0.7em
+
+  #playlist-controls
+    float: left
+    width: $playlist-controls-width
+    height: $player-height
+
+    button
+      display: block
+      background-color: $white
+      color: $red
+      border: none
+      width: $playlist-controls-width
+      height: $playlist-controls-width
+      border-bottom: 1px solid darken($white, 5%)
+
+      &:focus
+        outline: none
+      &:not(:disabled):hover
+        background-color: darken($white, 5%)
+      &:disabled
+        opacity: .3
+        cursor: not-allowed
+
   
   #player
-    position: absolute
-    top: 0px
-    left: 300px
-    width: 480px
-    height: 100%
+    float: left
+    width: $player-width
+    height: $player-height
     background-color: $black
