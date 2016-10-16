@@ -107,17 +107,17 @@ const PlaylistItem = React.createClass({
   render: function () {
     return (
         <div className="playlist-item">
-          <button className="btn btn-secondary btn-sm remove"
+          <a className="playlist-item--remove"
                   onClick={this.remove}
-                  title="Remove this video">
+                  title="Remove this video from the list">
               &times;
-          </button>
+          </a>
 
-          <a onClick={this.raise} title={this.props.title}>
+          <a className="playlist-item--title" onClick={this.raise} title={this.props.title}>
             {this.props.title}
           </a>
 
-          <p>
+          <p className="playlist-item--channel">
             {this.props.channel}
           </p>
         </div>
