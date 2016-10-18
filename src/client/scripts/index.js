@@ -18,11 +18,11 @@ const mainElement = document.getElementById('main');
 const titlebarElement = document.getElementById('titlebar-container');
 
 const SidebarItem = React.createClass({
-  handleClick: function(event){
+  handleClick(event){
     event.preventDefault();
     this.props.handleClick();
   },
-  render: function () {
+  render() {
     return (
       <li className="nav-item">
         <a href="#" className={this.props.isCurrent? 'nav-link active' : 'nav-link'}
@@ -38,10 +38,10 @@ const SidebarItem = React.createClass({
 });
 
 const Sidebar = React.createClass({
-  handleClick: function (pageName) {
+  handleClick(pageName) {
     this.props.changePage(pageName);
   },
-  render: function () {
+  render() {
     let pages = [];
     for (let pageName in this.props.pages) {
       pages.push(
@@ -66,10 +66,10 @@ const Sidebar = React.createClass({
 });
 
 const App = React.createClass({
-  shouldComponentUpdate: function (nextProps, nextState) {
+  shouldComponentUpdate(nextProps, nextState) {
     return nextState.currentPageName !== this.state.currentPageName;
   },
-  getInitialState: function () {
+  getInitialState() {
     return {
       pages: {
         subscriptions:
@@ -80,10 +80,10 @@ const App = React.createClass({
       currentPageName: 'subscriptions'
     };
   },
-  changePage: function (pageName) {
+  changePage(pageName) {
     this.setState({ currentPageName: pageName });
   },
-  render: function () {
+  render() {
     return (
       <div>
         <Sidebar

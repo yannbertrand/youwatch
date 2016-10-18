@@ -2,7 +2,7 @@ let isPlaylistPlaying = false;
 const {remote} = require('electron');
 
 const Player = React.createClass({
-  onStateChange: function (event) {
+  onStateChange(event) {
     if (event.data === YT.PlayerState.UNSTARTED) return;
     if (event.data === YT.PlayerState.CUED) return;
 
@@ -12,7 +12,7 @@ const Player = React.createClass({
       isPlaylistPlaying = true;
     }
   },
-  removeVideo: function () {
+  removeVideo() {
     // No more video to play
     // (1 because we will remove the played video)
     if (this.state.playlist.length === 1)
@@ -21,7 +21,7 @@ const Player = React.createClass({
     // Remove last played video
     window.dispatchEvent(new CustomEvent('playlist.removeVideo', { detail: { video: this.state.playlist[0] } }));
   },
-  updatePlaylist: function (forceNextVideo) {
+  updatePlaylist(forceNextVideo) {
     if (!this.state.playlist.length) return;
 
     const statesThatNeedCue = [
@@ -48,10 +48,10 @@ const Player = React.createClass({
       playlist: nextProps.playlist,
     }, updatePlaylist);
   },
-  componentDidMount: function () {
+  componentDidMount() {
     window.addEventListener('playlist.playNextVideo', this.playNextVideo);
 
-    document.addEventListener("webkitfullscreenchange", function () {
+    document.addEventListener("webkitfullscreenchange", () => {
       const currentWindow = remote.getCurrentWindow();
       let isFullScreen = !!document.querySelector("#player:-webkit-full-screen");
 
@@ -99,29 +99,29 @@ const Player = React.createClass({
       })
     });
   },
-  componentWillUnmount: function () {
+  componentWillUnmount() {
     window.removeEventListener('playlist.playNextVideo', this.playNextVideo);
   },
-  playNextVideo: function () {
+  playNextVideo() {
     this.removeVideo();
   },
-  render: function () {
+  render() {
     return <div id="player"></div>;
   }
 });
 
 const PlaylistItem = React.createClass({
-  raise: function () {
+  raise() {
     if (this.props.id) {
       window.dispatchEvent(new CustomEvent('playlist.raiseVideo', { detail: { video: this.props } }));
     }
   },
-  remove: function () {
+  remove() {
     if (this.props.id) {
       window.dispatchEvent(new CustomEvent('playlist.removeVideo', { detail: { video: this.props } }));
     }
   },
-  render: function () {
+  render() {
     return (
         <div className="playlist-item">
           <a className="playlist-item--remove"
@@ -143,7 +143,7 @@ const PlaylistItem = React.createClass({
 });
 
 const Playlist = React.createClass({
-  render: function () {
+  render() {
     let videos = [];
     for (var index in this.props.videos) {
       videos.push(
@@ -187,13 +187,13 @@ const Controls = React.createClass({
 });
 
 const CurrentPlaylist = React.createClass({
-  getInitialState: function () {
+  getInitialState() {
     return { 
       videos: [],
       playlistVisible: false,
     };
   },
-  componentDidMount: function () {
+  componentDidMount() {
     // ToDo - retrieve playlist from backend
 
     window.addEventListener('playlist.addVideo', this.addVideo);
@@ -202,14 +202,14 @@ const CurrentPlaylist = React.createClass({
     window.addEventListener('playlist.raiseVideo', this.raiseVideo);
     window.addEventListener('playlist.toggleVisibility', this.toggleVisibility);
   },
-  componentWillUnmount: function () {
+  componentWillUnmount() {
     window.removeEventListener('playlist.addVideo', this.addVideo, false);
     window.removeEventListener('playlist.cueVideo', this.cueVideo, false);
     window.removeEventListener('playlist.removeVideo', this.removeVideo, false);
     window.removeEventListener('playlist.raiseVideo', this.raiseVideo, false);
     window.removeEventListener('playlist.toggleVisibility', this.toggleVisibility, false);    
   },
-  addVideo: function (event) {
+  addVideo(event) {
     // Add the video in first position if no video playing
     // Else add it in second position
 
@@ -228,7 +228,7 @@ const CurrentPlaylist = React.createClass({
       return state;
     });
   },
-  cueVideo: function (event) {
+  cueVideo(event) {
     // Add the video in last position
     let video = this.normalizeVideo(event.detail.video);
 
@@ -241,7 +241,7 @@ const CurrentPlaylist = React.createClass({
       return state;
     });
   },
-  removeVideo: function (event) {
+  removeVideo(event) {
     let video = this.normalizeVideo(event.detail.video);
 
     if (!this.isInPlaylist(video))
@@ -253,7 +253,7 @@ const CurrentPlaylist = React.createClass({
       return state;
     });
   },
-  raiseVideo: function (event) {
+  raiseVideo(event) {
     let video = this.normalizeVideo(event.detail.video);
 
     if (!this.isInPlaylist(video))
@@ -270,21 +270,21 @@ const CurrentPlaylist = React.createClass({
       return state;
     });
   },
-  normalizeVideo: function (video) {
+  normalizeVideo(video) {
     if (_.isObject(video))
       return video;
 
     return { id: video };
   },
-  isInPlaylist: function (video) {
+  isInPlaylist(video) {
     return _.some(this.state.videos, video);
   },
 
-  toggleVisibility: function() {
+  toggleVisibility() {
     this.state.playlistVisible = document.querySelector('#playlist').classList.toggle('visible');
   },
 
-  render: function () {
+  render() {
     return (
       <div id="current-playlist">
         <Playlist videos={ this.state.videos } />

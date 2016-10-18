@@ -1,14 +1,14 @@
 const Switch = require('../components/switch.react.js')
 
 const ConfigurationPage = React.createClass({
-  toggleDarkTheme: function () {
+  toggleDarkTheme() {
     const darkTheme = document.body.classList.toggle('dark');
 
     localStorage.setItem('darkTheme', castBooleanToString(darkTheme));
 
     this.setState({ darkTheme });
   },
-  changeLayout: function (event) {
+  changeLayout(event) {
     let layout = event.target.value;
 
     switch (layout) {
@@ -28,14 +28,14 @@ const ConfigurationPage = React.createClass({
     localStorage.setItem('layout', layout);
     this.setState({ layout: layout });
   },
-  getInitialState: () => {
+  getInitialState() {
     return {
       showConsole: false,
       darkTheme : isDarkThemeActive(),
       layout: getActiveLayout(),
     };
   },
-  render: function () {
+  render() {
     return (
       <div className="text-page">
         <h1>Configuration</h1>
