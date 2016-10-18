@@ -100,7 +100,7 @@ const Player = React.createClass({
     });
   },
   componentWillUnmount: function () {
-    window.removeEventListener('playlist.playNextVideo');
+    window.removeEventListener('playlist.playNextVideo', this.playNextVideo);
   },
   playNextVideo: function () {
     this.removeVideo();
