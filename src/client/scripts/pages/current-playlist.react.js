@@ -24,14 +24,18 @@ const Player = React.createClass({
   },
   updatePlaylist: function () {
     if (!this.state.playlist.length) return;
-    if (!this.state.player.getPlaylist()) return;
 
     // Update playlist and start playing
-    this.state.player.loadPlaylist(this.state.playlist);
+    this.state.player.loadVideoById(this.state.playlist[0]);
   },
   componentWillReceiveProps(nextProps) {
-    if (!isPlaylistPlaying && this.state.player.cuePlaylist && nextProps.playlist.length) {
-      this.state.player.cuePlaylist(nextProps.playlist);
+    const statesThatNeedCue = [YT.PlayerState.ENDED, YT.PlayerState.CUED];
+    
+    if (!isPlaylistPlaying
+      && this.state.player.cueVideoById // Player is loaded
+      && nextProps.playlist.length
+      && statesThatNeedCue.indexOf(this.state.player.getPlayerState()) > -1) {
+        this.state.player.cueVideoById(nextProps.playlist[0]);
     }
 
     this.setState({
@@ -39,7 +43,6 @@ const Player = React.createClass({
     });
   },
   componentDidMount: function () {
-
     document.addEventListener("webkitfullscreenchange", function () {
       const currentWindow = remote.getCurrentWindow();
       let isFullScreen = !!document.querySelector("#player:-webkit-full-screen");
