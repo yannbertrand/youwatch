@@ -26,7 +26,7 @@ const ConfigurationPage = React.createClass({
     };
 
     localStorage.setItem('layout', layout);
-    this.setState({ layout: layout });
+    this.setState({ layout });
   },
   getInitialState() {
     return {
