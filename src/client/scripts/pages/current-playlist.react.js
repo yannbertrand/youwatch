@@ -7,42 +7,50 @@ const Player = React.createClass({
     if (event.data === YT.PlayerState.CUED) return;
 
     if (event.data === YT.PlayerState.ENDED) {
-      // No more video to play
-      // (1 because we will remove the played video)
-      if (this.state.playlist.length === 1)
-        isPlaylistPlaying = false;
-
-      // Remove last played video
-      window.dispatchEvent(new CustomEvent('playlist.removeVideo', { detail: { video: this.state.playlist[0] } }));
-
-      // The video has changed
-      // Seize the opportunity to update the playlist without interruption
-      this.updatePlaylist();
+      this.removeVideo();
     } else {
       isPlaylistPlaying = true;
     }
   },
-  updatePlaylist: function () {
+  removeVideo: function () {
+    // No more video to play
+    // (1 because we will remove the played video)
+    if (this.state.playlist.length === 1)
+      isPlaylistPlaying = false;
+
+    // Remove last played video
+    window.dispatchEvent(new CustomEvent('playlist.removeVideo', { detail: { video: this.state.playlist[0] } }));
+  },
+  updatePlaylist: function (forceNextVideo) {
     if (!this.state.playlist.length) return;
 
-    // Update playlist and start playing
-    this.state.player.loadVideoById(this.state.playlist[0]);
+    const statesThatNeedCue = [
+      YT.PlayerState.CUED,
+    ];
+
+    let playerState = this.state.player.getPlayerState();
+
+    if (statesThatNeedCue.indexOf(playerState) > -1) {
+      this.state.player.cueVideoById(this.state.playlist[0]);
+    } else if (forceNextVideo) {
+      this.state.player.loadVideoById(this.state.playlist[0]);
+    }
   },
   componentWillReceiveProps(nextProps) {
-    const statesThatNeedCue = [YT.PlayerState.ENDED, YT.PlayerState.CUED];
-    
-    if (!isPlaylistPlaying
-      && this.state.player.cueVideoById // Player is loaded
-      && nextProps.playlist.length
-      && statesThatNeedCue.indexOf(this.state.player.getPlayerState()) > -1) {
-        this.state.player.cueVideoById(nextProps.playlist[0]);
+    let updatePlaylist;
+    if (this.state.playlist[0] !== nextProps.playlist[0]) {
+      updatePlaylist = this.updatePlaylist.bind(null, true);
+    } else {
+      updatePlaylist = this.updatePlaylist.bind(null, false);
     }
 
     this.setState({
       playlist: nextProps.playlist,
-    });
+    }, updatePlaylist);
   },
   componentDidMount: function () {
+    window.addEventListener('playlist.playNextVideo', this.playNextVideo);
+
     document.addEventListener("webkitfullscreenchange", function () {
       const currentWindow = remote.getCurrentWindow();
       let isFullScreen = !!document.querySelector("#player:-webkit-full-screen");
@@ -90,6 +98,12 @@ const Player = React.createClass({
         }
       })
     });
+  },
+  componentWillUnmount: function () {
+    window.removeEventListener('playlist.playNextVideo');
+  },
+  playNextVideo: function () {
+    this.removeVideo();
   },
   render: function () {
     return <div id="player"></div>;
@@ -151,16 +165,21 @@ const Playlist = React.createClass({
 });
 
 const Controls = React.createClass({
-  togglePlaylistVisibility: function(e) {
-    e.preventDefault();
+  isNextVideoDisabled() {
+    return this.props.numberOfVideos <= 1;
+  },
+  playNextVideo() {
+    window.dispatchEvent(new CustomEvent('playlist.playNextVideo'));
+  },
+  togglePlaylistVisibility() {
     window.dispatchEvent(new CustomEvent('playlist.toggleVisibility'));
   },
-  render: function () {
+  render() {
     return (
       <div id="playlist-controls">
         <button><i className="fa fa-backward"></i></button>
         <button><i className="fa fa-repeat"></i></button>
-        <button><i className="fa fa-forward"></i></button>
+        <button onClick={ this.playNextVideo } disabled={ this.isNextVideoDisabled() }><i className="fa fa-forward"></i></button>
         <button onClick={ this.togglePlaylistVisibility }><i className="fa fa-list"></i></button>
       </div>
     );
@@ -263,14 +282,13 @@ const CurrentPlaylist = React.createClass({
 
   toggleVisibility: function() {
     this.state.playlistVisible = document.querySelector('#playlist').classList.toggle('visible');
-    
   },
 
   render: function () {
     return (
       <div id="current-playlist">
         <Playlist videos={ this.state.videos } />
-        <Controls />
+        <Controls numberOfVideos={ this.state.videos.length } />
         <Player playlist={ _.map(this.state.videos, 'id') } />
       </div>
     );
