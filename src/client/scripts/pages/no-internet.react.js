@@ -1,5 +1,5 @@
 const NoInternetPage = React.createClass({
-  render: function () {
+  render() {
     return (
       <div className="text-page">
         <div className="jumbotron">
@@ -9,7 +9,7 @@ const NoInternetPage = React.createClass({
         </div>
       </div>
     );
-  }
+  },
 });
 
 module.exports = NoInternetPage;
