@@ -73,7 +73,10 @@
       "babel/object-curly-spacing": "off",
       "key-spacing": "off",
       "no-multiple-empty-lines": "off",
-      "arrow-parens": ["error", "always"]
+      "arrow-parens": ["error", "always"],
+      "padded-blocks": ["warn"],
+      "unicorn/catch-error-name": ["error", {"name": "error"}],
+      "callback-return": "warn"
     },
     "overrides": [
       {
