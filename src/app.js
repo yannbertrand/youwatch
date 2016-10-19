@@ -1,16 +1,16 @@
 'use strict';
 
 const electron = require('electron');
-const app = electron.app;
-
+const youtubeRegex = require('youtube-regex');
 
 const VideoManager = require('./videomanager');
 const YoutubeApi = require('./youtubeapi');
 const Windows = require('./windows')(electron);
 const server = require('./server');
-const database = require('./database');
 
-const youtubeRegex = require('youtube-regex');
+
+const app = electron.app;
+
 
 // adds debug features like hotkeys for triggering dev tools and reload
 require('electron-debug')();
@@ -36,9 +36,9 @@ app.on('ready', () => {
     });
 
     socket.on('subscriptions/list', () => {
-      if (subscriptions.length)
+      if (subscriptions.length > 0)
         return socket.emit('subscriptions/list', subscriptions);
-      
+
       YoutubeApi.getSubscriptions((err, _subscriptions) => {
         if (err) {
           console.error(err);
@@ -67,10 +67,10 @@ app.on('ready', () => {
       if (!youtubeRegex().test(text))
         return;
 
-      let videoId = youtubeRegex().exec(text)[1];
-      YoutubeApi.getVideo(videoId, function (err, theVideo) {
+      const videoId = youtubeRegex().exec(text)[1];
+      YoutubeApi.getVideo(videoId, (err/* , theVideo */) => {
         if (err) return;
-        playVideo(theVideo);
+        // ToDo
       });
     });
 
@@ -88,9 +88,9 @@ app.on('ready', () => {
   server.hapi.route({
     method: 'GET',
     path:'/youtube/callback',
-    handler: function (request, reply) {
+    handler: (request) => {
       server.io.emit('youtube/waiting');
-      YoutubeApi.getToken(request.query.code, function (token) {
+      YoutubeApi.getToken(request.query.code, (token) => {
         server.io.emit('youtube/callback', token);
 
         Windows.closeLogInWindow();
@@ -108,7 +108,7 @@ app.on('window-all-closed', () => {
   }
 });
 
-app.on('activate', function () {
+app.on('activate', () => {
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   Windows.activateWithNoOpenWindows();
