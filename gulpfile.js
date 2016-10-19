@@ -18,12 +18,12 @@ const plumberConfig = {
   errorHandler: notify.onError({
     title:    'Gulp error!',
     message:  '<%= error.message %>',
-  })
+  }),
 };
 
 const debugConfig = (taskName) => {
   return {
-    title: 'Task \'' + taskName + '\' -'
+    title: 'Task \'' + taskName + '\' -',
   };
 };
 
@@ -31,9 +31,9 @@ const replaceOptions = {
   patterns: [
     {
       match: 'PORT',
-      replace: CONFIG.PORT
-    }
-  ]
+      replace: CONFIG.PORT,
+    },
+  ],
 };
 
 
@@ -57,7 +57,7 @@ gulp.task('transpile:server', (callback) => {
     .pipe(debug(debugConfig('transpile:server')))
     .pipe(replace(replaceOptions))
     .pipe(babel({
-      presets: ['es2015', 'react']
+      presets: ['es2015', 'react'],
     }))
     .pipe(gulp.dest('dist'))
     .on('end', callback);
@@ -70,7 +70,7 @@ gulp.task('transpile:client', (callback) => {
     .pipe(debug(debugConfig('transpile:client')))
     .pipe(replace(replaceOptions))
     .pipe(babel({
-      presets: ['es2015', 'react']
+      presets: ['es2015', 'react'],
     }))
     .pipe(gulp.dest('dist/client'))
     .on('end', callback);
@@ -87,7 +87,7 @@ gulp.task('sass', (callback) => {
         './node_modules/bootstrap/scss/',
         './node_modules/font-awesome/scss/',
         './node_modules/z-switch/sass/',
-      ]
+      ],
     }).on('error', sass.logError))
     .pipe(sourcemaps.write('./'))
     .pipe(gulp.dest('dist/client/styles'))

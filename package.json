@@ -67,7 +67,7 @@
     "esnext": true,
     "space": 2,
     "rules": {
-      "comma-dangle": "off",
+      "comma-dangle": ["warn", "always-multiline"],
       "no-multi-spaces": "off",
       "curly": "off",
       "babel/object-curly-spacing": "off",

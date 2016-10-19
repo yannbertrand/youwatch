@@ -95,7 +95,7 @@ app.on('ready', () => {
 
         Windows.closeLogInWindow();
       });
-    }
+    },
   });
 });
 
