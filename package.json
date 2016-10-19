@@ -76,7 +76,11 @@
       "arrow-parens": ["error", "always"],
       "padded-blocks": ["warn"],
       "unicorn/catch-error-name": ["error", {"name": "error"}],
-      "callback-return": "warn"
+      "callback-return": "warn",
+      "object-shorthand": ["error", "always", { "avoidQuotes": true }],
+      "quote-props": "warn",
+      "object-curly-spacing": ["warn", "always"],
+      "brace-style": ["error", "1tbs", { "allowSingleLine": true }]
     },
     "overrides": [
       {
