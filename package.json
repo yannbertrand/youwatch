@@ -57,7 +57,7 @@
     "gulp-replace-task": "^0.11.0",
     "gulp-sass": "^2.3.2",
     "gulp-sourcemaps": "^1.6.0",
-    "xo": "^0.16.0"
+    "xo": "^0.17.0"
   },
   "xo": {
     "ignores": [
@@ -70,7 +70,10 @@
       "comma-dangle": "off",
       "no-multi-spaces": "off",
       "curly": "off",
-      "babel/object-curly-spacing": "off"
+      "babel/object-curly-spacing": "off",
+      "key-spacing": "off",
+      "no-multiple-empty-lines": "off",
+      "arrow-parens": ["error", "always"]
     },
     "overrides": [
       {
