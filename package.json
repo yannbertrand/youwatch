@@ -13,7 +13,7 @@
   },
   "scripts": {
     "start": "node_modules/.bin/gulp",
-    "test": "node_modules/.bin/xo src/*.js",
+    "lint": "node_modules/.bin/xo",
     "clean": "rm -rf dist; rm -f ~/.config/configstore/YouWatch.json; rm -rf ~/Library/Application\\ Support/YouWatch",
     "build": "npm run build:osx && npm run build:linux && npm run build:windows",
     "build:osx": "node_modules/.bin/electron-packager . --overwrite --out=build --prune --platform=darwin --arch=x64 --app-version=$npm_package_version --icon=static/icon.icns",
@@ -60,10 +60,28 @@
     "xo": "^0.16.0"
   },
   "xo": {
+    "ignores": [
+      "media",
+      "static"
+    ],
     "esnext": true,
-    "envs": [
-      "node",
-      "browser"
+    "space": 2,
+    "rules": {
+      "comma-dangle": "off",
+      "no-multi-spaces": "off",
+      "curly": "off",
+      "babel/object-curly-spacing": "off"
+    },
+    "overrides": [
+      {
+        "files": "**/*.js",
+        "envs": ["node"]
+      },
+      {
+        "files": "src/client/**/*.js",
+        "globals": ["window", "document", "YT"],
+        "envs": ["browser"]
+      }
     ]
   }
 }
