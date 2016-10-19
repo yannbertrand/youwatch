@@ -6,7 +6,7 @@ const debug       = require('gulp-debug');
 const cache       = require('gulp-cached');
 const plumber     = require('gulp-plumber');
 const replace     = require('gulp-replace-task');
-const notify      = require("gulp-notify");
+const notify      = require('gulp-notify');
 const electron    = require('electron-connect').server.create();
 const tcpPortUsed = require('tcp-port-used');
 const CONFIG      = require('./src/config');
@@ -16,8 +16,8 @@ const CONFIG      = require('./src/config');
  */
 const plumberConfig = {
   errorHandler: notify.onError({
-    title:    "Gulp error!",
-    message:  "<%= error.message %>",
+    title:    'Gulp error!',
+    message:  '<%= error.message %>',
   })
 };
 

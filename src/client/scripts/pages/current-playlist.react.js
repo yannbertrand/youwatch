@@ -51,9 +51,9 @@ const Player = React.createClass({
   componentDidMount() {
     window.addEventListener('playlist.playNextVideo', this.playNextVideo);
 
-    document.addEventListener("webkitfullscreenchange", () => {
+    document.addEventListener('webkitfullscreenchange', () => {
       const currentWindow = remote.getCurrentWindow();
-      let isFullScreen = !!document.querySelector("#player:-webkit-full-screen");
+      let isFullScreen = !!document.querySelector('#player:-webkit-full-screen');
 
       if (isFullScreen) {
         document.body.classList.add('fullscreen');
