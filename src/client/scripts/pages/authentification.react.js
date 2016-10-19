@@ -1,10 +1,10 @@
 const AuthentificationPage = React.createClass({
-  getInitialState: function () { return { loading: false }; },
-  openAuthWindow: function () {
+  getInitialState() { return { loading: false }; },
+  openAuthWindow() {
     this.setState({ loading: true });
     Socket.emit('youtube/auth');
   },
-  render: function () {
+  render() {
     if (this.state.loading) {
       return (
         <div className="text-page">
@@ -30,7 +30,7 @@ const AuthentificationPage = React.createClass({
         </div>
       </div>
     );
-  }
+  },
 });
 
 module.exports = AuthentificationPage;
