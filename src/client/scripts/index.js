@@ -18,14 +18,15 @@ const titlebarElement = document.getElementById('titlebar-container');
 
 const SidebarItem = React.createClass({
   propTypes: {
-    handleClick: React.PropTypes.func,
+    changePage: React.PropTypes.func,
     isCurrent: React.PropTypes.bool,
     icon: React.PropTypes.string,
+    page: React.PropTypes.string,
     pageName: React.PropTypes.string,
   },
   handleClick(event) {
     event.preventDefault();
-    this.props.handleClick();
+    this.props.changePage(this.props.page);
   },
   render() {
     return (
@@ -44,23 +45,21 @@ const SidebarItem = React.createClass({
 const Sidebar = React.createClass({
   propTypes: {
     changePage: React.PropTypes.func,
-    pages: React.PropTypes.array,
-    currentPageName: React.PropTypes.string,
-  },
-  handleClick(pageName) {
-    this.props.changePage(pageName);
+    pages: React.PropTypes.object,
+    currentPage: React.PropTypes.string,
   },
   render() {
     const pages = [];
-    for (const pageName in this.props.pages) {
-      if ({}.hasOwnProperty.call(this.props.pages, pageName)) {
+    for (const page in this.props.pages) {
+      if ({}.hasOwnProperty.call(this.props.pages, page)) {
         pages.push(
           <SidebarItem
-            key={pageName}
-            pageName={this.props.pages[pageName].name}
-            icon={this.props.pages[pageName].icon}
-            isCurrent={this.props.currentPageName === pageName}
-            handleClick={this.handleClick.bind(this, pageName)}
+            key={page}
+            page={page}
+            pageName={this.props.pages[page].name}
+            icon={this.props.pages[page].icon}
+            isCurrent={this.props.currentPage === page}
+            changePage={this.props.changePage}
             />
         );
       }
@@ -78,10 +77,10 @@ const Sidebar = React.createClass({
 
 const App = React.createClass({
   propTypes: {
-    currentPageName: React.PropTypes.string,
+    currentPage: React.PropTypes.string,
   },
   shouldComponentUpdate(nextProps, nextState) {
-    return nextState.currentPageName !== this.state.currentPageName;
+    return nextState.currentPage !== this.state.currentPage;
   },
   getInitialState() {
     return {
@@ -91,23 +90,23 @@ const App = React.createClass({
         configuration:
           { name: 'Configuration', icon: 'fa-cog', page: <ConfigurationPage /> },
       },
-      currentPageName: 'subscriptions',
+      currentPage: 'subscriptions',
     };
   },
-  changePage(pageName) {
-    this.setState({ currentPageName: pageName });
+  changePage(newPage) {
+    this.setState({ currentPage: newPage });
   },
   render() {
     return (
       <div>
         <Sidebar
           pages={this.state.pages}
-          currentPageName={this.state.currentPageName}
+          currentPage={this.state.currentPage}
           changePage={this.changePage}
           />
 
         <div id="content">
-          {this.state.pages[this.state.currentPageName].page}
+          {this.state.pages[this.state.currentPage].page}
         </div>
       </div>
     );
