@@ -3,7 +3,6 @@ const { remote } = require('electron');
 const MacTitlebar = React.createClass({
 
   render() {
-
     return (
 
       <div id="titlebar">
@@ -13,7 +12,6 @@ const MacTitlebar = React.createClass({
       </div>
 
     );
-
   },
 
 });
@@ -25,10 +23,10 @@ const WindowsTitlebar = React.createClass({
   },
 
   maximize() {
-    if (!this.state.window.isMaximized())
-      this.state.window.maximize();
-    else
+    if (this.state.window.isMaximized())
       this.state.window.unmaximize();
+    else
+      this.state.window.maximize();
   },
 
   quit() {
@@ -36,8 +34,8 @@ const WindowsTitlebar = React.createClass({
   },
 
   openMenu(e) {
-    e.preventDefault()
-    this.state.menu.popup()
+    e.preventDefault();
+    this.state.menu.popup();
   },
 
   getInitialState() {
@@ -48,32 +46,33 @@ const WindowsTitlebar = React.createClass({
           {
             label: 'test',
             click() {
-              alert('this is a test :)')
-            }
+              // eslint-disable-next-line no-alert
+              alert('this is a test :)');
+            },
           },
           {
-            type: 'separator'
+            type: 'separator',
           },
           {
-            label: 'Quit', 
+            label: 'Quit',
             click: this.quit,
-            accelerator: 'Alt+F4'
+            accelerator: 'Alt+F4',
           },
-        ]
+        ],
       },
 
       {
         label: 'Window',
         submenu: [
           {
-            label: 'Minimize', 
-            click: this.minimize
+            label: 'Minimize',
+            click: this.minimize,
           },
           {
-            label: 'Maximize', 
-            click: this.maximize
+            label: 'Maximize',
+            click: this.maximize,
           },
-        ]
+        ],
       },
 
       {
@@ -81,31 +80,30 @@ const WindowsTitlebar = React.createClass({
         submenu: [
           {
             label: 'Yann Bertrand',
-            click () { remote.shell.openExternal('http://yann-bertrand.fr/') }
+            click() { remote.shell.openExternal('http://yann-bertrand.fr/'); },
           },
           {
             label: 'Benjamin Caradeuc',
-            click () { remote.shell.openExternal('http://caradeuc.info/') }
+            click() { remote.shell.openExternal('http://caradeuc.info/'); },
           },
           {
-            type: 'separator'
+            type: 'separator',
           },
           {
             label: 'GitHub repo',
-            click () { remote.shell.openExternal('https://github.com/YannBertrand/YouWatch') }
-          }
-        ]
-      }
-    ]
+            click() { remote.shell.openExternal('https://github.com/YannBertrand/YouWatch'); },
+          },
+        ],
+      },
+    ];
 
     return {
       window: remote.getCurrentWindow(),
-      menu : remote.Menu.buildFromTemplate(menuTemplate)
+      menu : remote.Menu.buildFromTemplate(menuTemplate),
     };
   },
 
   render() {
-
     return (
 
       <div id="titlebar">
@@ -133,7 +131,6 @@ const WindowsTitlebar = React.createClass({
       </div>
 
     );
-
   },
 
 });
@@ -141,12 +138,10 @@ const WindowsTitlebar = React.createClass({
 const Titlebar = React.createClass({
 
   render() {
-
     if (process.platform === 'darwin')
       return <MacTitlebar />;
-    else
-      return <WindowsTitlebar />;
 
+    return <WindowsTitlebar />;
   },
 
 });
