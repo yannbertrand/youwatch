@@ -1,6 +1,7 @@
 const React = require('react');
 
-const CurrentPlaylist = require('./current-playlist.react.js');
+const Utils = require('../utils');
+const CurrentPlaylist = require('./current-playlist.react');
 
 const Video = React.createClass({
   propTypes: {
@@ -20,7 +21,7 @@ const Video = React.createClass({
   addVideo() {
     if (this.props.id) {
       window.dispatchEvent(new CustomEvent('playlist.addVideo', { detail: { video: this.props } }));
-      Socket.emit('video/next', this.props);
+      Utils.Socket.emit('video/next', this.props);
     }
   },
   markVideoAsWatched() {
@@ -30,7 +31,7 @@ const Video = React.createClass({
   cueVideo() {
     if (this.props.id) {
       window.dispatchEvent(new CustomEvent('playlist.cueVideo', { detail: { video: this.props } }));
-      Socket.emit('video/cue', this.props);
+      Utils.Socket.emit('video/cue', this.props);
     }
   },
   render() {
@@ -97,20 +98,20 @@ const VideoGrid = React.createClass({
 const SubscriptionsPage = React.createClass({
   getInitialState() { return { loading: true, videos: null }; },
   componentDidMount() {
-    Socket.emit('subscriptions/list');
-    Socket.on('subscriptions/list', (subscriptions) => {
+    Utils.Socket.emit('subscriptions/list');
+    Utils.Socket.on('subscriptions/list', (subscriptions) => {
       this.setState({ loading: false, videos: subscriptions });
       window.addEventListener('paste', this.onPaste);
     });
   },
   componentWillUnmount() {
-    Socket.removeAllListeners('subscriptions/list');
+    Utils.Socket.removeAllListeners('subscriptions/list');
     window.removeEventListener('paste', this.onPaste);
   },
   onPaste(event) {
     if (!event.clipboardData.getData('text/plain')) return;
 
-    Socket.emit('video/paste', event.clipboardData.getData('text/plain'));
+    Utils.Socket.emit('video/paste', event.clipboardData.getData('text/plain'));
   },
   render() {
     if (this.state.loading) {

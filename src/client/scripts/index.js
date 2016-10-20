@@ -12,7 +12,6 @@ const Utils = require('./scripts/utils');
 window.Tether = require('tether');
 window.lazysizes = require('lazysizes');
 
-const Socket = io('http://localhost:@@PORT');
 const mainElement = document.getElementById('main');
 const titlebarElement = document.getElementById('titlebar-container');
 
@@ -121,8 +120,8 @@ function loadYoutube(_YT) {
 
 window.addEventListener('offline', switchToOfflineMode);
 window.addEventListener('online', tryStoredAccessToken);
-Socket.on('youtube/notauthenticated', renderAuthentication);
-Socket.on('youtube/callback', renderApp);
+Utils.Socket.on('youtube/notauthenticated', renderAuthentication);
+Utils.Socket.on('youtube/callback', renderApp);
 
 loadConfig();
 
@@ -133,7 +132,7 @@ if (navigator.onLine) {
 }
 
 function tryStoredAccessToken() {
-  Socket.emit('app/authenticate');
+  Utils.Socket.emit('app/authenticate');
 }
 
 ReactDOM.render(

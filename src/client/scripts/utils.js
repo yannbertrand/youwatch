@@ -1,3 +1,5 @@
+const Socket = io('http://localhost:@@PORT');
+
 function isDarkThemeActive() {
   return document.body.classList.contains('dark');
 }
@@ -16,6 +18,7 @@ function castBooleanToString(boolean) {
 }
 
 module.exports = {
+  Socket,
   isDarkThemeActive,
   getActiveLayout,
   castBooleanToString,

@@ -1,6 +1,7 @@
 const React = require('react');
 
 const Switch = require('../components/switch.react.js');
+const Utils = require('../utils');
 
 const ConfigurationPage = React.createClass({
   toggleDarkTheme() {
