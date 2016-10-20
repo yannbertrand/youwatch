@@ -113,8 +113,15 @@
         }
       ],
       "eol-last": "error",
-      "react/jsx-space-before-closing": ["warn", "always"],
-      "react/jsx-handler-names": "off"
+      "react/jsx-space-before-closing": [
+        "warn",
+        "always"
+      ],
+      "react/jsx-handler-names": "off",
+      "import/no-unresolved": [
+        "warn",
+        { "ignore": [".react$"] }
+      ]
     },
     "overrides": [
       {

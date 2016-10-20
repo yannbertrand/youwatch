@@ -6,7 +6,7 @@ const ConfigurationPage = React.createClass({
   toggleDarkTheme() {
     const darkTheme = document.body.classList.toggle('dark');
 
-    localStorage.setItem('darkTheme', castBooleanToString(darkTheme));
+    localStorage.setItem('darkTheme', Utils.castBooleanToString(darkTheme));
 
     this.setState({ darkTheme });
   },
@@ -33,8 +33,8 @@ const ConfigurationPage = React.createClass({
   getInitialState() {
     return {
       showConsole: false,
-      darkTheme : isDarkThemeActive(),
-      layout: getActiveLayout(),
+      darkTheme : Utils.isDarkThemeActive(),
+      layout: Utils.getActiveLayout(),
     };
   },
   render() {
