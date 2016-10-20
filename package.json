@@ -81,7 +81,8 @@
       "object-shorthand": ["error", "always", { "avoidQuotes": true }],
       "quote-props": "warn",
       "object-curly-spacing": ["warn", "always"],
-      "brace-style": ["error", "1tbs", { "allowSingleLine": true }]
+      "brace-style": ["error", "1tbs", { "allowSingleLine": true }],
+      "eol-last": "error"
     },
     "overrides": [
       {
