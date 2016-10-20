@@ -112,6 +112,7 @@ const App = React.createClass({
   },
 });
 
+// eslint-disable-next-line no-unused-vars
 let YT;
 YouTubeIframeLoader.load(loadYoutube);
 function loadYoutube(_YT) {
