@@ -1,3 +1,6 @@
+const React = require('react');
+const CurrentPlaylist = require('./current-playlist.react.js')
+
 const Video = React.createClass({
   getInitialState() {
     const isDarkTheme = document.body.classList.contains('dark');

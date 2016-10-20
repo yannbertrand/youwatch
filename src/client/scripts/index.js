@@ -1,4 +1,3 @@
-const _ = require('lodash');
 const React = require('react');
 const ReactDOM = require('react-dom');
 const YouTubeIframeLoader = require('youtube-iframe');
