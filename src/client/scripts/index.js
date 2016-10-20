@@ -1,13 +1,13 @@
 const _ = require('lodash');
 const React = require('react');
 const ReactDOM = require('react-dom');
-const CurrentPlaylist = require('./scripts/pages/current-playlist.react.js');
+const YouTubeIframeLoader = require('youtube-iframe');
+
 const SubscriptionsPage = require('./scripts/pages/subscriptions.react.js');
 const ConfigurationPage = require('./scripts/pages/configuration.react.js');
 const AuthentificationPage = require('./scripts/pages/authentification.react.js');
 const NoInternetPage = require('./scripts/pages/no-internet.react.js');
 const Titlebar = require('./scripts/components/titlebar.react.js');
-const YouTubeIframeLoader = require('youtube-iframe');
 
 
 window.Tether = require('tether');
@@ -18,14 +18,14 @@ const mainElement = document.getElementById('main');
 const titlebarElement = document.getElementById('titlebar-container');
 
 const SidebarItem = React.createClass({
-  handleClick: function(event){
+  handleClick(event) {
     event.preventDefault();
     this.props.handleClick();
   },
-  render: function () {
+  render() {
     return (
       <li className="nav-item">
-        <a href="#" className={this.props.isCurrent? 'nav-link active' : 'nav-link'}
+        <a href="#" className={this.props.isCurrent ? 'nav-link active' : 'nav-link'}
            onClick={this.handleClick}>
           <i className={'fa fa-fw ' + this.props.icon}></i>
           <span className="page-name">
@@ -34,25 +34,27 @@ const SidebarItem = React.createClass({
         </a>
       </li>
     );
-  }
+  },
 });
 
 const Sidebar = React.createClass({
-  handleClick: function (pageName) {
+  handleClick(pageName) {
     this.props.changePage(pageName);
   },
-  render: function () {
-    let pages = [];
-    for (let pageName in this.props.pages) {
-      pages.push(
-        <SidebarItem
-          key={pageName}
-          pageName={this.props.pages[pageName].name}
-          icon={this.props.pages[pageName].icon}
-          isCurrent={this.props.currentPageName === pageName}
-          handleClick={this.handleClick.bind(this, pageName)}
-        />
-      );
+  render() {
+    const pages = [];
+    for (const pageName in this.props.pages) {
+      if ({}.hasOwnProperty.call(this.props.pages, pageName)) {
+        pages.push(
+          <SidebarItem
+            key={pageName}
+            pageName={this.props.pages[pageName].name}
+            icon={this.props.pages[pageName].icon}
+            isCurrent={this.props.currentPageName === pageName}
+            handleClick={this.handleClick.bind(this, pageName)}
+          />
+        );
+      }
     }
 
     return (
@@ -62,28 +64,28 @@ const Sidebar = React.createClass({
         </ul>
       </div>
     );
-  }
+  },
 });
 
 const App = React.createClass({
-  shouldComponentUpdate: function (nextProps, nextState) {
+  shouldComponentUpdate(nextProps, nextState) {
     return nextState.currentPageName !== this.state.currentPageName;
   },
-  getInitialState: function () {
+  getInitialState() {
     return {
       pages: {
         subscriptions:
           { name: 'Subscriptions', icon: 'fa-th', page: <SubscriptionsPage /> },
         configuration:
-          { name: 'Configuration', icon: 'fa-cog', page: <ConfigurationPage /> }
+          { name: 'Configuration', icon: 'fa-cog', page: <ConfigurationPage /> },
       },
-      currentPageName: 'subscriptions'
+      currentPageName: 'subscriptions',
     };
   },
-  changePage: function (pageName) {
+  changePage(pageName) {
     this.setState({ currentPageName: pageName });
   },
-  render: function () {
+  render() {
     return (
       <div>
         <Sidebar
@@ -97,20 +99,23 @@ const App = React.createClass({
         </div>
       </div>
     );
-  }
-})
+  },
+});
 
 let YT;
-YouTubeIframeLoader.load(_YT => YT = _YT);
+YouTubeIframeLoader.load(loadYoutube);
+function loadYoutube(_YT) {
+  YT = _YT;
+}
 
-window.addEventListener('offline', renderOfflineMode);
+window.addEventListener('offline', switchToOfflineMode);
 window.addEventListener('online', tryStoredAccessToken);
 Socket.on('youtube/notauthenticated', renderAuthentication);
 Socket.on('youtube/callback', renderApp);
 
 loadConfig();
 
-if (navigator.onLine) {
+if (navigator.onLine) {
   tryStoredAccessToken();
 } else {
   switchToOfflineMode();
@@ -132,11 +137,16 @@ function renderAuthentication() {
   );
 }
 
-function renderApp(token) {
+function renderApp() {
   ReactDOM.render(
     <App />,
     mainElement
   );
+}
+
+function switchToOfflineMode() {
+  // ToDo save states
+  renderOfflineMode();
 }
 
 function renderOfflineMode() {
@@ -156,7 +166,7 @@ function loadConfig() {
   } else
     localStorage.setItem('darkTheme', castBooleanToString(isDarkThemeActive()));
 
-  if (layout) {
+  if (layout) {
     if (layout === 'overlay') {
       document.body.classList.add('layout-overlay');
     } else if (layout === 'sticker') {
@@ -180,7 +190,7 @@ function getActiveLayout() {
 }
 
 function castBooleanToString(boolean) {
-  return boolean? '1': '0';
+  return boolean ? '1' : '0';
 }
 
-document.body.classList.add(process.platform)
+document.body.classList.add(process.platform);
