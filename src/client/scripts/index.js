@@ -17,6 +17,12 @@ const mainElement = document.getElementById('main');
 const titlebarElement = document.getElementById('titlebar-container');
 
 const SidebarItem = React.createClass({
+  propTypes: {
+    handleClick: React.PropTypes.func,
+    isCurrent: React.PropTypes.bool,
+    icon: React.PropTypes.string,
+    pageName: React.PropTypes.string,
+  },
   handleClick(event) {
     event.preventDefault();
     this.props.handleClick();
@@ -24,9 +30,8 @@ const SidebarItem = React.createClass({
   render() {
     return (
       <li className="nav-item">
-        <a href="#" className={this.props.isCurrent ? 'nav-link active' : 'nav-link'}
-           onClick={this.handleClick}>
-          <i className={'fa fa-fw ' + this.props.icon}></i>
+        <a href="#" className={this.props.isCurrent ? 'nav-link active' : 'nav-link'} onClick={this.handleClick}>
+          <i className={'fa fa-fw ' + this.props.icon} />
           <span className="page-name">
             {this.props.pageName}
           </span>
@@ -37,6 +42,11 @@ const SidebarItem = React.createClass({
 });
 
 const Sidebar = React.createClass({
+  propTypes: {
+    changePage: React.PropTypes.func,
+    pages: React.PropTypes.array,
+    currentPageName: React.PropTypes.string,
+  },
   handleClick(pageName) {
     this.props.changePage(pageName);
   },
@@ -51,7 +61,7 @@ const Sidebar = React.createClass({
             icon={this.props.pages[pageName].icon}
             isCurrent={this.props.currentPageName === pageName}
             handleClick={this.handleClick.bind(this, pageName)}
-          />
+            />
         );
       }
     }
@@ -67,6 +77,9 @@ const Sidebar = React.createClass({
 });
 
 const App = React.createClass({
+  propTypes: {
+    currentPageName: React.PropTypes.string,
+  },
   shouldComponentUpdate(nextProps, nextState) {
     return nextState.currentPageName !== this.state.currentPageName;
   },
@@ -91,7 +104,7 @@ const App = React.createClass({
           pages={this.state.pages}
           currentPageName={this.state.currentPageName}
           changePage={this.changePage}
-        />
+          />
 
         <div id="content">
           {this.state.pages[this.state.currentPageName].page}
