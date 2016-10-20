@@ -1,58 +1,67 @@
-const _ = require('lodash');
 const React = require('react');
 const ReactDOM = require('react-dom');
-const CurrentPlaylist = require('./scripts/pages/current-playlist.react.js');
+const YouTubeIframeLoader = require('youtube-iframe');
+
 const SubscriptionsPage = require('./scripts/pages/subscriptions.react.js');
 const ConfigurationPage = require('./scripts/pages/configuration.react.js');
 const AuthentificationPage = require('./scripts/pages/authentification.react.js');
 const NoInternetPage = require('./scripts/pages/no-internet.react.js');
 const Titlebar = require('./scripts/components/titlebar.react.js');
-const YouTubeIframeLoader = require('youtube-iframe');
-
+const Utils = require('./scripts/utils');
 
 window.Tether = require('tether');
 window.lazysizes = require('lazysizes');
 
-const Socket = io('http://localhost:@@PORT');
 const mainElement = document.getElementById('main');
 const titlebarElement = document.getElementById('titlebar-container');
 
 const SidebarItem = React.createClass({
-  handleClick: function(event){
-    event.preventDefault();
-    this.props.handleClick();
+  propTypes: {
+    changePage: React.PropTypes.func,
+    isCurrent: React.PropTypes.bool,
+    icon: React.PropTypes.string,
+    page: React.PropTypes.string,
+    pageName: React.PropTypes.string,
   },
-  render: function () {
+  handleClick(event) {
+    event.preventDefault();
+    this.props.changePage(this.props.page);
+  },
+  render() {
     return (
       <li className="nav-item">
-        <a href="#" className={this.props.isCurrent? 'nav-link active' : 'nav-link'}
-           onClick={this.handleClick}>
-          <i className={'fa fa-fw ' + this.props.icon}></i>
+        <a href="#" className={this.props.isCurrent ? 'nav-link active' : 'nav-link'} onClick={this.handleClick}>
+          <i className={'fa fa-fw ' + this.props.icon} />
           <span className="page-name">
             {this.props.pageName}
           </span>
         </a>
       </li>
     );
-  }
+  },
 });
 
 const Sidebar = React.createClass({
-  handleClick: function (pageName) {
-    this.props.changePage(pageName);
+  propTypes: {
+    changePage: React.PropTypes.func,
+    pages: React.PropTypes.object,
+    currentPage: React.PropTypes.string,
   },
-  render: function () {
-    let pages = [];
-    for (let pageName in this.props.pages) {
-      pages.push(
-        <SidebarItem
-          key={pageName}
-          pageName={this.props.pages[pageName].name}
-          icon={this.props.pages[pageName].icon}
-          isCurrent={this.props.currentPageName === pageName}
-          handleClick={this.handleClick.bind(this, pageName)}
-        />
-      );
+  render() {
+    const pages = [];
+    for (const page in this.props.pages) {
+      if ({}.hasOwnProperty.call(this.props.pages, page)) {
+        pages.push(
+          <SidebarItem
+            key={page}
+            page={page}
+            pageName={this.props.pages[page].name}
+            icon={this.props.pages[page].icon}
+            isCurrent={this.props.currentPage === page}
+            changePage={this.props.changePage}
+            />
+        );
+      }
     }
 
     return (
@@ -62,62 +71,69 @@ const Sidebar = React.createClass({
         </ul>
       </div>
     );
-  }
+  },
 });
 
 const App = React.createClass({
-  shouldComponentUpdate: function (nextProps, nextState) {
-    return nextState.currentPageName !== this.state.currentPageName;
+  propTypes: {
+    currentPage: React.PropTypes.string,
   },
-  getInitialState: function () {
+  shouldComponentUpdate(nextProps, nextState) {
+    return nextState.currentPage !== this.state.currentPage;
+  },
+  getInitialState() {
     return {
       pages: {
         subscriptions:
           { name: 'Subscriptions', icon: 'fa-th', page: <SubscriptionsPage /> },
         configuration:
-          { name: 'Configuration', icon: 'fa-cog', page: <ConfigurationPage /> }
+          { name: 'Configuration', icon: 'fa-cog', page: <ConfigurationPage /> },
       },
-      currentPageName: 'subscriptions'
+      currentPage: 'subscriptions',
     };
   },
-  changePage: function (pageName) {
-    this.setState({ currentPageName: pageName });
+  changePage(newPage) {
+    this.setState({ currentPage: newPage });
   },
-  render: function () {
+  render() {
     return (
       <div>
         <Sidebar
           pages={this.state.pages}
-          currentPageName={this.state.currentPageName}
+          currentPage={this.state.currentPage}
           changePage={this.changePage}
-        />
+          />
 
         <div id="content">
-          {this.state.pages[this.state.currentPageName].page}
+          {this.state.pages[this.state.currentPage].page}
         </div>
       </div>
     );
-  }
-})
+  },
+});
 
+// eslint-disable-next-line no-unused-vars
 let YT;
-YouTubeIframeLoader.load(_YT => YT = _YT);
+YouTubeIframeLoader.load(loadYoutube);
+function loadYoutube(_YT) {
+  YT = _YT;
+}
 
-window.addEventListener('offline', renderOfflineMode);
+window.addEventListener('offline', switchToOfflineMode);
 window.addEventListener('online', tryStoredAccessToken);
-Socket.on('youtube/notauthenticated', renderAuthentication);
-Socket.on('youtube/callback', renderApp);
+Utils.Socket.on('youtube/notauthenticated', renderAuthentication);
+Utils.Socket.on('youtube/callback', renderApp);
 
 loadConfig();
 
-if (navigator.onLine) {
+if (navigator.onLine) {
   tryStoredAccessToken();
 } else {
   switchToOfflineMode();
 }
 
 function tryStoredAccessToken() {
-  Socket.emit('app/authenticate');
+  Utils.Socket.emit('app/authenticate');
 }
 
 ReactDOM.render(
@@ -132,11 +148,16 @@ function renderAuthentication() {
   );
 }
 
-function renderApp(token) {
+function renderApp() {
   ReactDOM.render(
     <App />,
     mainElement
   );
+}
+
+function switchToOfflineMode() {
+  // ToDo save states
+  renderOfflineMode();
 }
 
 function renderOfflineMode() {
@@ -154,33 +175,16 @@ function loadConfig() {
     if (darkTheme === '1')
       document.body.classList.add('dark');
   } else
-    localStorage.setItem('darkTheme', castBooleanToString(isDarkThemeActive()));
+    localStorage.setItem('darkTheme', Utils.castBooleanToString(Utils.isDarkThemeActive()));
 
-  if (layout) {
+  if (layout) {
     if (layout === 'overlay') {
       document.body.classList.add('layout-overlay');
     } else if (layout === 'sticker') {
       document.body.classList.add('layout-sticker');
     }
   } else
-    localStorage.setItem('layout', getActiveLayout());
+    localStorage.setItem('layout', Utils.getActiveLayout());
 }
 
-function isDarkThemeActive() {
-  return document.body.classList.contains('dark');
-}
-
-function getActiveLayout() {
-  if (document.body.classList.contains('layout-overlay'))
-    return 'overlay';
-  if (document.body.classList.contains('layout-sticker'))
-    return 'sticker';
-
-  return 'youtube';
-}
-
-function castBooleanToString(boolean) {
-  return boolean? '1': '0';
-}
-
-document.body.classList.add(process.platform)
+document.body.classList.add(process.platform);

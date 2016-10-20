@@ -4,7 +4,7 @@ module.exports = {
   // https://code.google.com/apis/console
   CREDENTIALS: {
     CLIENT_ID: 'YOUR_CLIENT_ID_HERE',
-    CLIENT_SECRET: 'YOUR_CLIENT_SECRET_HERE'
+    CLIENT_SECRET: 'YOUR_CLIENT_SECRET_HERE',
   },
 
   // YouWatch need to open an HTTP server and a websocket server
@@ -16,13 +16,13 @@ module.exports = {
   // The main window config
   MAIN_WINDOW: {
     WIDTH: 1200,
-    HEIGHT: 700
+    HEIGHT: 700,
   },
 
   // The auth window config
   AUTH_WINDOW: {
     WIDTH: 500,
-    HEIGHT: 600
-  }
+    HEIGHT: 600,
+  },
 
 };

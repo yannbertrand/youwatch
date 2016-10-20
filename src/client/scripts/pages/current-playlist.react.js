@@ -1,8 +1,11 @@
+const { remote } = require('electron');
+const React = require('react');
+const _ = require('lodash');
+
 let isPlaylistPlaying = false;
-const {remote} = require('electron');
 
 const Player = React.createClass({
-  onStateChange: function (event) {
+  onStateChange(event) {
     if (event.data === YT.PlayerState.UNSTARTED) return;
     if (event.data === YT.PlayerState.CUED) return;
 
@@ -22,15 +25,15 @@ const Player = React.createClass({
       isPlaylistPlaying = true;
     }
   },
-  updatePlaylist: function () {
-    if (!this.state.playlist.length) return;
+  updatePlaylist() {
+    if (this.state.playlist.length === 0) return;
     if (!this.state.player.getPlaylist()) return;
 
     // Update playlist and start playing
     this.state.player.loadPlaylist(this.state.playlist);
   },
   componentWillReceiveProps(nextProps) {
-    if (!isPlaylistPlaying && this.state.player.cuePlaylist && nextProps.playlist.length) {
+    if (!isPlaylistPlaying && this.state.player.cuePlaylist && nextProps.playlist.length > 0) {
       this.state.player.cuePlaylist(nextProps.playlist);
     }
 
@@ -38,17 +41,15 @@ const Player = React.createClass({
       playlist: nextProps.playlist,
     });
   },
-  componentDidMount: function () {
-
-    document.addEventListener("webkitfullscreenchange", function () {
+  componentDidMount() {
+    document.addEventListener('webkitfullscreenchange', () => {
       const currentWindow = remote.getCurrentWindow();
-      let isFullScreen = !!document.querySelector("#player:-webkit-full-screen");
+      const isFullScreen = Boolean(document.querySelector('#player:-webkit-full-screen'));
 
       if (isFullScreen) {
         document.body.classList.add('fullscreen');
         currentWindow.setMinimumSize(160, 90);
-      }
-      else {
+      } else {
         document.body.classList.remove('fullscreen');
         currentWindow.setMinimumSize(880, 370);
 
@@ -81,37 +82,44 @@ const Player = React.createClass({
 
       // YT may not be loaded at this time, need to find a solution...
       // That's probably why I can't put this in a getInitialState method
-      player: new YT.Player('player', {
+      player: new YT.Player('player', {
         events: {
-          onStateChange: this.onStateChange
-        }
-      })
+          onStateChange: this.onStateChange,
+        },
+      }),
     });
   },
-  render: function () {
-    return <div id="player"></div>;
-  }
+  render() {
+    return <div id="player" />;
+  },
 });
 
 const PlaylistItem = React.createClass({
-  raise: function () {
+  propTypes: {
+    id: React.PropTypes.string,
+    title: React.PropTypes.string,
+    channel: React.PropTypes.string,
+  },
+  raise() {
     if (this.props.id) {
       window.dispatchEvent(new CustomEvent('playlist.raiseVideo', { detail: { video: this.props } }));
     }
   },
-  remove: function () {
+  remove() {
     if (this.props.id) {
       window.dispatchEvent(new CustomEvent('playlist.removeVideo', { detail: { video: this.props } }));
     }
   },
-  render: function () {
+  render() {
     return (
       <div>
         <div className="playlist-item">
-          <button className="btn btn-secondary btn-sm remove"
-                  onClick={this.remove}
-                  title="Remove this video"
-                  disabled>&times;</button>
+          <button
+            className="btn btn-secondary btn-sm remove"
+            onClick={this.remove}
+            title="Remove this video"
+            disabled
+            >&times;</button>
           <h5>
             <a onClick={this.raise} title={this.props.title}>
               {this.props.title}
@@ -122,20 +130,24 @@ const PlaylistItem = React.createClass({
         <hr />
       </div>
     );
-  }
+  },
 });
 
 const Playlist = React.createClass({
-  render: function () {
-    let videos = [];
-    for (var index in this.props.videos) {
+  propTypes: {
+    videos: React.PropTypes.array,
+  },
+  render() {
+    const videos = [];
+    for (const video of this.props.videos) {
       videos.push(
         <PlaylistItem
-          key={this.props.videos[index].id}
-          id={this.props.videos[index].id}
-          thumbnail={this.props.videos[index].thumbnail}
-          title={this.props.videos[index].title}
-          channel={this.props.videos[index].channel} />
+          key={video.id}
+          id={video.id}
+          thumbnail={video.thumbnail}
+          title={video.title}
+          channel={video.channel}
+          />
         );
     }
 
@@ -144,14 +156,14 @@ const Playlist = React.createClass({
         {videos}
       </div>
     );
-  }
+  },
 });
 
 const CurrentPlaylist = React.createClass({
-  getInitialState: function () {
+  getInitialState() {
     return { videos: [] };
   },
-  componentDidMount: function () {
+  componentDidMount() {
     // ToDo - retrieve playlist from backend
 
     window.addEventListener('playlist.addVideo', this.addVideo);
@@ -159,22 +171,22 @@ const CurrentPlaylist = React.createClass({
     window.addEventListener('playlist.removeVideo', this.removeVideo);
     window.addEventListener('playlist.raiseVideo', this.raiseVideo);
   },
-  componentWillUnmount: function () {
+  componentWillUnmount() {
     window.removeEventListener('playlist.addVideo', this.addVideo, false);
     window.removeEventListener('playlist.cueVideo', this.cueVideo, false);
     window.removeEventListener('playlist.removeVideo', this.removeVideo, false);
     window.removeEventListener('playlist.raiseVideo', this.raiseVideo, false);
   },
-  addVideo: function (event) {
+  addVideo(event) {
     // Add the video in first position if no video playing
     // Else add it in second position
 
-    let video = this.normalizeVideo(event.detail.video);
+    const video = this.normalizeVideo(event.detail.video);
 
     if (this.isInPlaylist(video))
       return;
 
-    this.setState(state => {
+    this.setState((state) => {
       if (isPlaylistPlaying) {
         state.videos.splice(1, 0, video);
       } else {
@@ -184,38 +196,38 @@ const CurrentPlaylist = React.createClass({
       return state;
     });
   },
-  cueVideo: function (event) {
+  cueVideo(event) {
     // Add the video in last position
-    let video = this.normalizeVideo(event.detail.video);
+    const video = this.normalizeVideo(event.detail.video);
 
     if (this.isInPlaylist(video))
       return;
 
-    this.setState(state => {
+    this.setState((state) => {
       state.videos.push(video);
 
       return state;
     });
   },
-  removeVideo: function (event) {
-    let video = this.normalizeVideo(event.detail.video);
+  removeVideo(event) {
+    const video = this.normalizeVideo(event.detail.video);
 
     if (!this.isInPlaylist(video))
       return;
 
-    this.setState(state => {
+    this.setState((state) => {
       state.videos = _.reject(state.videos, video);
 
       return state;
     });
   },
-  raiseVideo: function (event) {
-    let video = this.normalizeVideo(event.detail.video);
+  raiseVideo(event) {
+    const video = this.normalizeVideo(event.detail.video);
 
     if (!this.isInPlaylist(video))
       return;
 
-    this.setState(state => {
+    this.setState((state) => {
       state.videos = _.reject(state.videos, video);
       if (isPlaylistPlaying) {
         state.videos.splice(1, 0, video);
@@ -226,23 +238,23 @@ const CurrentPlaylist = React.createClass({
       return state;
     });
   },
-  normalizeVideo: function (video) {
+  normalizeVideo(video) {
     if (_.isObject(video))
       return video;
 
     return { id: video };
   },
-  isInPlaylist: function (video) {
+  isInPlaylist(video) {
     return _.some(this.state.videos, video);
   },
-  render: function () {
+  render() {
     return (
       <div id="current-playlist">
-        <Playlist videos={ this.state.videos } />
-        <Player playlist={ _.map(this.state.videos, 'id') } />
+        <Playlist videos={this.state.videos} />
+        <Player playlist={_.map(this.state.videos, 'id')} />
       </div>
     );
-  }
+  },
 });
 
 module.exports = CurrentPlaylist;
