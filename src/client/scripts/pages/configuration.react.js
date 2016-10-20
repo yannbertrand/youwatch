@@ -1,3 +1,5 @@
+const React = require('react');
+
 const Switch = require('../components/switch.react.js');
 
 const ConfigurationPage = React.createClass({

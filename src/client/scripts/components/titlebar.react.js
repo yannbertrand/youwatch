@@ -1,4 +1,5 @@
 const { remote } = require('electron');
+const React = require('react');
 
 const MacTitlebar = React.createClass({
 
@@ -115,16 +116,16 @@ const WindowsTitlebar = React.createClass({
 
         <div className="titlebar--controls-wrapper">
           <div className="titlebar--controls-minimize" onClick={this.minimize}>
-            <span></span>
+            <span />
           </div>
 
           <div className="titlebar--controls-maximize" onClick={this.maximize}>
-            <span></span>
+            <span />
           </div>
 
           <div className="titlebar--controls-close" onClick={this.quit}>
-            <span></span>
-            <span className="bar2"></span>
+            <span />
+            <span className="bar2" />
           </div>
         </div>
 

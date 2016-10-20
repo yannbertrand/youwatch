@@ -1,3 +1,6 @@
+const React = require('react');
+const _ = require('lodash');
+
 let isPlaylistPlaying = false;
 const { remote } = require('electron');
 

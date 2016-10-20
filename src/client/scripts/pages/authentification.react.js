@@ -1,3 +1,5 @@
+const React = require('react');
+
 const AuthentificationPage = React.createClass({
   getInitialState() { return { loading: false }; },
   openAuthWindow() {

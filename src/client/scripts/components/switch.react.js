@@ -1,4 +1,18 @@
+const React = require('react');
+
 const Switch = React.createClass({
+
+  propTypes: {
+    beforeText: React.PropTypes.string,
+    afterText: React.PropTypes.string,
+    size: React.PropTypes.string,
+    color: React.PropTypes.string,
+    shape: React.PropTypes.string,
+    isChecked: React.PropTypes.bool,
+    onChange: React.PropTypes.func,
+    textOn: React.PropTypes.string,
+    textOff: React.PropTypes.string,
+  },
 
   render() {
     // Space between switch & labels
@@ -30,7 +44,7 @@ const Switch = React.createClass({
         <input type="checkbox" defaultChecked={this.props.isChecked} onChange={this.props.onChange} />
 
         <div className="z-switch--container">
-          <div className="z-switch--slider" data-on={this.props.textOn} data-off={this.props.textOff}></div>
+          <div className="z-switch--slider" data-on={this.props.textOn} data-off={this.props.textOff} />
         </div>
 
         {afterText}

@@ -49,6 +49,8 @@
     "electron": "^1.4.1",
     "electron-connect": "^0.6.0",
     "electron-packager": "^8.0.0",
+    "eslint-config-xo-react": "^0.10.0",
+    "eslint-plugin-react": "^6.4.1",
     "gulp": "^3.9.1",
     "gulp-babel": "^6.1.2",
     "gulp-cached": "^1.1.0",
@@ -68,31 +70,70 @@
     "esnext": true,
     "space": 2,
     "rules": {
-      "comma-dangle": ["warn", "always-multiline"],
+      "comma-dangle": [
+        "warn",
+        "always-multiline"
+      ],
       "no-multi-spaces": "off",
       "curly": "off",
       "babel/object-curly-spacing": "off",
       "key-spacing": "off",
       "no-multiple-empty-lines": "off",
-      "arrow-parens": ["error", "always"],
-      "padded-blocks": ["warn"],
-      "unicorn/catch-error-name": ["error", {"name": "error"}],
+      "arrow-parens": [
+        "error",
+        "always"
+      ],
+      "padded-blocks": [
+        "warn"
+      ],
+      "unicorn/catch-error-name": [
+        "error",
+        {
+          "name": "error"
+        }
+      ],
       "callback-return": "warn",
-      "object-shorthand": ["error", "always", { "avoidQuotes": true }],
+      "object-shorthand": [
+        "error",
+        "always",
+        {
+          "avoidQuotes": true
+        }
+      ],
       "quote-props": "warn",
-      "object-curly-spacing": ["warn", "always"],
-      "brace-style": ["error", "1tbs", { "allowSingleLine": true }],
-      "eol-last": "error"
+      "object-curly-spacing": [
+        "warn",
+        "always"
+      ],
+      "brace-style": [
+        "error",
+        "1tbs",
+        {
+          "allowSingleLine": true
+        }
+      ],
+      "eol-last": "error",
+      "react/jsx-space-before-closing": ["warn", "always"],
+      "react/jsx-handler-names": "off"
     },
     "overrides": [
       {
         "files": "**/*.js",
-        "envs": ["node"]
+        "envs": [
+          "node"
+        ]
       },
       {
         "files": "src/client/**/*.js",
-        "globals": ["window", "document", "YT"],
-        "envs": ["browser"]
+        "extends": "xo-react",
+        "globals": [
+          "window",
+          "document",
+          "YT"
+        ],
+        "envs": [
+          "browser"
+        ]
       }
     ]
   }
