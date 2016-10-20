@@ -7,7 +7,7 @@ const ConfigurationPage = require('./scripts/pages/configuration.react.js');
 const AuthentificationPage = require('./scripts/pages/authentification.react.js');
 const NoInternetPage = require('./scripts/pages/no-internet.react.js');
 const Titlebar = require('./scripts/components/titlebar.react.js');
-
+const Utils = require('./scripts/utils');
 
 window.Tether = require('tether');
 window.lazysizes = require('lazysizes');
@@ -175,7 +175,7 @@ function loadConfig() {
     if (darkTheme === '1')
       document.body.classList.add('dark');
   } else
-    localStorage.setItem('darkTheme', castBooleanToString(isDarkThemeActive()));
+    localStorage.setItem('darkTheme', Utils.castBooleanToString(Utils.isDarkThemeActive()));
 
   if (layout) {
     if (layout === 'overlay') {
@@ -184,24 +184,7 @@ function loadConfig() {
       document.body.classList.add('layout-sticker');
     }
   } else
-    localStorage.setItem('layout', getActiveLayout());
-}
-
-function isDarkThemeActive() {
-  return document.body.classList.contains('dark');
-}
-
-function getActiveLayout() {
-  if (document.body.classList.contains('layout-overlay'))
-    return 'overlay';
-  if (document.body.classList.contains('layout-sticker'))
-    return 'sticker';
-
-  return 'youtube';
-}
-
-function castBooleanToString(boolean) {
-  return boolean ? '1' : '0';
+    localStorage.setItem('layout', Utils.getActiveLayout());
 }
 
 document.body.classList.add(process.platform);
