@@ -135,22 +135,20 @@ const PlaylistItem = React.createClass({
 
 const Playlist = React.createClass({
   propTypes: {
-    videos: React.PropTypes.object,
+    videos: React.PropTypes.array,
   },
   render() {
     const videos = [];
-    for (const index in this.props.videos) {
-      if ({}.hasOwnProperty.call(this.props.videos, index)) {
-        videos.push(
-          <PlaylistItem
-            key={this.props.videos[index].id}
-            id={this.props.videos[index].id}
-            thumbnail={this.props.videos[index].thumbnail}
-            title={this.props.videos[index].title}
-            channel={this.props.videos[index].channel}
-            />
-          );
-      }
+    for (const video of this.props.videos) {
+      videos.push(
+        <PlaylistItem
+          key={video.id}
+          id={video.id}
+          thumbnail={video.thumbnail}
+          title={video.title}
+          channel={video.channel}
+          />
+        );
     }
 
     return (
