@@ -1,10 +1,12 @@
 const React = require('react');
 
+const Utils = require('../utils');
+
 const AuthentificationPage = React.createClass({
   getInitialState() { return { loading: false }; },
   openAuthWindow() {
     this.setState({ loading: true });
-    Socket.emit('youtube/auth');
+    Utils.Socket.emit('youtube/auth');
   },
   render() {
     if (this.state.loading) {
