@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-undef
 const Socket = io('http://localhost:@@PORT');
 
 function isDarkThemeActive() {
