@@ -45,13 +45,14 @@ const ConfigurationPage = React.createClass({
           <div className="form-group row">
             <label className="col-sm-4">Dark Theme</label>
             <div className="col-sm-8">
-              <Switch isChecked={this.state.darkTheme}
-                      onChange={this.toggleDarkTheme}
-                      size="lg"
-                      textOn="I"
-                      textOff="O"
-                      shape="square"
-                       />
+              <Switch
+                isChecked={this.state.darkTheme}
+                onChange={this.toggleDarkTheme}
+                size="lg"
+                textOn="I"
+                textOff="O"
+                shape="square"
+                />
             </div>
           </div>
           <div className="form-group row">

@@ -1,8 +1,8 @@
+const { remote } = require('electron');
 const React = require('react');
 const _ = require('lodash');
 
 let isPlaylistPlaying = false;
-const { remote } = require('electron');
 
 const Player = React.createClass({
   onStateChange(event) {
@@ -90,11 +90,16 @@ const Player = React.createClass({
     });
   },
   render() {
-    return <div id="player"></div>;
+    return <div id="player" />;
   },
 });
 
 const PlaylistItem = React.createClass({
+  propTypes: {
+    id: React.PropTypes.string,
+    title: React.PropTypes.string,
+    channel: React.PropTypes.string,
+  },
   raise() {
     if (this.props.id) {
       window.dispatchEvent(new CustomEvent('playlist.raiseVideo', { detail: { video: this.props } }));
@@ -109,10 +114,12 @@ const PlaylistItem = React.createClass({
     return (
       <div>
         <div className="playlist-item">
-          <button className="btn btn-secondary btn-sm remove"
-                  onClick={this.remove}
-                  title="Remove this video"
-                  disabled>&times;</button>
+          <button
+            className="btn btn-secondary btn-sm remove"
+            onClick={this.remove}
+            title="Remove this video"
+            disabled
+            >&times;</button>
           <h5>
             <a onClick={this.raise} title={this.props.title}>
               {this.props.title}
@@ -127,6 +134,9 @@ const PlaylistItem = React.createClass({
 });
 
 const Playlist = React.createClass({
+  propTypes: {
+    videos: React.PropTypes.object,
+  },
   render() {
     const videos = [];
     for (const index in this.props.videos) {
@@ -137,7 +147,8 @@ const Playlist = React.createClass({
             id={this.props.videos[index].id}
             thumbnail={this.props.videos[index].thumbnail}
             title={this.props.videos[index].title}
-            channel={this.props.videos[index].channel} />
+            channel={this.props.videos[index].channel}
+            />
           );
       }
     }
@@ -241,8 +252,8 @@ const CurrentPlaylist = React.createClass({
   render() {
     return (
       <div id="current-playlist">
-        <Playlist videos={ this.state.videos } />
-        <Player playlist={ _.map(this.state.videos, 'id') } />
+        <Playlist videos={this.state.videos} />
+        <Player playlist={_.map(this.state.videos, 'id')} />
       </div>
     );
   },

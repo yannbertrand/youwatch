@@ -1,7 +1,15 @@
 const React = require('react');
-const CurrentPlaylist = require('./current-playlist.react.js')
+
+const CurrentPlaylist = require('./current-playlist.react.js');
 
 const Video = React.createClass({
+  propTypes: {
+    id: React.PropTypes.string,
+    duration: React.PropTypes.string,
+    title: React.PropTypes.string,
+    channel: React.PropTypes.string,
+    thumbnail: React.PropTypes.string,
+  },
   getInitialState() {
     const isDarkTheme = document.body.classList.contains('dark');
 
@@ -32,13 +40,17 @@ const Video = React.createClass({
           <img className="thumbnail lazyload blur-up" data-sizes="auto" data-src={this.props.thumbnail} src={this.state.loaderUrl} />
         </div>
         <span className="duration">{this.props.duration}</span>
-        <button className="mark-watched btn btn-secondary btn-sm cue"
-                onClick={this.markVideoAsWatched}
-                disabled
-                title="Mark as watched">&times;</button>
-        <button className="cue btn btn-secondary btn-sm cue"
-                onClick={this.cueVideo}
-                title="Cue this video">+</button>
+        <button
+          className="mark-watched btn btn-secondary btn-sm cue"
+          onClick={this.markVideoAsWatched}
+          disabled
+          title="Mark as watched"
+          >&times;</button>
+        <button
+          className="cue btn btn-secondary btn-sm cue"
+          onClick={this.cueVideo}
+          title="Cue this video"
+          >+</button>
         <header>
           <h5>
             <a onClick={this.addVideo} title={this.props.title}>
@@ -53,9 +65,12 @@ const Video = React.createClass({
 });
 
 const VideoGrid = React.createClass({
+  propTypes: {
+    videos: React.PropTypes.array,
+  },
   render() {
     if (this.props.videos.length > 0) {
-      let videoNodes = this.props.videos.map((video) => {
+      const videoNodes = this.props.videos.map((video) => {
         return (
           <Video
             key={video.id}
@@ -63,7 +78,8 @@ const VideoGrid = React.createClass({
             duration={video.duration}
             thumbnail={video.thumbnail}
             title={video.title}
-            channel={video.channel} />
+            channel={video.channel}
+            />
         );
       });
 
