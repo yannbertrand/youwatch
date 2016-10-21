@@ -14,6 +14,7 @@
   "scripts": {
     "start": "node_modules/.bin/gulp",
     "lint": "node_modules/.bin/xo",
+    "test": "npm run lint",
     "clean": "rm -rf dist; rm -f ~/.config/configstore/YouWatch.json; rm -rf ~/Library/Application\\ Support/YouWatch",
     "build": "npm run build:osx && npm run build:linux && npm run build:windows",
     "build:osx": "node_modules/.bin/electron-packager . --overwrite --out=build --prune --platform=darwin --arch=x64 --app-version=$npm_package_version --icon=static/icon.icns",
@@ -48,6 +49,8 @@
     "electron": "^1.4.1",
     "electron-connect": "^0.6.0",
     "electron-packager": "^8.0.0",
+    "eslint-config-xo-react": "^0.10.0",
+    "eslint-plugin-react": "^6.4.1",
     "gulp": "^3.9.1",
     "gulp-babel": "^6.1.2",
     "gulp-cached": "^1.1.0",
@@ -57,7 +60,7 @@
     "gulp-replace-task": "^0.11.0",
     "gulp-sass": "^2.3.2",
     "gulp-sourcemaps": "^1.6.0",
-    "xo": "^0.16.0"
+    "xo": "^0.17.0"
   },
   "xo": {
     "ignores": [
@@ -67,20 +70,77 @@
     "esnext": true,
     "space": 2,
     "rules": {
-      "comma-dangle": "off",
+      "comma-dangle": [
+        "warn",
+        "always-multiline"
+      ],
       "no-multi-spaces": "off",
       "curly": "off",
-      "babel/object-curly-spacing": "off"
+      "babel/object-curly-spacing": "off",
+      "key-spacing": "off",
+      "no-multiple-empty-lines": "off",
+      "arrow-parens": [
+        "error",
+        "always"
+      ],
+      "padded-blocks": [
+        "warn"
+      ],
+      "unicorn/catch-error-name": [
+        "error",
+        {
+          "name": "error"
+        }
+      ],
+      "callback-return": "warn",
+      "object-shorthand": [
+        "error",
+        "always",
+        {
+          "avoidQuotes": true
+        }
+      ],
+      "quote-props": "warn",
+      "object-curly-spacing": [
+        "warn",
+        "always"
+      ],
+      "brace-style": [
+        "error",
+        "1tbs",
+        {
+          "allowSingleLine": true
+        }
+      ],
+      "eol-last": "error",
+      "react/jsx-space-before-closing": [
+        "warn",
+        "always"
+      ],
+      "react/jsx-handler-names": "off",
+      "import/no-unresolved": [
+        "warn",
+        { "ignore": [".react$"] }
+      ]
     },
     "overrides": [
       {
         "files": "**/*.js",
-        "envs": ["node"]
+        "envs": [
+          "node"
+        ]
       },
       {
         "files": "src/client/**/*.js",
-        "globals": ["window", "document", "YT"],
-        "envs": ["browser"]
+        "extends": "xo-react",
+        "globals": [
+          "window",
+          "document",
+          "YT"
+        ],
+        "envs": [
+          "browser"
+        ]
       }
     ]
   }
