@@ -180,7 +180,7 @@ const Playlist = React.createClass({
 
 const Controls = React.createClass({
   propTypes: {
-    numberOfVideos: React.PropTypes.integer,
+    numberOfVideos: React.PropTypes.number,
   },
   isNextVideoDisabled() {
     return this.props.numberOfVideos <= 1;
