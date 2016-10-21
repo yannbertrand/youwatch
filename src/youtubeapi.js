@@ -22,7 +22,7 @@ module.exports = {
 
 // Check if the stored access token (if existing) is still working
 function tryStoredAccessToken(cb) {
-  if(!configStore.get('tokens')) {
+  if (!configStore.get('tokens')) {
     return cb(true);
   }
 
@@ -32,11 +32,11 @@ function tryStoredAccessToken(cb) {
     part: 'id',
     mine: true,
     auth: oauth2Client,
-  }, function (err, response) {
+  }, (err) => {
     if (err) return cb(true);
 
     // Refresh the access token
-    oauth2Client.refreshAccessToken(function (err, newTokens) {
+    oauth2Client.refreshAccessToken((err, newTokens) => {
       if (err) return cb(true);
 
       configStore.set('tokens', newTokens);
@@ -44,38 +44,39 @@ function tryStoredAccessToken(cb) {
       return cb(false, newTokens);
     });
   });
-};
+}
 
 // retrieve the auth page url
 function getAuthUrl(cb) {
   // generate consent page url
-  var url = oauth2Client.generateAuthUrl({
+  const url = oauth2Client.generateAuthUrl({
+    // eslint-disable-next-line camelcase
     access_type: 'offline', // will return a refresh token
     // approval_prompt : 'force',
     scope: 'https://www.googleapis.com/auth/youtube.readonly', // can be a space-delimited string or an array of scopes
   });
 
   return cb(url);
-};
+}
 
 // retrieve an access token
 function getToken(code, cb) {
   // request access token
-  oauth2Client.getToken(code, function(err, tokens) {
+  oauth2Client.getToken(code, (err, tokens) => {
     if (!err) {
       configStore.set('tokens', tokens);
       oauth2Client.setCredentials(tokens);
-      cb(tokens);
+      return cb(tokens);
     }
   });
-};
+}
 
 function getVideo(videoId, cb) {
   YouTube.videos.list({
     part: 'id, snippet',
     id: videoId,
     auth: oauth2Client,
-  }, function (err, videoPage) {
+  }, (err, videoPage) => {
     if (err) {
       console.log('Error while trying to get a video', err);
       return cb(err);
@@ -90,31 +91,31 @@ function getVideo(videoId, cb) {
       thumbnail: videoPage.items[0].snippet.thumbnails.high.url,
       title: videoPage.items[0].snippet.title,
       channel: videoPage.items[0].snippet.channelTitle,
-      publishedAt: new Date(videoPage.items[0].snippet.publishedAt)
+      publishedAt: new Date(videoPage.items[0].snippet.publishedAt),
     });
   });
-};
+}
 
 function getSubscriptions(cb) {
   try {
-    let dataset = require('../dataset.json');
+    // eslint-disable-next-line import/no-unresolved
+    const dataset = require('../dataset.json');
 
-    if (dataset && dataset.length)
+    if (dataset && dataset.length > 0)
       return cb(null, dataset);
-  } catch (exception) {
+  } catch (error) {
     console.info(' -> You can create a `dataset.json` file if you don\'t want to load your subscriptions');
   }
 
   async.auto({
 
-    getSubscriptions: function (next) {
-      var subscriptions = [];
-      var nextPageToken = true;
-      var i = 1;
+    getSubscriptions(next) {
+      let subscriptions = [];
+      let nextPageToken = true;
 
       async.whilst(
         () => nextPageToken,
-        function (nextPage) {
+        (nextPage) => {
           YouTube.subscriptions.list({
             part: 'id, snippet',
             mine: true,
@@ -122,7 +123,7 @@ function getSubscriptions(cb) {
             order: 'alphabetical',
             pageToken: nextPageToken || null,
             auth: oauth2Client,
-          }, function (err, aSubscriptionsPage) {
+          }, (err, aSubscriptionsPage) => {
             if (err) {
               console.log('Error while trying to find a subscription page');
               return nextPage(); // In fact retrying the same page
@@ -133,22 +134,22 @@ function getSubscriptions(cb) {
             nextPage(null, subscriptions);
           });
         },
-        function (err, allSubscriptions) {
-            if (err) return next(err);
-            next(null, allSubscriptions);
+        (err, allSubscriptions) => {
+          if (err) return next(err);
+          next(null, allSubscriptions);
         }
       );
     },
 
     getChannelDetails: ['getSubscriptions', function (results, next) {
-      var channelsDetails = [];
+      const channelsDetails = [];
 
-      async.each(results['getSubscriptions'], function (subscription, nextSubscription) {
+      async.each(results.getSubscriptions, (subscription, nextSubscription) => {
         YouTube.channels.list({
           part: 'id, contentDetails',
           id: subscription.snippet.resourceId.channelId,
           auth: oauth2Client,
-        }, function (err, channelDetails) {
+        }, (err, channelDetails) => {
           if (err) {
             console.log('Error while trying to get channel ' + subscription.snippet.resourceId.channelId, err);
             return nextSubscription();
@@ -159,47 +160,47 @@ function getSubscriptions(cb) {
 
           nextSubscription();
         });
-      }, function (err) {
+      }, (err) => {
         next(err, channelsDetails);
       });
     }],
 
     getLastUploadedVideos: ['getChannelDetails', function (results, next) {
-      var videosIds = [];
+      let videosIds = [];
 
-      async.each(results['getChannelDetails'], function (channel, nextChannel) {
+      async.each(results.getChannelDetails, (channel, nextChannel) => {
         if (channel.pageInfo.totalResults <= 0) return nextChannel();
 
         YouTube.playlistItems.list({
           part: 'id, contentDetails',
           playlistId: channel.items[0].contentDetails.relatedPlaylists.uploads,
           auth: oauth2Client,
-        }, function (err, lastUploadedVideosFromChannel) {
+        }, (err, lastUploadedVideosFromChannel) => {
           if (err) {
             console.log('Error while trying to find playlist ' + channel.items[0].contentDetails.relatedPlaylists.uploads + ' from channel ' + channel.items[0].id, err);
             return nextChannel();
           }
 
           videosIds = videosIds.concat(
-            lastUploadedVideosFromChannel.items.map(uploadedVideoFromChannel => {
+            lastUploadedVideosFromChannel.items.map((uploadedVideoFromChannel) => {
               return uploadedVideoFromChannel.contentDetails.videoId;
             })
           );
-          
+
           nextChannel();
         });
-      }, function (err) {
+      }, (err) => {
         next(err, videosIds);
       });
     }],
 
     constructVideosIdsStrings: ['getLastUploadedVideos', function (results, next) {
       let counter = 0;
-      let idList = [];
+      const idList = [];
       let currentIds = '';
 
-      for (let videoId of results['getLastUploadedVideos']) {
-        currentIds += (counter? ', ' : '') + videoId;
+      for (const videoId of results.getLastUploadedVideos) {
+        currentIds += (counter ? ', ' : '') + videoId;
 
         if (++counter === 50) {
           idList.push(currentIds);
@@ -217,50 +218,49 @@ function getSubscriptions(cb) {
 
     getVideosDetails: ['constructVideosIdsStrings', function (results, next) {
       let videosDetails = [];
-      async.each(results['constructVideosIdsStrings'], function (ids, nextIds) {
+      async.each(results.constructVideosIdsStrings, (ids, nextIds) => {
         YouTube.videos.list({
           part: 'id, snippet, contentDetails',
           id: ids,
           auth: oauth2Client,
-        }, function (err, videos) {
+        }, (err, videos) => {
           if (err) {
             console.log('Error while trying to find videos', err);
             return nextIds();
           }
 
           videosDetails = videosDetails.concat(
-            videos.items.map(video => {
+            videos.items.map((video) => {
               return {
                 id: video.id,
                 duration: iso8601ToStringDuration(video.contentDetails.duration),
                 thumbnail: video.snippet.thumbnails.medium.url,
                 title: video.snippet.title,
                 channel: video.snippet.channelTitle,
-                publishedAt: new Date(video.snippet.publishedAt)
-              }
+                publishedAt: new Date(video.snippet.publishedAt),
+              };
             })
           );
 
           return nextIds();
         });
-      }, function (err) {
+      }, (err) => {
         next(err, videosDetails);
       });
-
     }],
 
     orderLastUploadedVideos: ['getVideosDetails', function (results, next) {
-      next(null, results['getVideosDetails'].sort((firstVideo, secondVideo) => {
+      next(null, results.getVideosDetails.sort((firstVideo, secondVideo) => {
         return secondVideo.publishedAt.getTime() - firstVideo.publishedAt.getTime();
       }));
-    }]
+    }],
 
-  }, function (err, results) {
+  }, (err, results) => {
     if (err) return cb(err);
 
-    cb(null, results['orderLastUploadedVideos']);
+    cb(null, results.orderLastUploadedVideos);
   });
-};
+}
 
 
 
@@ -310,11 +310,11 @@ function iso8601ToStringDuration(rawDuration) {
   function leftpad(str, len, ch) {
     str = String(str);
 
-    var i = -1;
+    let i = -1;
 
     if (!ch && ch !== 0) ch = ' ';
 
-    len = len - str.length;
+    len -= str.length;
 
     while (++i < len) {
       str = ch + str;

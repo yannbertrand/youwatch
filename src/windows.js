@@ -1,4 +1,5 @@
 const app = require('electron').app;
+const path = require('path');
 
 const CONFIG = require('./config');
 
@@ -18,11 +19,11 @@ module.exports = function (electron) {
 const MAIN_WINDOW = 'main';
 const AUTH_WINDOW = 'auth';
 
-const ICON = __dirname + '/../static/icon.png';
+const ICON = path.join('static/icon.png');
 
 const isMac = process.platform === 'darwin';
 
-let windows = {};
+const windows = {};
 
 function openMainWindow() {
   if (!windows[MAIN_WINDOW])
@@ -37,12 +38,12 @@ function closeLogInWindow() {
   windows[AUTH_WINDOW].close();
 }
 
-function createWindow(windowName, url, width, height, icon) {
+function createWindow(windowName, url, width, height) {
   const _window = new BrowserWindow({
     title: app.getName(),
     width,
     height,
-    icon,
+    ICON,
     autoHideMenuBar: true,
     minWidth: 880,
     minHeight: 370,
@@ -54,7 +55,7 @@ function createWindow(windowName, url, width, height, icon) {
   });
 
   if (isMac)
-    app.dock.setIcon(icon);
+    app.dock.setIcon(ICON);
 
   if (require('electron-is-dev'))
     _window.openDevTools();
@@ -66,14 +67,13 @@ function createWindow(windowName, url, width, height, icon) {
 }
 
 function createMainWindow() {
-  const url = 'file://' + __dirname + '/client/index.html';
+  const url = 'file://' + path.resolve('dist/client/index.html');
 
   return createWindow(
     MAIN_WINDOW,
     url,
     CONFIG.MAIN_WINDOW.WIDTH,
-    CONFIG.MAIN_WINDOW.HEIGHT,
-    ICON
+    CONFIG.MAIN_WINDOW.HEIGHT
   );
 }
 
@@ -82,8 +82,7 @@ function createLogInWindow(url) {
     AUTH_WINDOW,
     url,
     CONFIG.AUTH_WINDOW.WIDTH,
-    CONFIG.AUTH_WINDOW.HEIGHT,
-    ICON
+    CONFIG.AUTH_WINDOW.HEIGHT
   );
 }
 

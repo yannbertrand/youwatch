@@ -1,24 +1,37 @@
+const React = require('react');
+
+const Utils = require('../utils');
+const CurrentPlaylist = require('./current-playlist.react');
+
 const Video = React.createClass({
+  propTypes: {
+    id: React.PropTypes.string,
+    duration: React.PropTypes.string,
+    title: React.PropTypes.string,
+    channel: React.PropTypes.string,
+    thumbnail: React.PropTypes.string,
+  },
   getInitialState() {
     const isDarkTheme = document.body.classList.contains('dark');
 
     return {
-      loaderUrl: isDarkTheme? 'images/loader_dark.gif' : 'images/loader_white.gif'
+      loaderUrl: isDarkTheme ? 'images/loader_dark.gif' : 'images/loader_white.gif',
     };
   },
   addVideo() {
     if (this.props.id) {
       window.dispatchEvent(new CustomEvent('playlist.addVideo', { detail: { video: this.props } }));
-      Socket.emit('video/next', this.props);
+      Utils.Socket.emit('video/next', this.props);
     }
   },
   markVideoAsWatched() {
+    // ToDo
     console.log('ToDo: markVideoAsWatched');
   },
   cueVideo() {
     if (this.props.id) {
       window.dispatchEvent(new CustomEvent('playlist.cueVideo', { detail: { video: this.props } }));
-      Socket.emit('video/cue', this.props);
+      Utils.Socket.emit('video/cue', this.props);
     }
   },
   render() {
@@ -28,13 +41,17 @@ const Video = React.createClass({
           <img className="thumbnail lazyload blur-up" data-sizes="auto" data-src={this.props.thumbnail} src={this.state.loaderUrl} />
         </div>
         <span className="duration">{this.props.duration}</span>
-        <button className="mark-watched btn btn-secondary btn-sm cue"
-                onClick={this.markVideoAsWatched}
-                disabled
-                title="Mark as watched">&times;</button>
-        <button className="cue btn btn-secondary btn-sm cue"
-                onClick={this.cueVideo}
-                title="Cue this video">+</button>
+        <button
+          className="mark-watched btn btn-secondary btn-sm cue"
+          onClick={this.markVideoAsWatched}
+          disabled
+          title="Mark as watched"
+          >&times;</button>
+        <button
+          className="cue btn btn-secondary btn-sm cue"
+          onClick={this.cueVideo}
+          title="Cue this video"
+          >+</button>
         <header>
           <h5>
             <a onClick={this.addVideo} title={this.props.title}>
@@ -45,13 +62,16 @@ const Video = React.createClass({
         </header>
       </article>
     );
-  }
+  },
 });
 
 const VideoGrid = React.createClass({
+  propTypes: {
+    videos: React.PropTypes.array,
+  },
   render() {
-    if (this.props.videos.length) {
-      let videoNodes = this.props.videos.map((video) => {
+    if (this.props.videos.length > 0) {
+      const videoNodes = this.props.videos.map((video) => {
         return (
           <Video
             key={video.id}
@@ -59,8 +79,9 @@ const VideoGrid = React.createClass({
             duration={video.duration}
             thumbnail={video.thumbnail}
             title={video.title}
-            channel={video.channel} />
-        )
+            channel={video.channel}
+            />
+        );
       });
 
       return (
@@ -71,26 +92,26 @@ const VideoGrid = React.createClass({
     }
 
     return <h4>Nothing to show at the moment</h4>;
-  }
+  },
 });
 
 const SubscriptionsPage = React.createClass({
   getInitialState() { return { loading: true, videos: null }; },
   componentDidMount() {
-    Socket.emit('subscriptions/list');
-    Socket.on('subscriptions/list', (subscriptions) => {
+    Utils.Socket.emit('subscriptions/list');
+    Utils.Socket.on('subscriptions/list', (subscriptions) => {
       this.setState({ loading: false, videos: subscriptions });
       window.addEventListener('paste', this.onPaste);
     });
   },
   componentWillUnmount() {
-    Socket.removeAllListeners('subscriptions/list');
+    Utils.Socket.removeAllListeners('subscriptions/list');
     window.removeEventListener('paste', this.onPaste);
   },
   onPaste(event) {
     if (!event.clipboardData.getData('text/plain')) return;
 
-    Socket.emit('video/paste', event.clipboardData.getData('text/plain'));
+    Utils.Socket.emit('video/paste', event.clipboardData.getData('text/plain'));
   },
   render() {
     if (this.state.loading) {
@@ -104,14 +125,14 @@ const SubscriptionsPage = React.createClass({
         </div>
       );
     }
-    
+
     return (
       <div>
         <VideoGrid videos={this.state.videos} />
         <CurrentPlaylist />
       </div>
     );
-  }
+  },
 });
 
 module.exports = SubscriptionsPage;
