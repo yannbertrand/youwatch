@@ -26,7 +26,6 @@ const Player = React.createClass({
   },
   updatePlaylist(forceNextVideo) {
     if (this.state.playlist.length === 0) return;
-    if (!this.state.player.getPlaylist()) return;
 
     const statesThatNeedCue = [
       YT.PlayerState.CUED,
