@@ -235,17 +235,17 @@ const Controls = React.createClass({
   render() {
     let replayVideoButton;
     if (this.state.isReplayingVideo) {
-      replayVideoButton = <button onClick={this.stopReplayCurrentVideo}><i className="fa fa-repeat fa-spin" /></button>;
+      replayVideoButton = <button className="btn" onClick={this.stopReplayCurrentVideo}><i className="fa fa-repeat fa-spin" /></button>;
     } else {
-      replayVideoButton = <button onClick={this.replayCurrentVideo}><i className="fa fa-repeat" /></button>;
+      replayVideoButton = <button className="btn" onClick={this.replayCurrentVideo}><i className="fa fa-repeat" /></button>;
     }
 
     return (
       <div id="playlist-controls">
-        <button><i className="fa fa-backward" /></button>
+        <button className="btn"><i className="fa fa-backward" /></button>
         {replayVideoButton}
-        <button onClick={this.playNextVideo} disabled={this.isNextVideoDisabled()}><i className="fa fa-forward" /></button>
-        <button onClick={this.togglePlaylistVisibility}><i className="fa fa-list" /></button>
+        <button className="btn" onClick={this.playNextVideo} disabled={this.isNextVideoDisabled()}><i className="fa fa-forward" /></button>
+        <button className="btn" onClick={this.togglePlaylistVisibility}><i className="fa fa-list" /></button>
       </div>
     );
   },
