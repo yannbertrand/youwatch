@@ -2,6 +2,7 @@ $playlist-width: 260px
 $player-width: 480px
 $player-height: ($player-width * 9 / 16)
 $playlist-controls-width: ( $player-height / 4 )
+$min-width: $playlist-width + $playlist-controls-width + $player-width
 
 #current-playlist
   position: fixed
@@ -13,12 +14,20 @@ $playlist-controls-width: ( $player-height / 4 )
 
   #playlist
     float: left
-    width: $playlist-width
-    height: $player-height
+
+    @media screen and (min-width: $min-width)
+      width: $playlist-width
+      height: $player-height
+      border-right: 1px solid darken($white, 5%)
+      display: none
+
+    @media screen and (max-width: $min-width)
+      width: $player-width - $playlist-controls-width
+      border-right: 1px solid darken($white, 5%)
+      height: $player-height
+
     overflow-y: auto
     overflow-x: hidden
-    border-right: 1px solid darken($white, 5%)
-    display: none
 
     &.visible
       display: block
@@ -69,9 +78,10 @@ $playlist-controls-width: ( $player-height / 4 )
 
 
   #playlist-controls
-    float: left
-    width: $playlist-controls-width
-    height: $player-height
+    @media screen and (min-width: $min-width)
+      float: left
+      width: $playlist-controls-width
+      height: $player-height
 
     button
       display: block
@@ -92,7 +102,6 @@ $playlist-controls-width: ( $player-height / 4 )
 
   
   #player
-    float: left
     width: $player-width
     height: $player-height
     background-color: $black
