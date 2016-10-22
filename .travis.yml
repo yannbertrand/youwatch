@@ -6,3 +6,5 @@ node_js:
   - "6"
   - "5"
   - "4"
+env:
+  - CI=true
