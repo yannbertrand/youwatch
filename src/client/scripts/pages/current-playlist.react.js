@@ -19,8 +19,11 @@ const Player = React.createClass({
     if (event.data === YT.PlayerState.ENDED) {
       if (this.state.isReplayingVideo)
         this.state.player.loadVideoById(this.state.playlist[0]);
-      else
+      else if (this.isVideoEnded()) {
+        window.dispatchEvent(new CustomEvent('playlist.endVideo', { detail: { video: this.state.playlist[0] } }));
+
         this.removeVideo();
+      }
     } else {
       isPlaylistPlaying = true;
     }
@@ -35,6 +38,7 @@ const Player = React.createClass({
     window.dispatchEvent(new CustomEvent('playlist.removeVideo', { detail: { video: this.state.playlist[0] } }));
   },
   updatePlaylist(forceNextVideo) {
+    // ToDo gérer anciennes vidéos
     if (this.state.playlist.length === 0) return;
 
     const statesThatNeedCue = [
@@ -136,6 +140,9 @@ const Player = React.createClass({
       player: this.state.player,
     });
   },
+  isVideoEnded() {
+    return this.state.player.getCurrentTime() === this.state.player.getDuration();
+  },
   render() {
     return <div id="player" />;
   },
@@ -208,13 +215,11 @@ const Playlist = React.createClass({
 
 const Controls = React.createClass({
   propTypes: {
+    numberOfPlayedVideos: React.PropTypes.number,
     numberOfVideos: React.PropTypes.number,
   },
   getInitialState() {
     return { isReplayingVideo: false };
-  },
-  isNextVideoDisabled() {
-    return this.props.numberOfVideos <= 1;
   },
   replayCurrentVideo() {
     this.setState({ isReplayingVideo: true });
@@ -225,6 +230,15 @@ const Controls = React.createClass({
     this.setState({ isReplayingVideo: false });
 
     window.dispatchEvent(new CustomEvent('player.stopReplayCurrentVideo'));
+  },
+  isPreviousVideoDisabled() {
+    return this.props.numberOfPlayedVideos === 0;
+  },
+  playPreviousVideo() {
+    window.dispatchEvent(new CustomEvent('playlist.playPreviousVideo'));
+  },
+  isNextVideoDisabled() {
+    return this.props.numberOfVideos <= 1;
   },
   playNextVideo() {
     window.dispatchEvent(new CustomEvent('playlist.playNextVideo'));
@@ -242,7 +256,7 @@ const Controls = React.createClass({
 
     return (
       <div id="playlist-controls">
-        <button className="btn"><i className="fa fa-backward" /></button>
+        <button className="btn" onClick={this.playPreviousVideo} disabled={this.isPreviousVideoDisabled()}><i className="fa fa-backward" /></button>
         {replayVideoButton}
         <button className="btn" onClick={this.playNextVideo} disabled={this.isNextVideoDisabled()}><i className="fa fa-forward" /></button>
         <button className="btn" onClick={this.togglePlaylistVisibility}><i className="fa fa-list" /></button>
@@ -255,6 +269,7 @@ const CurrentPlaylist = React.createClass({
   getInitialState() {
     return {
       videos: [],
+      playedVideos: [],
       playlistVisible: false,
     };
   },
@@ -263,6 +278,8 @@ const CurrentPlaylist = React.createClass({
 
     window.addEventListener('playlist.addVideo', this.addVideo);
     window.addEventListener('playlist.cueVideo', this.cueVideo);
+    window.addEventListener('playlist.endVideo', this.endVideo);
+    window.addEventListener('playlist.playPreviousVideo', this.playPreviousVideo);
     window.addEventListener('playlist.removeVideo', this.removeVideo);
     window.addEventListener('playlist.raiseVideo', this.raiseVideo);
     window.addEventListener('playlist.toggleVisibility', this.toggleVisibility);
@@ -270,6 +287,8 @@ const CurrentPlaylist = React.createClass({
   componentWillUnmount() {
     window.removeEventListener('playlist.addVideo', this.addVideo, false);
     window.removeEventListener('playlist.cueVideo', this.cueVideo, false);
+    window.removeEventListener('playlist.endVideo', this.endVideo, false);
+    window.removeEventListener('playlist.playPreviousVideo', this.playPreviousVideo, false);
     window.removeEventListener('playlist.removeVideo', this.removeVideo, false);
     window.removeEventListener('playlist.raiseVideo', this.raiseVideo, false);
     window.removeEventListener('playlist.toggleVisibility', this.toggleVisibility, false);
@@ -302,6 +321,25 @@ const CurrentPlaylist = React.createClass({
 
     this.setState((state) => {
       state.videos.push(video);
+
+      return state;
+    });
+  },
+  endVideo(event) {
+    const video = this.hydrateVideoFromPlaylist(event.detail.video);
+
+    this.setState((state) => {
+      state.playedVideos.push(video);
+
+      return state;
+    });
+  },
+  playPreviousVideo() {
+    this.setState((state) => {
+      const latestVideo = _.last(state.playedVideos);
+
+      state.playedVideos = _.reject(state.playedVideos, latestVideo);
+      state.videos.splice(0, 0, latestVideo);
 
       return state;
     });
@@ -341,12 +379,16 @@ const CurrentPlaylist = React.createClass({
 
     return { id: video };
   },
+  hydrateVideoFromPlaylist(videoId) {
+    return this.state.videos[_.findIndex(this.state.videos, { id: videoId })];
+  },
   isInPlaylist(video) {
     return _.some(this.state.videos, video);
   },
   toggleVisibility() {
     this.setState({
       videos: this.state.videos,
+      playedVideos: this.state.playedVideos,
       playlistVisible: document.querySelector('#playlist').classList.toggle('visible'),
     });
   },
@@ -354,7 +396,7 @@ const CurrentPlaylist = React.createClass({
     return (
       <div id="current-playlist">
         <Playlist videos={this.state.videos} />
-        <Controls numberOfVideos={this.state.videos.length} />
+        <Controls numberOfPlayedVideos={this.state.playedVideos.length} numberOfVideos={this.state.videos.length} />
         <Player playlist={_.map(this.state.videos, 'id')} />
       </div>
     );
