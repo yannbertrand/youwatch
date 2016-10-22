@@ -68,10 +68,12 @@ gulp.task('transpile:client', (callback) => {
     .pipe(plumber(plumberConfig))
     .pipe(cache('transpile'))
     .pipe(debug(debugConfig('transpile:client')))
+    .pipe(sourcemaps.init())
     .pipe(replace(replaceOptions))
     .pipe(babel({
       presets: ['es2015', 'react'],
     }))
+    .pipe(sourcemaps.write('./'))
     .pipe(gulp.dest('dist/client'))
     .on('end', callback);
 });
