@@ -5,12 +5,22 @@ const _ = require('lodash');
 let isPlaylistPlaying = false;
 
 const Player = React.createClass({
+  getInitialState() {
+    return {
+      playlist: [],
+      player: null,
+      isReplayingVideo: false,
+    };
+  },
   onStateChange(event) {
     if (event.data === YT.PlayerState.UNSTARTED) return;
     if (event.data === YT.PlayerState.CUED) return;
 
     if (event.data === YT.PlayerState.ENDED) {
-      this.removeVideo();
+      if (this.state.isReplayingVideo)
+        this.state.player.loadVideoById(this.state.playlist[0]);
+      else
+        this.removeVideo();
     } else {
       isPlaylistPlaying = true;
     }
@@ -53,6 +63,8 @@ const Player = React.createClass({
   },
   componentDidMount() {
     window.addEventListener('playlist.playNextVideo', this.playNextVideo);
+    window.addEventListener('player.replayCurrentVideo', this.replayCurrentVideo);
+    window.addEventListener('player.stopReplayCurrentVideo', this.stopReplayCurrentVideo);
 
     document.addEventListener('webkitfullscreenchange', () => {
       const currentWindow = remote.getCurrentWindow();
@@ -90,7 +102,8 @@ const Player = React.createClass({
     }, false);
 
     this.setState({
-      playlist: [],
+      playlist: this.state.playlist,
+      isReplayingVideo: this.state.isReplayingVideo,
 
       // YT may not be loaded at this time, need to find a solution...
       // That's probably why I can't put this in a getInitialState method
@@ -103,9 +116,25 @@ const Player = React.createClass({
   },
   componentWillUnmount() {
     window.removeEventListener('playlist.playNextVideo', this.playNextVideo);
+    window.removeEventListener('player.replayCurrentVideo', this.replayCurrentVideo);
+    window.removeEventListener('player.stopReplayCurrentVideo', this.stopReplayCurrentVideo);
   },
   playNextVideo() {
     this.removeVideo();
+  },
+  replayCurrentVideo() {
+    this.setState({
+      isReplayingVideo: true,
+      playlist: this.state.playlist,
+      player: this.state.player,
+    });
+  },
+  stopReplayCurrentVideo() {
+    this.setState({
+      isReplayingVideo: false,
+      playlist: this.state.playlist,
+      player: this.state.player,
+    });
   },
   render() {
     return <div id="player" />;
@@ -181,8 +210,21 @@ const Controls = React.createClass({
   propTypes: {
     numberOfVideos: React.PropTypes.number,
   },
+  getInitialState() {
+    return { isReplayingVideo: false };
+  },
   isNextVideoDisabled() {
     return this.props.numberOfVideos <= 1;
+  },
+  replayCurrentVideo() {
+    this.setState({ isReplayingVideo: true });
+
+    window.dispatchEvent(new CustomEvent('player.replayCurrentVideo'));
+  },
+  stopReplayCurrentVideo() {
+    this.setState({ isReplayingVideo: false });
+
+    window.dispatchEvent(new CustomEvent('player.stopReplayCurrentVideo'));
   },
   playNextVideo() {
     window.dispatchEvent(new CustomEvent('playlist.playNextVideo'));
@@ -191,10 +233,17 @@ const Controls = React.createClass({
     window.dispatchEvent(new CustomEvent('playlist.toggleVisibility'));
   },
   render() {
+    let replayVideoButton;
+    if (this.state.isReplayingVideo) {
+      replayVideoButton = <button onClick={this.stopReplayCurrentVideo}><i className="fa fa-repeat fa-spin" /></button>;
+    } else {
+      replayVideoButton = <button onClick={this.replayCurrentVideo}><i className="fa fa-repeat" /></button>;
+    }
+
     return (
       <div id="playlist-controls">
         <button><i className="fa fa-backward" /></button>
-        <button><i className="fa fa-repeat" /></button>
+        {replayVideoButton}
         <button onClick={this.playNextVideo} disabled={this.isNextVideoDisabled()}><i className="fa fa-forward" /></button>
         <button onClick={this.togglePlaylistVisibility}><i className="fa fa-list" /></button>
       </div>
