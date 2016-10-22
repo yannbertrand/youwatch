@@ -66,7 +66,7 @@ const Player = React.createClass({
     }, updatePlaylist);
   },
   componentDidMount() {
-    window.addEventListener('playlist.playNextVideo', this.playNextVideo);
+    window.addEventListener('player.playNextVideo', this.playNextVideo);
     window.addEventListener('player.replayCurrentVideo', this.replayCurrentVideo);
     window.addEventListener('player.stopReplayCurrentVideo', this.stopReplayCurrentVideo);
 
@@ -119,7 +119,7 @@ const Player = React.createClass({
     });
   },
   componentWillUnmount() {
-    window.removeEventListener('playlist.playNextVideo', this.playNextVideo);
+    window.removeEventListener('player.playNextVideo', this.playNextVideo);
     window.removeEventListener('player.replayCurrentVideo', this.replayCurrentVideo);
     window.removeEventListener('player.stopReplayCurrentVideo', this.stopReplayCurrentVideo);
   },
@@ -241,10 +241,10 @@ const Controls = React.createClass({
     return this.props.numberOfVideos <= 1;
   },
   playNextVideo() {
-    window.dispatchEvent(new CustomEvent('playlist.playNextVideo'));
+    window.dispatchEvent(new CustomEvent('player.playNextVideo'));
   },
   togglePlaylistVisibility() {
-    window.dispatchEvent(new CustomEvent('playlist.toggleVisibility'));
+    window.dispatchEvent(new CustomEvent('playlist.togglePlaylistVisibility'));
   },
   render() {
     let replayVideoButton;
@@ -282,16 +282,16 @@ const CurrentPlaylist = React.createClass({
     window.addEventListener('playlist.playPreviousVideo', this.playPreviousVideo);
     window.addEventListener('playlist.removeVideo', this.removeVideo);
     window.addEventListener('playlist.raiseVideo', this.raiseVideo);
-    window.addEventListener('playlist.toggleVisibility', this.toggleVisibility);
+    window.addEventListener('playlist.togglePlaylistVisibility', this.togglePlaylistVisibility);
   },
   componentWillUnmount() {
-    window.removeEventListener('playlist.addVideo', this.addVideo, false);
-    window.removeEventListener('playlist.cueVideo', this.cueVideo, false);
-    window.removeEventListener('playlist.endVideo', this.endVideo, false);
-    window.removeEventListener('playlist.playPreviousVideo', this.playPreviousVideo, false);
-    window.removeEventListener('playlist.removeVideo', this.removeVideo, false);
-    window.removeEventListener('playlist.raiseVideo', this.raiseVideo, false);
-    window.removeEventListener('playlist.toggleVisibility', this.toggleVisibility, false);
+    window.removeEventListener('playlist.addVideo', this.addVideo);
+    window.removeEventListener('playlist.cueVideo', this.cueVideo);
+    window.removeEventListener('playlist.endVideo', this.endVideo);
+    window.removeEventListener('playlist.playPreviousVideo', this.playPreviousVideo);
+    window.removeEventListener('playlist.removeVideo', this.removeVideo);
+    window.removeEventListener('playlist.raiseVideo', this.raiseVideo);
+    window.removeEventListener('playlist.togglePlaylistVisibility', this.togglePlaylistVisibility);
   },
   addVideo(event) {
     // Add the video in first position if no video playing
@@ -385,7 +385,7 @@ const CurrentPlaylist = React.createClass({
   isInPlaylist(video) {
     return _.some(this.state.videos, video);
   },
-  toggleVisibility() {
+  togglePlaylistVisibility() {
     this.setState({
       videos: this.state.videos,
       playedVideos: this.state.playedVideos,
