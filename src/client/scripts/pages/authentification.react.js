@@ -16,7 +16,7 @@ const AuthentificationPage = React.createClass({
             <h1 className="display-3">YouWatch</h1>
             <p className="lead">Please fulfill the informations on the other window</p>
             <p className="lead">
-              <button className="btn btn-primary btn-lg disabled">Logging in...</button>
+              <button className="btn btn-primary btn-lg disabled"><i className="fa fa-spinner fa-pulse" /> Logging in...</button>
             </p>
           </div>
         </div>
