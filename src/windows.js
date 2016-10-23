@@ -1,13 +1,9 @@
-const app = require('electron').app;
+const { app, BrowserWindow } = require('electron');
 const path = require('path');
 
 const CONFIG = require('./config');
 
-let BrowserWindow;
-
-module.exports = function (electron) {
-  BrowserWindow = electron.BrowserWindow;
-
+module.exports = function () {
   return {
     openMainWindow,
     openLogInWindow,
