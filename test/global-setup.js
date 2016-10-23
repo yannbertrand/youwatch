@@ -20,7 +20,7 @@ exports.getElectronPath = function () {
 
 exports.setupTimeout = function (test) {
   if (process.env.CI)
-    test.timeout(240000);
+    test.timeout(30000);
   else
     test.timeout(15000);
 };
