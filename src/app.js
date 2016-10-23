@@ -1,15 +1,13 @@
 'use strict';
 
-const electron = require('electron');
+const { app, shell } = require('electron');
 const youtubeRegex = require('youtube-regex');
 
 const VideoManager = require('./videomanager');
 const YoutubeApi = require('./youtubeapi');
-const Windows = require('./windows')(electron);
+const Windows = require('./windows')();
 const server = require('./server');
 
-
-const app = electron.app;
 
 
 // adds debug features like hotkeys for triggering dev tools and reload
@@ -31,7 +29,8 @@ app.on('ready', () => {
 
       YoutubeApi.getAuthUrl((url) => {
         socket.emit('youtube/waitingforuser');
-        Windows.openLogInWindow(url);
+
+        shell.openExternal(url);
       });
     });
 
@@ -88,13 +87,13 @@ app.on('ready', () => {
   server.hapi.route({
     method: 'GET',
     path:'/youtube/callback',
-    handler: (request) => {
+    handler: (request, reply) => {
       server.io.emit('youtube/waiting');
       YoutubeApi.getToken(request.query.code, (token) => {
         server.io.emit('youtube/callback', token);
-
-        Windows.closeLogInWindow();
       });
+
+      return reply.file(require('path').join('client/authenticated.html'));
     },
   });
 });
