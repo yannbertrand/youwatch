@@ -5,10 +5,10 @@ const server = new Hapi.Server({
   connections: {
     routes: {
       files: {
-        relativeTo: require('path').join(__dirname)
-      }
-    }
-  }
+        relativeTo: require('path').join(__dirname),
+      },
+    },
+  },
 });
 
 server.connection({
