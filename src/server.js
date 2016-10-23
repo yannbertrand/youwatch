@@ -1,11 +1,22 @@
 const Hapi = require('hapi');
 
 // Create the Hapi Web Server
-const server = new Hapi.Server();
+const server = new Hapi.Server({
+  connections: {
+    routes: {
+      files: {
+        relativeTo: require('path').join(__dirname),
+      },
+    },
+  },
+});
+
 server.connection({
   host: 'localhost',
   port: '@@PORT',
 });
+
+server.register(require('inert'), () => {});
 
 // Start the server
 server.start((err) => {
