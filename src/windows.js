@@ -3,18 +3,7 @@ const path = require('path');
 
 const CONFIG = require('./config');
 
-module.exports = function () {
-  return {
-    openMainWindow,
-    openLogInWindow,
-    closeLogInWindow,
-    activateWithNoOpenWindows,
-  };
-};
-
 const MAIN_WINDOW = 'main';
-const AUTH_WINDOW = 'auth';
-
 const ICON = path.join('static/icon.png');
 
 const isMac = process.platform === 'darwin';
@@ -26,20 +15,12 @@ function openMainWindow() {
     windows[MAIN_WINDOW] = createMainWindow();
 }
 
-function openLogInWindow(url) {
-  windows[AUTH_WINDOW] = createLogInWindow(url);
-}
-
-function closeLogInWindow() {
-  windows[AUTH_WINDOW].close();
-}
-
-function createWindow(windowName, url, width, height) {
+function createMainWindow() {
   const _window = new BrowserWindow({
     title: app.getName(),
-    width,
-    height,
-    ICON,
+    width: CONFIG.MAIN_WINDOW.WIDTH,
+    height: CONFIG.MAIN_WINDOW.HEIGHT,
+    icon: ICON,
     autoHideMenuBar: true,
     minWidth: 880,
     minHeight: 370,
@@ -56,37 +37,13 @@ function createWindow(windowName, url, width, height) {
   if (require('electron-is-dev'))
     _window.openDevTools();
 
-  _window.loadURL(url);
-  _window.on('closed', onClosed.bind(null, windowName));
+  _window.loadURL('file://' + path.resolve('dist/client/index.html'));
+  _window.on('closed', onClosed.bind(null, MAIN_WINDOW));
 
   return _window;
 }
 
-function createMainWindow() {
-  const url = 'file://' + path.resolve('dist/client/index.html');
-
-  return createWindow(
-    MAIN_WINDOW,
-    url,
-    CONFIG.MAIN_WINDOW.WIDTH,
-    CONFIG.MAIN_WINDOW.HEIGHT
-  );
-}
-
-function createLogInWindow(url) {
-  return createWindow(
-    AUTH_WINDOW,
-    url,
-    CONFIG.AUTH_WINDOW.WIDTH,
-    CONFIG.AUTH_WINDOW.HEIGHT
-  );
-}
-
-function activateWithNoOpenWindows() {
-  if (!windows[MAIN_WINDOW]) {
-    windows[MAIN_WINDOW] = createMainWindow();
-  }
-}
+module.exports.openMainWindow = openMainWindow;
 
 function onClosed(windowName) {
   // dereference the window

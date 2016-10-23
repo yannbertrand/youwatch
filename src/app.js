@@ -5,7 +5,7 @@ const youtubeRegex = require('youtube-regex');
 
 const VideoManager = require('./videomanager');
 const YoutubeApi = require('./youtubeapi');
-const Windows = require('./windows')();
+const Windows = require('./windows');
 const server = require('./server');
 
 
@@ -110,5 +110,5 @@ app.on('window-all-closed', () => {
 app.on('activate', () => {
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
-  Windows.activateWithNoOpenWindows();
+  Windows.openMainWindow();
 });
