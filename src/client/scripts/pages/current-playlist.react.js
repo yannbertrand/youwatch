@@ -5,43 +5,71 @@ const _ = require('lodash');
 let isPlaylistPlaying = false;
 
 const Player = React.createClass({
+  getInitialState() {
+    return {
+      playlist: [],
+      player: null,
+      isReplayingVideo: false,
+    };
+  },
   onStateChange(event) {
     if (event.data === YT.PlayerState.UNSTARTED) return;
     if (event.data === YT.PlayerState.CUED) return;
 
     if (event.data === YT.PlayerState.ENDED) {
-      // No more video to play
-      // (1 because we will remove the played video)
-      if (this.state.playlist.length === 1)
-        isPlaylistPlaying = false;
+      if (this.state.isReplayingVideo)
+        this.state.player.loadVideoById(this.state.playlist[0]);
+      else if (this.isVideoEnded()) {
+        window.dispatchEvent(new CustomEvent('playlist.endVideo', { detail: { video: this.state.playlist[0] } }));
 
-      // Remove last played video
-      window.dispatchEvent(new CustomEvent('playlist.removeVideo', { detail: { video: this.state.playlist[0] } }));
-
-      // The video has changed
-      // Seize the opportunity to update the playlist without interruption
-      this.updatePlaylist();
+        this.removeVideo();
+      }
     } else {
       isPlaylistPlaying = true;
     }
   },
-  updatePlaylist() {
-    if (this.state.playlist.length === 0) return;
-    if (!this.state.player.getPlaylist()) return;
+  removeVideo() {
+    // No more video to play
+    // (1 because we will remove the played video)
+    if (this.state.playlist.length === 1)
+      isPlaylistPlaying = false;
 
-    // Update playlist and start playing
-    this.state.player.loadPlaylist(this.state.playlist);
+    // Remove last played video
+    window.dispatchEvent(new CustomEvent('playlist.removeVideo', { detail: { video: this.state.playlist[0] } }));
+  },
+  updatePlaylist(forceNextVideo) {
+    // ToDo gérer anciennes vidéos
+    if (this.state.playlist.length === 0) return;
+
+    const statesThatNeedCue = [
+      YT.PlayerState.CUED,
+    ];
+
+    const playerState = this.state.player.getPlayerState();
+
+    if (statesThatNeedCue.indexOf(playerState) > -1) {
+      this.state.player.cueVideoById(this.state.playlist[0]);
+    } else if (forceNextVideo) {
+      this.state.player.loadVideoById(this.state.playlist[0]);
+    }
   },
   componentWillReceiveProps(nextProps) {
-    if (!isPlaylistPlaying && this.state.player.cuePlaylist && nextProps.playlist.length > 0) {
-      this.state.player.cuePlaylist(nextProps.playlist);
+    let updatePlaylist;
+    if (this.state.playlist[0] === nextProps.playlist[0]) {
+      updatePlaylist = this.updatePlaylist.bind(null, false);
+    } else {
+      updatePlaylist = this.updatePlaylist.bind(null, true);
     }
 
     this.setState({
       playlist: nextProps.playlist,
-    });
+    }, updatePlaylist);
   },
   componentDidMount() {
+    window.addEventListener('player.playNextVideo', this.playNextVideo);
+    window.addEventListener('player.replayCurrentVideo', this.replayCurrentVideo);
+    window.addEventListener('player.stopReplayCurrentVideo', this.stopReplayCurrentVideo);
+
     document.addEventListener('webkitfullscreenchange', () => {
       const currentWindow = remote.getCurrentWindow();
       const isFullScreen = Boolean(document.querySelector('#player:-webkit-full-screen'));
@@ -78,7 +106,8 @@ const Player = React.createClass({
     }, false);
 
     this.setState({
-      playlist: [],
+      playlist: this.state.playlist,
+      isReplayingVideo: this.state.isReplayingVideo,
 
       // YT may not be loaded at this time, need to find a solution...
       // That's probably why I can't put this in a getInitialState method
@@ -88,6 +117,31 @@ const Player = React.createClass({
         },
       }),
     });
+  },
+  componentWillUnmount() {
+    window.removeEventListener('player.playNextVideo', this.playNextVideo);
+    window.removeEventListener('player.replayCurrentVideo', this.replayCurrentVideo);
+    window.removeEventListener('player.stopReplayCurrentVideo', this.stopReplayCurrentVideo);
+  },
+  playNextVideo() {
+    this.removeVideo();
+  },
+  replayCurrentVideo() {
+    this.setState({
+      isReplayingVideo: true,
+      playlist: this.state.playlist,
+      player: this.state.player,
+    });
+  },
+  stopReplayCurrentVideo() {
+    this.setState({
+      isReplayingVideo: false,
+      playlist: this.state.playlist,
+      player: this.state.player,
+    });
+  },
+  isVideoEnded() {
+    return this.state.player.getCurrentTime() === this.state.player.getDuration();
   },
   render() {
     return <div id="player" />;
@@ -112,22 +166,22 @@ const PlaylistItem = React.createClass({
   },
   render() {
     return (
-      <div>
-        <div className="playlist-item">
-          <button
-            className="btn btn-secondary btn-sm remove"
-            onClick={this.remove}
-            title="Remove this video"
-            disabled
-            >&times;</button>
-          <h5>
-            <a onClick={this.raise} title={this.props.title}>
-              {this.props.title}
-            </a>
-          </h5>
-          <h6>{this.props.channel}</h6>
-        </div>
-        <hr />
+      <div className="playlist-item">
+        <a
+          className="playlist-item--remove"
+          onClick={this.remove}
+          title="Remove this video from the list"
+          >
+            &times;
+        </a>
+
+        <a className="playlist-item--title" onClick={this.raise} title={this.props.title}>
+          {this.props.title}
+        </a>
+
+        <p className="playlist-item--channel">
+          {this.props.channel}
+        </p>
       </div>
     );
   },
@@ -159,23 +213,85 @@ const Playlist = React.createClass({
   },
 });
 
+const Controls = React.createClass({
+  propTypes: {
+    numberOfPlayedVideos: React.PropTypes.number,
+    numberOfVideos: React.PropTypes.number,
+  },
+  getInitialState() {
+    return { isReplayingVideo: false };
+  },
+  replayCurrentVideo() {
+    this.setState({ isReplayingVideo: true });
+
+    window.dispatchEvent(new CustomEvent('player.replayCurrentVideo'));
+  },
+  stopReplayCurrentVideo() {
+    this.setState({ isReplayingVideo: false });
+
+    window.dispatchEvent(new CustomEvent('player.stopReplayCurrentVideo'));
+  },
+  isPreviousVideoDisabled() {
+    return this.props.numberOfPlayedVideos === 0;
+  },
+  playPreviousVideo() {
+    window.dispatchEvent(new CustomEvent('playlist.playPreviousVideo'));
+  },
+  isNextVideoDisabled() {
+    return this.props.numberOfVideos <= 1;
+  },
+  playNextVideo() {
+    window.dispatchEvent(new CustomEvent('player.playNextVideo'));
+  },
+  togglePlaylistVisibility() {
+    window.dispatchEvent(new CustomEvent('playlist.togglePlaylistVisibility'));
+  },
+  render() {
+    let replayVideoButton;
+    if (this.state.isReplayingVideo) {
+      replayVideoButton = <button className="btn" onClick={this.stopReplayCurrentVideo}><i className="fa fa-repeat fa-spin" /></button>;
+    } else {
+      replayVideoButton = <button className="btn" onClick={this.replayCurrentVideo}><i className="fa fa-repeat" /></button>;
+    }
+
+    return (
+      <div id="playlist-controls">
+        <button className="btn" onClick={this.playPreviousVideo} disabled={this.isPreviousVideoDisabled()}><i className="fa fa-backward" /></button>
+        {replayVideoButton}
+        <button className="btn" onClick={this.playNextVideo} disabled={this.isNextVideoDisabled()}><i className="fa fa-forward" /></button>
+        <button className="btn" onClick={this.togglePlaylistVisibility}><i className="fa fa-list" /></button>
+      </div>
+    );
+  },
+});
+
 const CurrentPlaylist = React.createClass({
   getInitialState() {
-    return { videos: [] };
+    return {
+      videos: [],
+      playedVideos: [],
+      playlistVisible: false,
+    };
   },
   componentDidMount() {
-    // ToDo - retrieve playlist from backend
+    // ToDo retrieve playlist from backend
 
     window.addEventListener('playlist.addVideo', this.addVideo);
     window.addEventListener('playlist.cueVideo', this.cueVideo);
+    window.addEventListener('playlist.endVideo', this.endVideo);
+    window.addEventListener('playlist.playPreviousVideo', this.playPreviousVideo);
     window.addEventListener('playlist.removeVideo', this.removeVideo);
     window.addEventListener('playlist.raiseVideo', this.raiseVideo);
+    window.addEventListener('playlist.togglePlaylistVisibility', this.togglePlaylistVisibility);
   },
   componentWillUnmount() {
-    window.removeEventListener('playlist.addVideo', this.addVideo, false);
-    window.removeEventListener('playlist.cueVideo', this.cueVideo, false);
-    window.removeEventListener('playlist.removeVideo', this.removeVideo, false);
-    window.removeEventListener('playlist.raiseVideo', this.raiseVideo, false);
+    window.removeEventListener('playlist.addVideo', this.addVideo);
+    window.removeEventListener('playlist.cueVideo', this.cueVideo);
+    window.removeEventListener('playlist.endVideo', this.endVideo);
+    window.removeEventListener('playlist.playPreviousVideo', this.playPreviousVideo);
+    window.removeEventListener('playlist.removeVideo', this.removeVideo);
+    window.removeEventListener('playlist.raiseVideo', this.raiseVideo);
+    window.removeEventListener('playlist.togglePlaylistVisibility', this.togglePlaylistVisibility);
   },
   addVideo(event) {
     // Add the video in first position if no video playing
@@ -205,6 +321,25 @@ const CurrentPlaylist = React.createClass({
 
     this.setState((state) => {
       state.videos.push(video);
+
+      return state;
+    });
+  },
+  endVideo(event) {
+    const video = this.hydrateVideoFromPlaylist(event.detail.video);
+
+    this.setState((state) => {
+      state.playedVideos.push(video);
+
+      return state;
+    });
+  },
+  playPreviousVideo() {
+    this.setState((state) => {
+      const latestVideo = _.last(state.playedVideos);
+
+      state.playedVideos = _.reject(state.playedVideos, latestVideo);
+      state.videos.splice(0, 0, latestVideo);
 
       return state;
     });
@@ -244,13 +379,24 @@ const CurrentPlaylist = React.createClass({
 
     return { id: video };
   },
+  hydrateVideoFromPlaylist(videoId) {
+    return this.state.videos[_.findIndex(this.state.videos, { id: videoId })];
+  },
   isInPlaylist(video) {
     return _.some(this.state.videos, video);
+  },
+  togglePlaylistVisibility() {
+    this.setState({
+      videos: this.state.videos,
+      playedVideos: this.state.playedVideos,
+      playlistVisible: document.querySelector('#playlist').classList.toggle('visible'),
+    });
   },
   render() {
     return (
       <div id="current-playlist">
         <Playlist videos={this.state.videos} />
+        <Controls numberOfPlayedVideos={this.state.playedVideos.length} numberOfVideos={this.state.videos.length} />
         <Player playlist={_.map(this.state.videos, 'id')} />
       </div>
     );
