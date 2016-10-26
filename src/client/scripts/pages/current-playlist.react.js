@@ -112,6 +112,8 @@ const Player = React.createClass({
       // YT may not be loaded at this time, need to find a solution...
       // That's probably why I can't put this in a getInitialState method
       player: new YT.Player('player', {
+        width: 480,
+        height: 270,
         events: {
           onStateChange: this.onStateChange,
         },
