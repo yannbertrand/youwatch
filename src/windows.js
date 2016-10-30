@@ -1,12 +1,16 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
 
-const CONFIG = require('./config');
-
-const MAIN_WINDOW = 'main';
-const ICON = path.join('static/icon.png');
-
 const isMac = process.platform === 'darwin';
+const MAIN_WINDOW = 'main';
+const ICON = path.join(__dirname, '..', 'static', 'icon.png');
+const url = require('url').format({
+  protocol: 'file',
+  slashes: true,
+  pathname: path.join(__dirname, 'client', 'index.html')
+});
+
+const CONFIG = require('./config');
 
 const windows = {};
 
@@ -37,7 +41,7 @@ function createMainWindow() {
   if (require('electron-is-dev'))
     _window.openDevTools();
 
-  _window.loadURL('file://' + path.resolve('dist/client/index.html'));
+  _window.loadURL(url);
   _window.on('closed', onClosed.bind(null, MAIN_WINDOW));
 
   return _window;

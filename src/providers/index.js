@@ -2,7 +2,7 @@
 //  i.e., `User.js` will become `exports['User']` or `exports.User`
 
 require('fs')
-  .readdirSync(require('path').join('src/providers'))
+  .readdirSync(__dirname)
   .forEach((file) => {
     if (file.match(/\.js$/) !== null && file !== 'index.js') {
       const name = file.replace('.js', '');
