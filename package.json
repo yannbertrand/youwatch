@@ -65,8 +65,9 @@
   },
   "xo": {
     "ignores": [
-      "media",
-      "static"
+      "build/**/*",
+      "media/**/*",
+      "static/**/*"
     ],
     "esnext": true,
     "space": 2,
