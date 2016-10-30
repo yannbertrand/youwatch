@@ -122,6 +122,7 @@ function loadYoutube(_YT) {
 window.addEventListener('offline', switchToOfflineMode);
 window.addEventListener('online', tryStoredAccessToken);
 Utils.Socket.on('youtube/notauthenticated', renderAuthentication);
+Utils.Socket.on('youtube/callbackerror', renderAuthentication);
 Utils.Socket.on('youtube/callback', renderApp);
 
 loadConfig();
@@ -141,9 +142,9 @@ ReactDOM.render(
   titlebarElement
 );
 
-function renderAuthentication() {
+function renderAuthentication(error) {
   ReactDOM.render(
-    <AuthentificationPage />,
+    <AuthentificationPage error={error} />,
     mainElement
   );
 }

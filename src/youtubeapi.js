@@ -63,11 +63,12 @@ function getAuthUrl(cb) {
 function getToken(code, cb) {
   // request access token
   oauth2Client.getToken(code, (err, tokens) => {
-    if (!err) {
-      configStore.set('tokens', tokens);
-      oauth2Client.setCredentials(tokens);
-      return cb(tokens);
-    }
+    if (err)
+      return cb(err);
+
+    configStore.set('tokens', tokens);
+    oauth2Client.setCredentials(tokens);
+    return cb(err, tokens);
   });
 }
 
