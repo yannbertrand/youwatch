@@ -89,11 +89,15 @@ app.on('ready', () => {
     path:'/youtube/callback',
     handler: (request, reply) => {
       server.io.emit('youtube/waiting');
-      YoutubeApi.getToken(request.query.code, (token) => {
-        server.io.emit('youtube/callback', token);
-      });
+      YoutubeApi.getToken(request.query.code, (err, token) => {
+        if (err) {
+          server.io.emit('youtube/callbackerror', err);
+          return;
+        }
 
-      return reply.file(require('path').join('client/authenticated.html'));
+        server.io.emit('youtube/callback', token);
+        return reply.file(require('path').join('client/authenticated.html'));
+      });
     },
   });
 });
