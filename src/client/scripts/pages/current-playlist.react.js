@@ -67,30 +67,31 @@ const Player = React.createClass({
       playlist: nextProps.playlist,
     }, updatePlaylist);
   },
+  onWebkitFullScreenChange() {
+    const currentWindow = remote.getCurrentWindow();
+    const isFullScreen = Boolean(document.querySelector('#player:-webkit-full-screen'));
+
+    Utils.Socket.emit('player/fullscreen', isFullScreen);
+
+    if (isFullScreen) {
+      document.body.classList.add('fullscreen');
+      currentWindow.setMinimumSize(160, 90);
+    } else {
+      document.body.classList.remove('fullscreen');
+      currentWindow.setMinimumSize(880, 370);
+    }
+
+    currentWindow.setAlwaysOnTop(isFullScreen);
+    currentWindow.setHasShadow(!isFullScreen);
+    currentWindow.setVisibleOnAllWorkspaces(isFullScreen);
+  },
   componentDidMount() {
     window.addEventListener('player.playNextVideo', this.playNextVideo);
     window.addEventListener('player.replayCurrentVideo', this.replayCurrentVideo);
     window.addEventListener('player.stopReplayCurrentVideo', this.stopReplayCurrentVideo);
 
-    document.addEventListener('webkitfullscreenchange', () => {
-      const currentWindow = remote.getCurrentWindow();
-      const isFullScreen = Boolean(document.querySelector('#player:-webkit-full-screen'));
-
-      if (Utils.getMode())
-        Utils.Socket.emit('player/fullscreen', isFullScreen);
-
-      if (isFullScreen) {
-        document.body.classList.add('fullscreen');
-        currentWindow.setMinimumSize(160, 90);
-      } else {
-        document.body.classList.remove('fullscreen');
-        currentWindow.setMinimumSize(880, 370);
-      }
-
-      currentWindow.setAlwaysOnTop(isFullScreen);
-      currentWindow.setHasShadow(!isFullScreen);
-      currentWindow.setVisibleOnAllWorkspaces(isFullScreen);
-    }, false);
+    if (Utils.getMode()) // Float-on-top mode
+      document.addEventListener('webkitfullscreenchange', this.onWebkitFullScreenChange);
 
     this.setState({
       playlist: this.state.playlist,
@@ -108,6 +109,8 @@ const Player = React.createClass({
     });
   },
   componentWillUnmount() {
+    document.removeEventListener('webkitfullscreenchange', this.onWebkitFullScreenChange);
+
     window.removeEventListener('player.playNextVideo', this.playNextVideo);
     window.removeEventListener('player.replayCurrentVideo', this.replayCurrentVideo);
     window.removeEventListener('player.stopReplayCurrentVideo', this.stopReplayCurrentVideo);

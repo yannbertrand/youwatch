@@ -11,6 +11,7 @@ function getMode() {
 
 function toggleMode() {
   localStorage.setItem('mode', castBooleanToString(!getMode()));
+  Socket.emit('config/mode', !getMode());
   return getMode();
 }
 
