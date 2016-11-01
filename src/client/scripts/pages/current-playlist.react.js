@@ -76,7 +76,7 @@ const Player = React.createClass({
       const currentWindow = remote.getCurrentWindow();
       const isFullScreen = Boolean(document.querySelector('#player:-webkit-full-screen'));
 
-      if (Utils.shouldResize())
+      if (Utils.getMode())
         Utils.Socket.emit('player/fullscreen', isFullScreen);
 
       if (isFullScreen) {
