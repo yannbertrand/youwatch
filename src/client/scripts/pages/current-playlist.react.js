@@ -76,7 +76,8 @@ const Player = React.createClass({
       const currentWindow = remote.getCurrentWindow();
       const isFullScreen = Boolean(document.querySelector('#player:-webkit-full-screen'));
 
-      Utils.Socket.emit('player/fullscreen', isFullScreen);
+      if (Utils.shouldResize())
+        Utils.Socket.emit('player/fullscreen', isFullScreen);
 
       if (isFullScreen) {
         document.body.classList.add('fullscreen');
@@ -84,24 +85,6 @@ const Player = React.createClass({
       } else {
         document.body.classList.remove('fullscreen');
         currentWindow.setMinimumSize(880, 370);
-
-        // Resize window if too small
-        const currentSize = currentWindow.getSize();
-        let needResize = false;
-        let newWidth = currentSize[0];
-        let newHeight = currentSize[1];
-        if (newWidth < 880) {
-          needResize = true;
-          newWidth = 880;
-        }
-        if (newHeight < 370) {
-          needResize = true;
-          newHeight = 370;
-        }
-
-        if (needResize) {
-          currentWindow.setSize(newWidth, newHeight, true);
-        }
       }
 
       currentWindow.setAlwaysOnTop(isFullScreen);
