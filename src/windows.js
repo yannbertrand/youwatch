@@ -10,8 +10,6 @@ const url = require('url').format({
   pathname: path.join(__dirname, 'client', 'index.html')
 });
 
-const CONFIG = require('./config');
-
 const windows = {};
 
 function openMainWindow() {
@@ -22,8 +20,8 @@ function openMainWindow() {
 function createMainWindow() {
   const _window = new BrowserWindow({
     title: app.getName(),
-    width: CONFIG.MAIN_WINDOW.WIDTH,
-    height: CONFIG.MAIN_WINDOW.HEIGHT,
+    width: 1600,
+    height: 900,
     icon: ICON,
     autoHideMenuBar: true,
     minWidth: 880,
