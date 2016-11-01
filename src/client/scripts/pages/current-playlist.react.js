@@ -86,12 +86,17 @@ const Player = React.createClass({
     currentWindow.setVisibleOnAllWorkspaces(isFullScreen);
   },
   componentDidMount() {
+    const currentWindow = remote.getCurrentWindow();
+
     window.addEventListener('player.playNextVideo', this.playNextVideo);
     window.addEventListener('player.replayCurrentVideo', this.replayCurrentVideo);
     window.addEventListener('player.stopReplayCurrentVideo', this.stopReplayCurrentVideo);
 
-    if (Utils.getMode()) // Float-on-top mode
+    currentWindow.setFullScreenable(true);
+    if (Utils.getMode()) { // Float-on-top mode
       document.addEventListener('webkitfullscreenchange', this.onWebkitFullScreenChange);
+      currentWindow.setFullScreenable(false);
+    }
 
     this.setState({
       playlist: this.state.playlist,

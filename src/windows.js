@@ -60,7 +60,6 @@ app.on('ready', () => {
       minHeight: 370,
       frame: isMac,
       titleBarStyle: 'hidden-inset',
-      fullscreenable: false, // so that the youtube videos go fullscreen inside the window, not in the screen
       alwaysOnTop: false,
       hasShadow: true,
       enableLargerThanScreen: true,
@@ -81,10 +80,6 @@ app.on('ready', () => {
     return _window;
   }
 
-  function switchMode(mode) {
-    windows[MAIN_WINDOW].setFullScreenable(mode);
-  }
-
   function toggleFullscreen(_isFullscreen) {
     const bounds = configStore.get('window.' + (_isFullscreen ? 'fullscreen' : 'classic'));
 
@@ -96,7 +91,6 @@ app.on('ready', () => {
   }
 
   module.exports.openMainWindow = openMainWindow;
-  module.exports.switchMode = switchMode;
   module.exports.toggleFullscreen = toggleFullscreen;
 
   function onResize(windowName) {
