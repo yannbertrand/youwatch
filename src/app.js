@@ -48,10 +48,6 @@ app.on('ready', () => {
       });
     });
 
-    socket.on('config/mode', (mode) => {
-      Windows.switchMode(mode);
-    });
-
     socket.on('player/fullscreen', (isFullscreen) => {
       Windows.toggleFullscreen(isFullscreen);
     });
