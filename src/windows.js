@@ -1,17 +1,19 @@
 const { app, BrowserWindow } = require('electron');
-const Configstore = require('configstore');
 const path = require('path');
+const url = require('url');
+const Configstore = require('configstore');
 
 const configStore = new Configstore('YouWatch');
 
-const isMac = process.platform === 'darwin';
-const MAIN_WINDOW = 'main';
-const ICON = path.join(__dirname, '..', 'static', 'icon.png');
-const url = require('url').format({
+const pageUrl = url.format({
   protocol: 'file',
   slashes: true,
   pathname: path.join(__dirname, 'client', 'index.html')
 });
+
+const isMac = process.platform === 'darwin';
+const MAIN_WINDOW = 'main';
+const ICON = path.join(__dirname, '..', 'static', 'icon.png');
 
 const windows = {};
 
@@ -42,13 +44,21 @@ function createMainWindow() {
   if (require('electron-is-dev'))
     _window.openDevTools();
 
-  _window.loadURL(url);
+  _window.loadURL(pageUrl);
+  _window.on('resize', onResize.bind(null, MAIN_WINDOW));
   _window.on('closed', onClosed.bind(null, MAIN_WINDOW));
 
   return _window;
 }
 
 module.exports.openMainWindow = openMainWindow;
+
+function onResize(windowName) {
+  const size = windows[windowName].getSize();
+
+  configStore.set('width', size[0]);
+  configStore.set('height', size[1]);
+}
 
 function onClosed(windowName) {
   // dereference the window
