@@ -48,6 +48,10 @@ app.on('ready', () => {
       });
     });
 
+    socket.on('player/fullscreen', (isFullscreen) => {
+      Windows.toggleFullscreen(isFullscreen);
+    });
+
     // Video
     socket.on('video/start', (id) => {
       console.log('Video started: ', id);
