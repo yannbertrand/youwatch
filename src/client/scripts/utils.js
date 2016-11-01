@@ -5,13 +5,13 @@ function isDarkThemeActive() {
   return document.body.classList.contains('dark');
 }
 
-function shouldResize() {
-  return castStringToBoolean(localStorage.getItem('doResize'));
+function getMode() {
+  return castStringToBoolean(localStorage.getItem('mode'));
 }
 
-function toggleResize() {
-  localStorage.setItem('doResize', castBooleanToString(!shouldResize()));
-  return shouldResize();
+function toggleMode() {
+  localStorage.setItem('mode', castBooleanToString(!getMode()));
+  return getMode();
 }
 
 function getActiveLayout() {
@@ -36,6 +36,6 @@ module.exports = {
   isDarkThemeActive,
   getActiveLayout,
   castBooleanToString,
-  shouldResize,
-  toggleResize,
+  getMode,
+  toggleMode,
 };

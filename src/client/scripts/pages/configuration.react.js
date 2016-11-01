@@ -11,10 +11,10 @@ const ConfigurationPage = React.createClass({
 
     this.setState({ darkTheme });
   },
-  toggleResize() {
-    const doResize = Utils.toggleResize();
+  toggleMode() {
+    const mode = Utils.toggleMode();
 
-    this.setState({ doResize });
+    this.setState({ mode });
   },
   changeLayout(event) {
     const layout = event.target.value;
@@ -41,7 +41,7 @@ const ConfigurationPage = React.createClass({
       showConsole: false,
       darkTheme : Utils.isDarkThemeActive(),
       layout: Utils.getActiveLayout(),
-      doResize: Utils.shouldResize(),
+      mode: Utils.getMode(),
     };
   },
   render() {
@@ -81,8 +81,8 @@ const ConfigurationPage = React.createClass({
             </label>
             <div className="col-sm-1 col-form-label">
               <Switch
-                isChecked={this.state.doResize}
-                onChange={this.toggleResize}
+                isChecked={this.state.getMode}
+                onChange={this.toggleMode}
                 color="1"
                 size="lg"
                 shape="square"
