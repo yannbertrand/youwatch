@@ -6,8 +6,8 @@ const Configstore = require('configstore');
 
 app.on('ready', () => {
   const primaryDisplay = electron.screen.getPrimaryDisplay();
-  const screenWidth = primaryDisplay.bounds.width;
-  const screenHeight = primaryDisplay.bounds.height;
+
+  const { width: screenWidth, height: screenHeight } = primaryDisplay.size;
   const appWidth = 0.75 * screenWidth;
   const appHeight = 0.75 * screenHeight;
 
