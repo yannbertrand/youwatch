@@ -11,6 +11,11 @@ const ConfigurationPage = React.createClass({
 
     this.setState({ darkTheme });
   },
+  toggleResize() {
+    const doResize = Utils.toggleResize();
+
+    this.setState({ doResize });
+  },
   changeLayout(event) {
     const layout = event.target.value;
 
@@ -36,6 +41,7 @@ const ConfigurationPage = React.createClass({
       showConsole: false,
       darkTheme : Utils.isDarkThemeActive(),
       layout: Utils.getActiveLayout(),
+      doResize: Utils.shouldResize(),
     };
   },
   render() {
@@ -66,6 +72,19 @@ const ConfigurationPage = React.createClass({
                   <option value="sticker">Sticker</option>
                 </select>
               </div>
+            </div>
+          </div>
+          <div className="form-group row">
+            <label className="col-sm-4">Resize when going fullscreen</label>
+            <div className="col-sm-8">
+              <Switch
+                isChecked={this.state.doResize}
+                onChange={this.toggleResize}
+                size="lg"
+                textOn="I"
+                textOff="O"
+                shape="square"
+                />
             </div>
           </div>
         </form>
