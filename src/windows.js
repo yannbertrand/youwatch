@@ -13,13 +13,13 @@ const configStore = new Configstore('YouWatch', {
       width: 640,
       height: 380,
     },
-  }
+  },
 });
 
 const pageUrl = url.format({
   protocol: 'file',
   slashes: true,
-  pathname: path.join(__dirname, 'client', 'index.html')
+  pathname: path.join(__dirname, 'client', 'index.html'),
 });
 
 const isMac = process.platform === 'darwin';

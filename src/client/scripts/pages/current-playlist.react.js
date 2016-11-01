@@ -2,6 +2,8 @@ const { remote } = require('electron');
 const React = require('react');
 const _ = require('lodash');
 
+const Utils = require('../utils');
+
 let isPlaylistPlaying = false;
 
 const Player = React.createClass({
