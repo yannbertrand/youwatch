@@ -81,7 +81,7 @@ const ConfigurationPage = React.createClass({
             </label>
             <div className="col-sm-1 col-form-label">
               <Switch
-                isChecked={this.state.getMode}
+                isChecked={this.state.mode}
                 onChange={this.toggleMode}
                 color="1"
                 size="lg"

@@ -81,6 +81,10 @@ app.on('ready', () => {
     return _window;
   }
 
+  function switchMode(mode) {
+    windows[MAIN_WINDOW].setFullScreenable(mode);
+  }
+
   function toggleFullscreen(_isFullscreen) {
     const bounds = configStore.get('window.' + (_isFullscreen ? 'fullscreen' : 'classic'));
 
@@ -92,6 +96,7 @@ app.on('ready', () => {
   }
 
   module.exports.openMainWindow = openMainWindow;
+  module.exports.switchMode = switchMode;
   module.exports.toggleFullscreen = toggleFullscreen;
 
   function onResize(windowName) {
