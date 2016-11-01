@@ -1,5 +1,8 @@
 const { app, BrowserWindow } = require('electron');
+const Configstore = require('configstore');
 const path = require('path');
+
+const configStore = new Configstore('YouWatch');
 
 const isMac = process.platform === 'darwin';
 const MAIN_WINDOW = 'main';
@@ -20,8 +23,8 @@ function openMainWindow() {
 function createMainWindow() {
   const _window = new BrowserWindow({
     title: app.getName(),
-    width: 1600,
-    height: 900,
+    width: configStore.get('width') || 1600,
+    height: configStore.get('height') || 900,
     icon: ICON,
     autoHideMenuBar: true,
     minWidth: 880,
