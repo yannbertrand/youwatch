@@ -28,8 +28,8 @@ app.on('ready', () => {
   };
 
   const configStore = new Configstore('YouWatch');
-  if (!configStore.get('window.' + sortedDisplaysIds))
-    configStore.set('window.' + sortedDisplaysIds, defaultConfig);
+  if (!configStore.get(getConfigStoreWindowKey()))
+    configStore.set(getConfigStoreWindowKey(), defaultConfig);
 
   const pageUrl = url.format({
     protocol: 'file',
@@ -53,10 +53,10 @@ app.on('ready', () => {
   function createMainWindow() {
     const _window = new BrowserWindow({
       title: app.getName(),
-      x: configStore.get('window.' + sortedDisplaysIds + '.classic.x'),
-      y: configStore.get('window.' + sortedDisplaysIds + '.classic.y'),
-      width: configStore.get('window.' + sortedDisplaysIds + '.classic.width'),
-      height: configStore.get('window.' + sortedDisplaysIds + '.classic.height'),
+      x: configStore.get(getConfigStoreWindow('classic.x')),
+      y: configStore.get(getConfigStoreWindow('classic.y')),
+      width: configStore.get(getConfigStoreWindow('classic.width')),
+      height: configStore.get(getConfigStoreWindow('classic.height')),
       icon: ICON,
       autoHideMenuBar: true,
       minWidth: 880,
@@ -84,7 +84,7 @@ app.on('ready', () => {
   }
 
   function togglePlayerState(_isPlayerMaximized) {
-    const bounds = configStore.get('window.' + sortedDisplaysIds + '.' + (_isPlayerMaximized ? 'floatOnTop' : 'classic'));
+    const bounds = configStore.get(getConfigStoreWindow(_isPlayerMaximized ? 'floatOnTop' : 'classic'));
 
     isChangingMode = true;
     windows[MAIN_WINDOW].setBounds(bounds, true);
@@ -101,12 +101,20 @@ app.on('ready', () => {
       return;
 
     const bounds = windows[windowName].getBounds();
-    const key = 'window.' + sortedDisplaysIds + '.' + (isPlayerMaximized ? 'floatOnTop' : 'classic');
+    const key = getConfigStoreWindow(isPlayerMaximized ? 'floatOnTop' : 'classic');
     configStore.set(key, bounds);
   }
 
   function onClosed(windowName) {
     // dereference the window
     windows[windowName] = null;
+  }
+
+  function getConfigStoreWindowKey() {
+    return 'window.' + sortedDisplaysIds;
+  }
+
+  function getConfigStoreWindow(param) {
+    return getConfigStoreWindowKey() + '.' + param;
   }
 });
