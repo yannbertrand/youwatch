@@ -21,9 +21,9 @@ app.on('ready', () => {
       },
       floatOnTop: {
         x: screenWidth - 640,
-        y: screenHeight - 380,
+        y: screenHeight - 360,
         width: 640,
-        height: 380,
+        height: 360,
       },
     },
   });
