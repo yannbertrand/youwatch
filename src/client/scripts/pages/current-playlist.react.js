@@ -71,7 +71,7 @@ const Player = React.createClass({
     const currentWindow = remote.getCurrentWindow();
     const isFullScreen = Boolean(document.querySelector('#player:-webkit-full-screen'));
 
-    Utils.Socket.emit('player/fullscreen', isFullScreen);
+    Utils.Socket.emit('player/floatontop', isFullScreen);
 
     if (isFullScreen) {
       document.body.classList.add('fullscreen');

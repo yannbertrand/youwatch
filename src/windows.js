@@ -19,7 +19,7 @@ app.on('ready', () => {
         width: appWidth,
         height: appHeight,
       },
-      fullscreen: {
+      floatOnTop: {
         x: screenWidth - 640,
         y: screenHeight - 380,
         width: 640,
@@ -39,7 +39,7 @@ app.on('ready', () => {
   const ICON = path.join(__dirname, '..', 'static', 'icon.png');
 
   const windows = {};
-  let isFullscreen = false;
+  let isPlayerMaximized = false;
   let isChangingMode = false;
 
   function openMainWindow() {
@@ -80,25 +80,25 @@ app.on('ready', () => {
     return _window;
   }
 
-  function toggleFullscreen(_isFullscreen) {
-    const bounds = configStore.get('window.' + (_isFullscreen ? 'fullscreen' : 'classic'));
+  function togglePlayerState(_isPlayerMaximized) {
+    const bounds = configStore.get('window.' + (_isPlayerMaximized ? 'floatOnTop' : 'classic'));
 
     isChangingMode = true;
     windows[MAIN_WINDOW].setBounds(bounds, true);
     isChangingMode = false;
 
-    isFullscreen = _isFullscreen;
+    isPlayerMaximized = _isPlayerMaximized;
   }
 
   module.exports.openMainWindow = openMainWindow;
-  module.exports.toggleFullscreen = toggleFullscreen;
+  module.exports.togglePlayerState = togglePlayerState;
 
   function onResize(windowName) {
     if (isChangingMode)
       return;
 
     const bounds = windows[windowName].getBounds();
-    const key = 'window.' + (isFullscreen ? 'fullscreen' : 'classic');
+    const key = 'window.' + (_isPlayerMaximized ? 'floatOnTop' : 'classic');
     configStore.set(key, bounds);
   }
 
