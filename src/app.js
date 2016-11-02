@@ -48,8 +48,8 @@ app.on('ready', () => {
       });
     });
 
-    socket.on('player/fullscreen', (isFullscreen) => {
-      Windows.toggleFullscreen(isFullscreen);
+    socket.on('player/floatontop', (isPlayerMaximized) => {
+      Windows.togglePlayerState(isPlayerMaximized);
     });
 
     // Video
