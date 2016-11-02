@@ -98,7 +98,7 @@ app.on('ready', () => {
       return;
 
     const bounds = windows[windowName].getBounds();
-    const key = 'window.' + (_isPlayerMaximized ? 'floatOnTop' : 'classic');
+    const key = 'window.' + (isPlayerMaximized ? 'floatOnTop' : 'classic');
     configStore.set(key, bounds);
   }
 
