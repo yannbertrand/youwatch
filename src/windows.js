@@ -4,32 +4,10 @@ const path = require('path');
 const url = require('url');
 const Configstore = require('configstore');
 
+const configStore = new Configstore('YouWatch');
+
 app.on('ready', () => {
-  const primaryDisplay = electron.screen.getPrimaryDisplay();
-  let sortedDisplaysIds = electron.screen.getAllDisplays().map((display) => display.id).sort().join('-');
-
-  const { width: screenWidth, height: screenHeight } = primaryDisplay.size;
-  const appWidth = 0.75 * screenWidth;
-  const appHeight = 0.75 * screenHeight;
-
-  const defaultConfig = {
-    classic: {
-      x: (screenWidth / 2.0) - (appWidth / 2.0),
-      y: (screenHeight / 2.0) - (appHeight / 2.0),
-      width: appWidth,
-      height: appHeight,
-    },
-    floatOnTop: {
-      x: screenWidth - 640,
-      y: screenHeight - 360,
-      width: 640,
-      height: 360,
-    },
-  };
-
-  const configStore = new Configstore('YouWatch');
-  if (!configStore.get(getConfigStoreWindowKey()))
-    configStore.set(getConfigStoreWindowKey(), defaultConfig);
+  const screen = electron.screen;
 
   const pageUrl = url.format({
     protocol: 'file',
@@ -42,8 +20,13 @@ app.on('ready', () => {
   const ICON = path.join(__dirname, '..', 'static', 'icon.png');
 
   const windows = {};
+
   let isPlayerMaximized = false;
   let isChangingMode = false;
+  let primaryDisplay;
+  let sortedDisplaysIds;
+
+  onNumberOfDisplaysChange();
 
   function openMainWindow() {
     if (!windows[MAIN_WINDOW])
@@ -80,6 +63,9 @@ app.on('ready', () => {
 
     _window.on('closed', onClosed.bind(null, MAIN_WINDOW));
 
+    screen.on('display-added', onNumberOfDisplaysChange);
+    screen.on('display-removed', onNumberOfDisplaysChange);
+
     return _window;
   }
 
@@ -97,7 +83,7 @@ app.on('ready', () => {
   module.exports.togglePlayerState = togglePlayerState;
 
   function onResize(windowName) {
-    if (isChangingMode)
+    if (isChangingMode || primaryDisplay.id !== screen.getPrimaryDisplay().id)
       return;
 
     const bounds = windows[windowName].getBounds();
@@ -108,6 +94,39 @@ app.on('ready', () => {
   function onClosed(windowName) {
     // dereference the window
     windows[windowName] = null;
+  }
+
+  function onNumberOfDisplaysChange() {
+    sortedDisplaysIds = screen.getAllDisplays().map((display) => display.id).sort().join('-');
+    primaryDisplay = screen.getPrimaryDisplay();
+
+    if (!windows[MAIN_WINDOW] || !configStore.get(getConfigStoreWindowKey())) {
+      const { width: screenWidth, height: screenHeight } = primaryDisplay.size;
+      const appWidth = 0.75 * screenWidth;
+      const appHeight = 0.75 * screenHeight;
+
+      const defaultConfig = {
+        classic: {
+          x: (screenWidth / 2.0) - (appWidth / 2.0),
+          y: (screenHeight / 2.0) - (appHeight / 2.0),
+          width: appWidth,
+          height: appHeight,
+        },
+        floatOnTop: {
+          x: screenWidth - 640,
+          y: screenHeight - 360,
+          width: 640,
+          height: 360,
+        },
+      };
+
+      configStore.set(getConfigStoreWindowKey(), defaultConfig);
+    }
+
+    if (windows[MAIN_WINDOW]) {
+      const bounds = configStore.get(getConfigStoreWindow(isPlayerMaximized ? 'floatOnTop' : 'classic'));
+      windows[MAIN_WINDOW].setBounds(bounds, true);
+    }
   }
 
   function getConfigStoreWindowKey() {
