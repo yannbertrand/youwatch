@@ -6,27 +6,30 @@ const Configstore = require('configstore');
 
 app.on('ready', () => {
   const primaryDisplay = electron.screen.getPrimaryDisplay();
+  let sortedDisplaysIds = electron.screen.getAllDisplays().map((display) => display.id).sort().join('-');
 
   const { width: screenWidth, height: screenHeight } = primaryDisplay.size;
   const appWidth = 0.75 * screenWidth;
   const appHeight = 0.75 * screenHeight;
 
-  const configStore = new Configstore('YouWatch', {
-    window: {
-      classic: {
-        x: (screenWidth / 2.0) - (appWidth / 2.0),
-        y: (screenHeight / 2.0) - (appHeight / 2.0),
-        width: appWidth,
-        height: appHeight,
-      },
-      floatOnTop: {
-        x: screenWidth - 640,
-        y: screenHeight - 360,
-        width: 640,
-        height: 360,
-      },
+  const defaultConfig = {
+    classic: {
+      x: (screenWidth / 2.0) - (appWidth / 2.0),
+      y: (screenHeight / 2.0) - (appHeight / 2.0),
+      width: appWidth,
+      height: appHeight,
     },
-  });
+    floatOnTop: {
+      x: screenWidth - 640,
+      y: screenHeight - 360,
+      width: 640,
+      height: 360,
+    },
+  };
+
+  const configStore = new Configstore('YouWatch');
+  if (!configStore.get('window.' + sortedDisplaysIds))
+    configStore.set('window.' + sortedDisplaysIds, defaultConfig);
 
   const pageUrl = url.format({
     protocol: 'file',
@@ -50,10 +53,10 @@ app.on('ready', () => {
   function createMainWindow() {
     const _window = new BrowserWindow({
       title: app.getName(),
-      x: configStore.get('window.classic.x'),
-      y: configStore.get('window.classic.y'),
-      width: configStore.get('window.classic.width'),
-      height: configStore.get('window.classic.height'),
+      x: configStore.get('window.' + sortedDisplaysIds + '.classic.x'),
+      y: configStore.get('window.' + sortedDisplaysIds + '.classic.y'),
+      width: configStore.get('window.' + sortedDisplaysIds + '.classic.width'),
+      height: configStore.get('window.' + sortedDisplaysIds + '.classic.height'),
       icon: ICON,
       autoHideMenuBar: true,
       minWidth: 880,
@@ -81,7 +84,7 @@ app.on('ready', () => {
   }
 
   function togglePlayerState(_isPlayerMaximized) {
-    const bounds = configStore.get('window.' + (_isPlayerMaximized ? 'floatOnTop' : 'classic'));
+    const bounds = configStore.get('window.' + sortedDisplaysIds + '.' + (_isPlayerMaximized ? 'floatOnTop' : 'classic'));
 
     isChangingMode = true;
     windows[MAIN_WINDOW].setBounds(bounds, true);
@@ -98,7 +101,7 @@ app.on('ready', () => {
       return;
 
     const bounds = windows[windowName].getBounds();
-    const key = 'window.' + (isPlayerMaximized ? 'floatOnTop' : 'classic');
+    const key = 'window.' + sortedDisplaysIds + '.' + (isPlayerMaximized ? 'floatOnTop' : 'classic');
     configStore.set(key, bounds);
   }
 
