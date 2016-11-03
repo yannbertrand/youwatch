@@ -26,14 +26,14 @@ app.on('ready', () => {
   let primaryDisplay;
   let sortedDisplaysIds;
 
-  onNumberOfDisplaysChange();
-
   function openMainWindow() {
     if (!windows[MAIN_WINDOW])
       windows[MAIN_WINDOW] = createMainWindow();
   }
 
   function createMainWindow() {
+    onNumberOfDisplaysChange();
+
     const _window = new BrowserWindow({
       title: app.getName(),
       x: configStore.get(getConfigStoreWindow('classic.x')),
@@ -100,7 +100,7 @@ app.on('ready', () => {
     sortedDisplaysIds = screen.getAllDisplays().map((display) => display.id).sort().join('-');
     primaryDisplay = screen.getPrimaryDisplay();
 
-    if (!windows[MAIN_WINDOW] || !configStore.get(getConfigStoreWindowKey())) {
+    if (!configStore.get(getConfigStoreWindowKey())) {
       const { width: screenWidth, height: screenHeight } = primaryDisplay.size;
       const appWidth = 0.75 * screenWidth;
       const appHeight = 0.75 * screenHeight;
