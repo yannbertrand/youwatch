@@ -49,6 +49,7 @@ app.on('ready', () => {
       alwaysOnTop: false,
       hasShadow: true,
       enableLargerThanScreen: true,
+      show: false,
     });
 
     if (isMac)
@@ -58,9 +59,10 @@ app.on('ready', () => {
       _window.openDevTools();
 
     _window.loadURL(pageUrl);
+
     _window.on('resize', onResize.bind(null, MAIN_WINDOW));
     _window.on('move', onResize.bind(null, MAIN_WINDOW));
-
+    _window.on('ready-to-show', () => _window.show());
     _window.on('closed', onClosed.bind(null, MAIN_WINDOW));
 
     screen.on('display-added', onNumberOfDisplaysChange);
