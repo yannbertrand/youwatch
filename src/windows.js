@@ -60,13 +60,13 @@ app.on('ready', () => {
 
     _window.loadURL(pageUrl);
 
-    _window.on('resize', onResize.bind(null, MAIN_WINDOW));
-    _window.on('move', onResize.bind(null, MAIN_WINDOW));
+    _window.on('resize', () => onResize(MAIN_WINDOW));
+    _window.on('move', () => onResize(MAIN_WINDOW));
     _window.on('ready-to-show', () => _window.show());
-    _window.on('closed', onClosed.bind(null, MAIN_WINDOW));
+    _window.on('closed', () => onClosed(MAIN_WINDOW));
 
-    screen.on('display-added', onNumberOfDisplaysChange);
-    screen.on('display-removed', onNumberOfDisplaysChange);
+    screen.on('display-added', () => onNumberOfDisplaysChange(MAIN_WINDOW));
+    screen.on('display-removed', () => onNumberOfDisplaysChange(MAIN_WINDOW));
 
     return _window;
   }
@@ -98,7 +98,7 @@ app.on('ready', () => {
     windows[windowName] = null;
   }
 
-  function onNumberOfDisplaysChange() {
+  function onNumberOfDisplaysChange(windowName) {
     sortedDisplaysIds = screen.getAllDisplays().map((display) => display.id).sort().join('-');
     primaryDisplay = screen.getPrimaryDisplay();
 
@@ -125,9 +125,9 @@ app.on('ready', () => {
       configStore.set(getConfigStoreWindowKey(), defaultConfig);
     }
 
-    if (windows[MAIN_WINDOW]) {
+    if (windows[windowName]) {
       const bounds = configStore.get(getConfigStoreWindow(isPlayerMaximized ? 'floatOnTop' : 'classic'));
-      windows[MAIN_WINDOW].setBounds(bounds, true);
+      windows[windowName].setBounds(bounds, true);
     }
   }
 
