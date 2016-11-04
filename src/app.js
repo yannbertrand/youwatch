@@ -86,6 +86,10 @@ app.on('ready', () => {
         }
       });
     });
+
+    Windows.setOnNumberOfDisplayChangeHandler((sortedDisplaysIds) => {
+      socket.emit('number-of-display/update', sortedDisplaysIds);
+    });
   });
 
   server.hapi.route({

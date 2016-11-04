@@ -44,6 +44,20 @@ const ConfigurationPage = React.createClass({
       mode: Utils.getMode(),
     };
   },
+  componentDidMount() {
+    Utils.Socket.on('number-of-display/update', this.onNumberOfDisplayChange);
+  },
+  componentWillUnmout() {
+    Utils.Socket.removeAllListeners('number-of-display/update');
+  },
+  onNumberOfDisplayChange() {
+    this.setState({
+      showConsole: this.state.showConsole,
+      darkTheme: this.state.darkTheme,
+      layout: this.state.layout,
+      mode: Utils.getMode(),
+    });
+  },
   render() {
     return (
       <div className="text-page">
