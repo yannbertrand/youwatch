@@ -55,14 +55,17 @@ app.on('ready', () => {
     if (isMac)
       app.dock.setIcon(ICON);
 
-    if (require('electron-is-dev'))
-      _window.openDevTools();
-
     _window.loadURL(pageUrl);
+
+    _window.on('ready-to-show', () => {
+      if (require('electron-is-dev'))
+        _window.openDevTools();
+
+      _window.show();
+    });
 
     _window.on('resize', () => onResize(MAIN_WINDOW));
     _window.on('move', () => onResize(MAIN_WINDOW));
-    _window.on('ready-to-show', () => _window.show());
     _window.on('closed', () => onClosed(MAIN_WINDOW));
 
     screen.on('display-added', () => onNumberOfDisplaysChange(MAIN_WINDOW));
