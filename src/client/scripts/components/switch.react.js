@@ -41,7 +41,7 @@ const Switch = React.createClass({
 
         {beforeText}
 
-        <input type="checkbox" defaultChecked={this.props.isChecked} onChange={this.props.onChange} />
+        <input type="checkbox" checked={this.props.isChecked} onChange={this.props.onChange} />
 
         <div className="z-switch--container">
           <div className="z-switch--slider" data-on={this.props.textOn} data-off={this.props.textOff} />

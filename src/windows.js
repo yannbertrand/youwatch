@@ -2,6 +2,7 @@ const electron = require('electron');
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
 const url = require('url');
+const _ = require('lodash');
 const Configstore = require('configstore');
 
 const configStore = new Configstore('YouWatch');
@@ -25,6 +26,7 @@ app.on('ready', () => {
   let isChangingMode = false;
   let primaryDisplay;
   let sortedDisplaysIds;
+  let onNumberOfDisplaysChangeHandler;
 
   function openMainWindow() {
     if (!windows[MAIN_WINDOW])
@@ -86,6 +88,7 @@ app.on('ready', () => {
 
   module.exports.openMainWindow = openMainWindow;
   module.exports.togglePlayerState = togglePlayerState;
+  module.exports.setOnNumberOfDisplayChangeHandler = setOnNumberOfDisplayChangeHandler;
 
   function onResize(windowName) {
     if (isChangingMode || primaryDisplay.id !== screen.getPrimaryDisplay().id)
@@ -132,6 +135,9 @@ app.on('ready', () => {
       const bounds = configStore.get(getConfigStoreWindow(isPlayerMaximized ? 'floatOnTop' : 'classic'));
       windows[windowName].setBounds(bounds, true);
     }
+
+    if (_.isFunction(onNumberOfDisplaysChangeHandler))
+      onNumberOfDisplaysChangeHandler(sortedDisplaysIds);
   }
 
   function getConfigStoreWindowKey() {
@@ -140,5 +146,10 @@ app.on('ready', () => {
 
   function getConfigStoreWindow(param) {
     return getConfigStoreWindowKey() + '.' + param;
+  }
+
+  function setOnNumberOfDisplayChangeHandler(handler) {
+    onNumberOfDisplaysChangeHandler = handler;
+    onNumberOfDisplaysChangeHandler(sortedDisplaysIds);
   }
 });
