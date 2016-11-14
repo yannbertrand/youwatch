@@ -2,13 +2,13 @@
 **Stability: 1 - Experimental**
 
 <p align="center">
-    <a href="./media/screenshot-mac.png"><img src="./media/screenshot-mac.png" width="75%"></a>
+    <a href="./media/screenshot-mac.png"><img src="./media/screenshot-mac.png" width="90%"></a>
 </p>
 
 <p align="center">
-    <a href="./media/screenshot-mac-overlay.png"><img src="./media/screenshot-mac-overlay.png" width="25%"></a>
-    <a href="./media/screenshot-linux-dark-overlay.png"><img src="./media/screenshot-linux-dark-overlay.png" width="25%"></a>
-    <a href="./media/screenshot-fullscreen.png"><img src="./media/screenshot-fullscreen.png" width="25%"></a>
+    <a href="./media/screenshot-mac-overlay.png"><img src="./media/screenshot-mac-overlay.png" width="30%"></a>
+    <a href="./media/screenshot-linux-dark-overlay.png"><img src="./media/screenshot-linux-dark-overlay.png" width="30%"></a>
+    <a href="./media/screenshot-fullscreen.png"><img src="./media/screenshot-fullscreen.png" width="30%"></a>
 </p>
 
 ## Description
