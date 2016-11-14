@@ -48,6 +48,10 @@ app.on('ready', () => {
       });
     });
 
+    socket.on('player/floatontop', (isPlayerMaximized) => {
+      Windows.togglePlayerState(isPlayerMaximized);
+    });
+
     // Video
     socket.on('video/start', (id) => {
       console.log('Video started: ', id);
@@ -81,6 +85,10 @@ app.on('ready', () => {
           socket.emit('youtube/callback', token);
         }
       });
+    });
+
+    Windows.setOnNumberOfDisplayChangeHandler((sortedDisplaysIds) => {
+      socket.emit('number-of-display/update', sortedDisplaysIds);
     });
   });
 

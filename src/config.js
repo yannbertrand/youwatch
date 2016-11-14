@@ -13,16 +13,4 @@ module.exports = {
   // and authorized redirect URIs on the Google Console
   PORT: 9000,
 
-  // The main window config
-  MAIN_WINDOW: {
-    WIDTH: 1200,
-    HEIGHT: 700,
-  },
-
-  // The auth window config
-  AUTH_WINDOW: {
-    WIDTH: 500,
-    HEIGHT: 600,
-  },
-
 };

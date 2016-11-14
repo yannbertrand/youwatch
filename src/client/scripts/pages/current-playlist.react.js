@@ -2,6 +2,8 @@ const { remote } = require('electron');
 const React = require('react');
 const _ = require('lodash');
 
+const Utils = require('../utils');
+
 let isPlaylistPlaying = false;
 
 const Player = React.createClass({
@@ -65,47 +67,37 @@ const Player = React.createClass({
       playlist: nextProps.playlist,
     }, updatePlaylist);
   },
+  isFullScreen() {
+    return Boolean(document.querySelector('#player:-webkit-full-screen'));
+  },
+  onWebkitFullScreenChange() {
+    const isFullScreen = this.isFullScreen();
+
+    Utils.Socket.emit('player/floatontop', isFullScreen);
+
+    if (isFullScreen) {
+      document.body.classList.add('fullscreen');
+      this.state.currentWindow.setMinimumSize(160, 90);
+    } else {
+      document.body.classList.remove('fullscreen');
+      this.state.currentWindow.setMinimumSize(880, 370);
+    }
+
+    this.state.currentWindow.setAlwaysOnTop(isFullScreen);
+    this.state.currentWindow.setHasShadow(!isFullScreen);
+    this.state.currentWindow.setVisibleOnAllWorkspaces(isFullScreen);
+  },
   componentDidMount() {
     window.addEventListener('player.playNextVideo', this.playNextVideo);
     window.addEventListener('player.replayCurrentVideo', this.replayCurrentVideo);
     window.addEventListener('player.stopReplayCurrentVideo', this.stopReplayCurrentVideo);
 
-    document.addEventListener('webkitfullscreenchange', () => {
-      const currentWindow = remote.getCurrentWindow();
-      const isFullScreen = Boolean(document.querySelector('#player:-webkit-full-screen'));
+    Utils.Socket.on('number-of-display/update', this.updateMode);
 
-      if (isFullScreen) {
-        document.body.classList.add('fullscreen');
-        currentWindow.setMinimumSize(160, 90);
-      } else {
-        document.body.classList.remove('fullscreen');
-        currentWindow.setMinimumSize(880, 370);
-
-        // Resize window if too small
-        const currentSize = currentWindow.getSize();
-        let needResize = false;
-        let newWidth = currentSize[0];
-        let newHeight = currentSize[1];
-        if (newWidth < 880) {
-          needResize = true;
-          newWidth = 880;
-        }
-        if (newHeight < 370) {
-          needResize = true;
-          newHeight = 370;
-        }
-
-        if (needResize) {
-          currentWindow.setSize(newWidth, newHeight, true);
-        }
-      }
-
-      currentWindow.setAlwaysOnTop(isFullScreen);
-      currentWindow.setHasShadow(!isFullScreen);
-      currentWindow.setVisibleOnAllWorkspaces(isFullScreen);
-    }, false);
+    document.addEventListener('webkitfullscreenchange', this.onWebkitFullScreenChange);
 
     this.setState({
+      currentWindow: remote.getCurrentWindow(),
       playlist: this.state.playlist,
       isReplayingVideo: this.state.isReplayingVideo,
 
@@ -118,12 +110,16 @@ const Player = React.createClass({
           onStateChange: this.onStateChange,
         },
       }),
-    });
+    }, this.updateMode);
   },
   componentWillUnmount() {
+    document.removeEventListener('webkitfullscreenchange', this.onWebkitFullScreenChange);
+
     window.removeEventListener('player.playNextVideo', this.playNextVideo);
     window.removeEventListener('player.replayCurrentVideo', this.replayCurrentVideo);
     window.removeEventListener('player.stopReplayCurrentVideo', this.stopReplayCurrentVideo);
+
+    Utils.Socket.removeAllListeners('number-of-display/update');
   },
   playNextVideo() {
     this.removeVideo();
@@ -144,6 +140,9 @@ const Player = React.createClass({
   },
   isVideoEnded() {
     return this.state.player.getCurrentTime() === this.state.player.getDuration();
+  },
+  updateMode() {
+    this.state.currentWindow.setFullScreenable(!Utils.getMode());
   },
   render() {
     return <div id="player" />;

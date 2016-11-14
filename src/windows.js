@@ -1,55 +1,155 @@
+const electron = require('electron');
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
+const url = require('url');
+const _ = require('lodash');
+const Configstore = require('configstore');
 
-const isMac = process.platform === 'darwin';
-const MAIN_WINDOW = 'main';
-const ICON = path.join(__dirname, '..', 'static', 'icon.png');
-const url = require('url').format({
-  protocol: 'file',
-  slashes: true,
-  pathname: path.join(__dirname, 'client', 'index.html')
-});
+const configStore = new Configstore('YouWatch');
 
-const CONFIG = require('./config');
+app.on('ready', () => {
+  const screen = electron.screen;
 
-const windows = {};
-
-function openMainWindow() {
-  if (!windows[MAIN_WINDOW])
-    windows[MAIN_WINDOW] = createMainWindow();
-}
-
-function createMainWindow() {
-  const _window = new BrowserWindow({
-    title: app.getName(),
-    width: CONFIG.MAIN_WINDOW.WIDTH,
-    height: CONFIG.MAIN_WINDOW.HEIGHT,
-    icon: ICON,
-    autoHideMenuBar: true,
-    minWidth: 880,
-    minHeight: 370,
-    frame: isMac,
-    titleBarStyle: 'hidden-inset',
-    fullscreenable: false, // so that the youtube videos go fullscreen inside the window, not in the screen
-    alwaysOnTop: false,
-    hasShadow: true,
+  const pageUrl = url.format({
+    protocol: 'file',
+    slashes: true,
+    pathname: path.join(__dirname, 'client', 'index.html'),
   });
 
-  if (isMac)
-    app.dock.setIcon(ICON);
+  const isMac = process.platform === 'darwin';
+  const MAIN_WINDOW = 'main';
+  const ICON = path.join(__dirname, '..', 'static', 'icon.png');
 
-  if (require('electron-is-dev'))
-    _window.openDevTools();
+  const windows = {};
 
-  _window.loadURL(url);
-  _window.on('closed', onClosed.bind(null, MAIN_WINDOW));
+  let isPlayerMaximized = false;
+  let isChangingMode = false;
+  let primaryDisplay;
+  let sortedDisplaysIds;
+  let onNumberOfDisplaysChangeHandler;
 
-  return _window;
-}
+  function openMainWindow() {
+    if (!windows[MAIN_WINDOW])
+      windows[MAIN_WINDOW] = createMainWindow();
+  }
 
-module.exports.openMainWindow = openMainWindow;
+  function createMainWindow() {
+    onNumberOfDisplaysChange();
 
-function onClosed(windowName) {
-  // dereference the window
-  windows[windowName] = null;
-}
+    const _window = new BrowserWindow({
+      title: app.getName(),
+      x: configStore.get(getConfigStoreWindow('classic.x')),
+      y: configStore.get(getConfigStoreWindow('classic.y')),
+      width: configStore.get(getConfigStoreWindow('classic.width')),
+      height: configStore.get(getConfigStoreWindow('classic.height')),
+      icon: ICON,
+      autoHideMenuBar: true,
+      minWidth: 880,
+      minHeight: 370,
+      frame: isMac,
+      titleBarStyle: 'hidden-inset',
+      alwaysOnTop: false,
+      hasShadow: true,
+      enableLargerThanScreen: true,
+      show: false,
+    });
+
+    if (isMac)
+      app.dock.setIcon(ICON);
+
+    _window.loadURL(pageUrl);
+
+    _window.on('ready-to-show', () => {
+      if (require('electron-is-dev'))
+        _window.openDevTools();
+
+      _window.show();
+    });
+
+    _window.on('resize', () => onResize(MAIN_WINDOW));
+    _window.on('move', () => onResize(MAIN_WINDOW));
+    _window.on('closed', () => onClosed(MAIN_WINDOW));
+
+    screen.on('display-added', () => onNumberOfDisplaysChange(MAIN_WINDOW));
+    screen.on('display-removed', () => onNumberOfDisplaysChange(MAIN_WINDOW));
+
+    return _window;
+  }
+
+  function togglePlayerState(_isPlayerMaximized) {
+    const bounds = configStore.get(getConfigStoreWindow(_isPlayerMaximized ? 'floatOnTop' : 'classic'));
+
+    isChangingMode = true;
+    windows[MAIN_WINDOW].setBounds(bounds, true);
+    isChangingMode = false;
+
+    isPlayerMaximized = _isPlayerMaximized;
+  }
+
+  module.exports.openMainWindow = openMainWindow;
+  module.exports.togglePlayerState = togglePlayerState;
+  module.exports.setOnNumberOfDisplayChangeHandler = setOnNumberOfDisplayChangeHandler;
+
+  function onResize(windowName) {
+    if (isChangingMode || primaryDisplay.id !== screen.getPrimaryDisplay().id)
+      return;
+
+    const bounds = windows[windowName].getBounds();
+    const key = getConfigStoreWindow(isPlayerMaximized ? 'floatOnTop' : 'classic');
+    configStore.set(key, bounds);
+  }
+
+  function onClosed(windowName) {
+    // dereference the window
+    windows[windowName] = null;
+  }
+
+  function onNumberOfDisplaysChange(windowName) {
+    sortedDisplaysIds = screen.getAllDisplays().map((display) => display.id).sort().join('-');
+    primaryDisplay = screen.getPrimaryDisplay();
+
+    if (!configStore.get(getConfigStoreWindowKey())) {
+      const { width: screenWidth, height: screenHeight } = primaryDisplay.size;
+      const appWidth = 0.75 * screenWidth;
+      const appHeight = 0.75 * screenHeight;
+
+      const defaultConfig = {
+        classic: {
+          x: (screenWidth / 2.0) - (appWidth / 2.0),
+          y: (screenHeight / 2.0) - (appHeight / 2.0),
+          width: appWidth,
+          height: appHeight,
+        },
+        floatOnTop: {
+          x: screenWidth - 640,
+          y: screenHeight - 360,
+          width: 640,
+          height: 360,
+        },
+      };
+
+      configStore.set(getConfigStoreWindowKey(), defaultConfig);
+    }
+
+    if (windows[windowName]) {
+      const bounds = configStore.get(getConfigStoreWindow(isPlayerMaximized ? 'floatOnTop' : 'classic'));
+      windows[windowName].setBounds(bounds, true);
+    }
+
+    if (_.isFunction(onNumberOfDisplaysChangeHandler))
+      onNumberOfDisplaysChangeHandler(sortedDisplaysIds);
+  }
+
+  function getConfigStoreWindowKey() {
+    return 'window.' + sortedDisplaysIds;
+  }
+
+  function getConfigStoreWindow(param) {
+    return getConfigStoreWindowKey() + '.' + param;
+  }
+
+  function setOnNumberOfDisplayChangeHandler(handler) {
+    onNumberOfDisplaysChangeHandler = handler;
+    onNumberOfDisplaysChangeHandler(sortedDisplaysIds);
+  }
+});
