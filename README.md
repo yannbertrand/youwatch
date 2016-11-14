@@ -2,7 +2,7 @@
 **Stability: 1 - Experimental**
 
 <p align="center">
-    <a href="./media/screenshot-mac.png"><img src="./media/screenshot-mac.png" width="90%"></a>
+    <a href="./media/screenshot-mac.png"><img src="./media/screenshot-mac.png" width="100%"></a>
 </p>
 
 <p align="center">
