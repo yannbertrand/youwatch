@@ -15,10 +15,13 @@
 YouWatch is a desktop app that improves the official YouTube webapp.
 
 * Gridifcation of the youtube subscriptions page (/feed/subscriptions)
-* Monitor on site activity and keeps track of which videos you've watched.
 * Create a playlist on the go
-* Save a playlist for future use
 * Float-on-top mode
+
+### Still to do
+
+* Monitor on site activity and keeps track of which videos you've watched.
+* Save a playlist for future use
 * Offline mode
 
 ## Stack
