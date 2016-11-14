@@ -1,7 +1,15 @@
 # YouWatch
 **Stability: 1 - Experimental**
 
-![Screenshot](./media/screenshot.png)
+<p align="center">
+    <a href="./media/screenshot-mac.png"><img src="./media/screenshot-mac.png" width="75%"></a>
+</p>
+
+<p align="center">
+    <a href="./media/screenshot-mac-overlay.png"><img src="./media/screenshot-mac-overlay.png" width="25%"></a>
+    <a href="./media/screenshot-linux-dark-overlay.png"><img src="./media/screenshot-linux-dark-overlay.png" width="25%"></a>
+    <a href="./media/screenshot-fullscreen.png"><img src="./media/screenshot-fullscreen.png" width="25%"></a>
+</p>
 
 ## Description
 YouWatch is a desktop app that improves the official YouTube webapp.
