@@ -1,36 +1,69 @@
+$scrollbar: #666666
+
 body.dark
 	background-color: $dark
 	color: $light
 
 	.jumbotron,
 	.form-control
-		background-color: lighten($dark, 10%)
+		background-color: $black
 		color: $light
 
 	#current-playlist,
 	#sidebar
-		background-color: $dark
+		background-color: $black
 		color: $light
+		border-right: 1px solid darken($black, 5%)
 
-	#sidebar
-		border-right: 1px solid darken($dark, 5%)
+	#current-playlist
+		#playlist
+			border-color: darken($black, 5%)
+			.playlist-item
+				border-color: darken($black, 5%)
+
+		#playlist-controls
+			button
+				background-color: $black
+				border-bottom-color: darken($black, 5%)
+				&:hover
+					background-color: darken($black, 5%)
 
 	.btn-secondary
 		background-color: $dark
 		color: $red
-		// border-color: $red
-		&:hover
+		&:not(:disabled):hover
 			background-color: $black
 		&:focus
 			background-color: $black
 			color: $red
-			// border: $red
 			outline: none
-			
+
 	&.layout-overlay,
 	&.layout-sticker
-		#videos-grid 
-			article.video
-				header
-					background-color: rgba($black, .8)
-					text-shadow: 0 0 2px $black
+		#content
+			#videos-grid 
+				article.video
+					header
+						background-color: rgba($black, .9)
+						text-shadow: 0 0 2px $black
+	
+	#titlebar
+		background-color: $black
+		border-bottom: 1px solid darken($black, 5%)
+
+		.titlebar--controls-wrapper
+			> div
+				span
+					border-color: $light
+				&:hover
+					background-color: $dark
+
+				&.titlebar--controls-close
+					&:hover
+						background-color: $red
+	
+	&:not(.darwin)
+		::-webkit-scrollbar-track
+			background: $dark
+		::-webkit-scrollbar-thumb
+			background: $scrollbar

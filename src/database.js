@@ -35,11 +35,11 @@ const Configuration = {
   connection: 'YouWatch',
 
   attributes: {
-    
+
   },
 
 };
- 
+
 const Channel = {
 
   identity: 'channel',
@@ -160,7 +160,7 @@ const Video = {
     seen: {
       type: 'boolean',
       required: true,
-      defaultsTo: false
+      defaultsTo: false,
     },
 
     playlistItem: {
@@ -170,4 +170,13 @@ const Video = {
 
   },
 
+};
+
+module.exports = {
+  User,
+  Configuration,
+  Channel,
+  Playlist,
+  PlaylistItem,
+  Video,
 };

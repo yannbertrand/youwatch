@@ -1,16 +1,14 @@
 'use strict';
 
-const electron = require('electron');
-const app = electron.app;
-
+const { app, shell } = require('electron');
+const youtubeRegex = require('youtube-regex');
 
 const VideoManager = require('./videomanager');
 const YoutubeApi = require('./youtubeapi');
-const Windows = require('./windows')(electron);
+const Windows = require('./windows');
 const server = require('./server');
-const database = require('./database');
 
-const youtubeRegex = require('youtube-regex');
+
 
 // adds debug features like hotkeys for triggering dev tools and reload
 require('electron-debug')();
@@ -31,14 +29,15 @@ app.on('ready', () => {
 
       YoutubeApi.getAuthUrl((url) => {
         socket.emit('youtube/waitingforuser');
-        Windows.openLogInWindow(url);
+
+        shell.openExternal(url);
       });
     });
 
     socket.on('subscriptions/list', () => {
-      if (subscriptions.length)
+      if (subscriptions.length > 0)
         return socket.emit('subscriptions/list', subscriptions);
-      
+
       YoutubeApi.getSubscriptions((err, _subscriptions) => {
         if (err) {
           console.error(err);
@@ -47,6 +46,10 @@ app.on('ready', () => {
           socket.emit('subscriptions/list', subscriptions);
         }
       });
+    });
+
+    socket.on('player/floatontop', (isPlayerMaximized) => {
+      Windows.togglePlayerState(isPlayerMaximized);
     });
 
     // Video
@@ -67,10 +70,10 @@ app.on('ready', () => {
       if (!youtubeRegex().test(text))
         return;
 
-      let videoId = youtubeRegex().exec(text)[1];
-      YoutubeApi.getVideo(videoId, function (err, theVideo) {
+      const videoId = youtubeRegex().exec(text)[1];
+      YoutubeApi.getVideo(videoId, (err/* , theVideo */) => {
         if (err) return;
-        playVideo(theVideo);
+        // ToDo
       });
     });
 
@@ -83,19 +86,27 @@ app.on('ready', () => {
         }
       });
     });
+
+    Windows.setOnNumberOfDisplayChangeHandler((sortedDisplaysIds) => {
+      socket.emit('number-of-display/update', sortedDisplaysIds);
+    });
   });
 
   server.hapi.route({
     method: 'GET',
     path:'/youtube/callback',
-    handler: function (request, reply) {
+    handler: (request, reply) => {
       server.io.emit('youtube/waiting');
-      YoutubeApi.getToken(request.query.code, function (token) {
-        server.io.emit('youtube/callback', token);
+      YoutubeApi.getToken(request.query.code, (err, token) => {
+        if (err) {
+          server.io.emit('youtube/callbackerror', err);
+          return;
+        }
 
-        Windows.closeLogInWindow();
+        server.io.emit('youtube/callback', token);
+        return reply.file(require('path').join('client/authenticated.html'));
       });
-    }
+    },
   });
 });
 
@@ -108,8 +119,8 @@ app.on('window-all-closed', () => {
   }
 });
 
-app.on('activate', function () {
+app.on('activate', () => {
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
-  Windows.activateWithNoOpenWindows();
+  Windows.openMainWindow();
 });

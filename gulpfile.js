@@ -6,7 +6,7 @@ const debug       = require('gulp-debug');
 const cache       = require('gulp-cached');
 const plumber     = require('gulp-plumber');
 const replace     = require('gulp-replace-task');
-const notify      = require("gulp-notify");
+const notify      = require('gulp-notify');
 const electron    = require('electron-connect').server.create();
 const tcpPortUsed = require('tcp-port-used');
 const CONFIG      = require('./src/config');
@@ -16,14 +16,14 @@ const CONFIG      = require('./src/config');
  */
 const plumberConfig = {
   errorHandler: notify.onError({
-    title:    "Gulp error!",
-    message:  "<%= error.message %>",
-  })
+    title:    'Gulp error!',
+    message:  '<%= error.message %>',
+  }),
 };
 
 const debugConfig = (taskName) => {
   return {
-    title: 'Task \'' + taskName + '\' -'
+    title: 'Task \'' + taskName + '\' -',
   };
 };
 
@@ -31,9 +31,9 @@ const replaceOptions = {
   patterns: [
     {
       match: 'PORT',
-      replace: CONFIG.PORT
-    }
-  ]
+      replace: CONFIG.PORT,
+    },
+  ],
 };
 
 
@@ -50,33 +50,35 @@ gulp.task('electron:reload:css',      ['sass'],                 () => electron.r
 /**
  * Files tasks
  */
-gulp.task('transpile:server', function (callback) {
+gulp.task('transpile:server', (callback) => {
   gulp.src(['src/**/*.js', '!src/client/*'])
     .pipe(plumber(plumberConfig))
     .pipe(cache('transpile'))
     .pipe(debug(debugConfig('transpile:server')))
     .pipe(replace(replaceOptions))
     .pipe(babel({
-      presets: ['es2015', 'react']
+      presets: ['es2015', 'react'],
     }))
     .pipe(gulp.dest('dist'))
     .on('end', callback);
 });
 
-gulp.task('transpile:client', function (callback) {
+gulp.task('transpile:client', (callback) => {
   gulp.src(['src/client/**/*.js'])
     .pipe(plumber(plumberConfig))
     .pipe(cache('transpile'))
     .pipe(debug(debugConfig('transpile:client')))
+    .pipe(sourcemaps.init())
     .pipe(replace(replaceOptions))
     .pipe(babel({
-      presets: ['es2015', 'react']
+      presets: ['es2015', 'react'],
     }))
+    .pipe(sourcemaps.write('./'))
     .pipe(gulp.dest('dist/client'))
     .on('end', callback);
 });
 
-gulp.task('sass', function (callback) {
+gulp.task('sass', (callback) => {
   gulp.src(['src/client/styles/**/*.sass'])
     .pipe(plumber(plumberConfig))
     .pipe(debug(debugConfig('sass')))
@@ -87,14 +89,14 @@ gulp.task('sass', function (callback) {
         './node_modules/bootstrap/scss/',
         './node_modules/font-awesome/scss/',
         './node_modules/z-switch/sass/',
-      ]
-      }).on('error', sass.logError))
+      ],
+    }).on('error', sass.logError))
     .pipe(sourcemaps.write('./'))
     .pipe(gulp.dest('dist/client/styles'))
     .on('end', callback);
 });
 
-gulp.task('copy:html', function (callback) {
+gulp.task('copy:html', (callback) => {
   gulp.src(['src/client/**/*.html'])
     .pipe(plumber(plumberConfig))
     .pipe(cache('copy'))
@@ -104,7 +106,7 @@ gulp.task('copy:html', function (callback) {
     .on('end', callback);
 });
 
-gulp.task('copy:assets', function (callback) {
+gulp.task('copy:assets', (callback) => {
   gulp.src(['src/client/**/*.*', '!src/client/**/*.{js,css,sass,html}'])
     .pipe(plumber(plumberConfig))
     .pipe(cache('copy'))
@@ -120,7 +122,7 @@ gulp.task('build', ['transpile:server', 'transpile:client', 'sass', 'copy:assets
 /**
  * Watch task
  */
-gulp.task('watch', function () {
+gulp.task('watch', () => {
   // Restart electron when server or electron js files change
   gulp.watch(['src/**/*.js', '!src/client/**/*.js'], ['electron:restart']);
 
@@ -132,7 +134,7 @@ gulp.task('watch', function () {
 
 
 
-/** 
+/**
  * ============================================================
  *   Default task (npm start)
  *   transpile, copy, ..., then start electron & watch files
@@ -146,13 +148,13 @@ gulp.task('default', ['electron:start', 'watch']);
  * Utils
  */
 
-gulp.task('check-port', function (callback) {
-  isPortUsed(CONFIG.PORT, function (err, portInUse) {
+gulp.task('check-port', (callback) => {
+  isPortUsed(CONFIG.PORT, (err, portInUse) => {
     if (err)
       return callback('An unknown error occured');
     if (portInUse)
       return callback('The port ' + CONFIG.PORT + ' is already in use');
-  
+
     callback();
   });
 });
@@ -160,9 +162,9 @@ gulp.task('check-port', function (callback) {
 function isPortUsed(port, callback) {
   tcpPortUsed
     .check(port, '127.0.0.1')
-    .then(function (inUse) {
+    .then((inUse) => {
       callback(null, inUse);
-    }, function (err) {
+    }, (err) => {
       callback(err);
-  });
-};
+    });
+}
