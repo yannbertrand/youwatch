@@ -2,13 +2,13 @@
 **Stability: 1 - Experimental**
 
 <p align="center">
-    <a href="./media/screenshot-mac.png"><img src="./media/screenshot-mac.png" width="100%"></a>
+    <a href="./media/screenshot-mac.png" title="macOS screenshot"><img src="./media/screenshot-mac.png" alt="macOS screenshot" width="100%"></a>
 </p>
 
 <p align="center">
-    <a href="./media/screenshot-mac-overlay.png"><img src="./media/screenshot-mac-overlay.png" width="30%"></a>
-    <a href="./media/screenshot-linux-dark-overlay.png"><img src="./media/screenshot-linux-dark-overlay.png" width="30%"></a>
-    <a href="./media/screenshot-fullscreen.png"><img src="./media/screenshot-fullscreen.png" width="30%"></a>
+    <a href="./media/screenshot-mac-overlay.png" title="macOS overlay mode screenshot"><img src="./media/screenshot-mac-overlay.png" alt="macOS overlay mode screenshot" width="30%"></a>
+    <a href="./media/screenshot-linux-dark-overlay.png" title="Windows/Linux dark overlay mode screenshot"><img src="./media/screenshot-linux-dark-overlay.png" alt="Windows/Linux dark overlay mode screenshot" width="30%"></a>
+    <a href="./media/screenshot-fullscreen.png" title="Fullscreen screenshot"><img src="./media/screenshot-fullscreen.png" alt="Fullscreen screenshot" width="30%"></a>
 </p>
 
 ## Description
@@ -27,13 +27,13 @@ YouWatch is a desktop app that improves the official YouTube webapp.
 ## Stack
 
 <p align="center">
-    <a href="http://electron.atom.io/"><img src="http://svgporn.com/logos/electron.svg" width="75%"></a>
+    <a href="http://electron.atom.io/" title="Electron website"><img src="http://yann-bertrand.fr/youwatch/electron.svg" alt="Electron icon" width="75%"></a>
 </p>
 
 <p align="center">
-    <a href="http://gulpjs.com/"><img src="http://svgporn.com/logos/gulp.svg" width="14%"></a>
-    <a href="https://facebook.github.io/react/"><img src="http://svgporn.com/logos/react.svg" width="31%"></a>
-    <a href="http://sass-lang.com/"><img src="http://svgporn.com/logos/sass.svg" width="31%"></a>
+    <a href="http://gulpjs.com/" title="Gulp website"><img src="http://yann-bertrand.fr/youwatch/gulp.svg" alt="Gulp icon" width="14%"></a>
+    <a href="https://facebook.github.io/react/" title="React website"><img src="http://yann-bertrand.fr/youwatch/react.svg" alt="React icon" width="31%"></a>
+    <a href="http://sass-lang.com/" title="Sass website"><img src="http://yann-bertrand.fr/youwatch/sass.svg" alt="Sass icon" width="31%"></a>
 </p>
 
 ## Dev
