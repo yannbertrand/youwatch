@@ -24,7 +24,7 @@
   "dependencies": {
     "async": "^2.0.1",
     "bootstrap": "^4.0.0-alpha.4",
-    "configstore": "^2.0.0",
+    "electron-config": "^0.2.1",
     "electron-debug": "^1.0.0",
     "electron-is-dev": "^0.1.2",
     "font-awesome": "^4.6.3",
