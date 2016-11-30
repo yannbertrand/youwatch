@@ -27,13 +27,13 @@ YouWatch is a desktop app that improves the official YouTube webapp.
 ## Stack
 
 <p align="center">
-    <a href="http://electron.atom.io/"><img src="./media/electron.svg" width="75%"></a>
+    <a href="http://electron.atom.io/"><img src="http://yann-bertrand.fr/youwatch/electron.svg" width="75%"></a>
 </p>
 
 <p align="center">
-    <a href="http://gulpjs.com/"><img src="./media/gulp.svg" width="14%"></a>
-    <a href="https://facebook.github.io/react/"><img src="./media/react.svg" width="31%"></a>
-    <a href="http://sass-lang.com/"><img src="./media/sass.svg" width="31%"></a>
+    <a href="http://gulpjs.com/"><img src="http://yann-bertrand.fr/youwatch/gulp.svg" width="14%"></a>
+    <a href="https://facebook.github.io/react/"><img src="http://yann-bertrand.fr/youwatch/react.svg" width="31%"></a>
+    <a href="http://sass-lang.com/"><img src="http://yann-bertrand.fr/youwatch/sass.svg" width="31%"></a>
 </p>
 
 ## Dev
