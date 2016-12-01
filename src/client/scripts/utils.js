@@ -1,9 +1,9 @@
-const Configstore = require('configstore');
+const Config = require('electron-config');
 
 // eslint-disable-next-line no-undef
 const Socket = io('http://localhost:@@PORT');
 
-const configStore = new Configstore('YouWatch');
+const config = new Config('YouWatch');
 let sortedDisplaysIds;
 
 Socket.on('number-of-display/update', onNumberOfDisplayChange);
@@ -15,16 +15,16 @@ function isDarkThemeActive() {
 function onNumberOfDisplayChange(_sortedDisplaysIds) {
   sortedDisplaysIds = _sortedDisplaysIds;
 
-  if (!configStore.get('window.' + sortedDisplaysIds + '.preferedMode'))
-    configStore.set('window.' + sortedDisplaysIds + '.preferedMode', false);
+  if (!config.get('window.' + sortedDisplaysIds + '.preferedMode'))
+    config.set('window.' + sortedDisplaysIds + '.preferedMode', false);
 }
 
 function getMode() {
-  return configStore.get('window.' + sortedDisplaysIds + '.preferedMode');
+  return config.get('window.' + sortedDisplaysIds + '.preferedMode');
 }
 
 function toggleMode() {
-  configStore.set('window.' + sortedDisplaysIds + '.preferedMode', !getMode());
+  config.set('window.' + sortedDisplaysIds + '.preferedMode', !getMode());
   return getMode();
 }
 

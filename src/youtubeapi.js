@@ -1,10 +1,10 @@
-const Configstore = require('configstore');
+const Config = require('electron-config');
 const async = require('async');
 const Google = require('googleapis');
 
 const CONFIG = require('./config');
 
-const configStore = new Configstore('YouWatch');
+const config = new Config('YouWatch');
 const YouTube = Google.youtube('v3');
 const oauth2Client = new Google.auth.OAuth2(
   CONFIG.CREDENTIALS.CLIENT_ID,
@@ -22,11 +22,11 @@ module.exports = {
 
 // Check if the stored access token (if existing) is still working
 function tryStoredAccessToken(cb) {
-  if (!configStore.get('tokens')) {
+  if (!config.get('tokens')) {
     return cb(true);
   }
 
-  oauth2Client.setCredentials(configStore.get('tokens'));
+  oauth2Client.setCredentials(config.get('tokens'));
 
   YouTube.subscriptions.list({
     part: 'id',
@@ -39,7 +39,7 @@ function tryStoredAccessToken(cb) {
     oauth2Client.refreshAccessToken((err, newTokens) => {
       if (err) return cb(true);
 
-      configStore.set('tokens', newTokens);
+      config.set('tokens', newTokens);
 
       return cb(false, newTokens);
     });
@@ -66,7 +66,7 @@ function getToken(code, cb) {
     if (err)
       return cb(err);
 
-    configStore.set('tokens', tokens);
+    config.set('tokens', tokens);
     oauth2Client.setCredentials(tokens);
     return cb(err, tokens);
   });

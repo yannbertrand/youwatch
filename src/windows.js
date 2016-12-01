@@ -3,9 +3,9 @@ const { app, BrowserWindow } = require('electron');
 const path = require('path');
 const url = require('url');
 const _ = require('lodash');
-const Configstore = require('configstore');
+const Config = require('electron-config');
 
-const configStore = new Configstore('YouWatch');
+const config = new Config('YouWatch');
 
 app.on('ready', () => {
   const screen = electron.screen;
@@ -38,10 +38,10 @@ app.on('ready', () => {
 
     const _window = new BrowserWindow({
       title: app.getName(),
-      x: configStore.get(getConfigStoreWindow('classic.x')),
-      y: configStore.get(getConfigStoreWindow('classic.y')),
-      width: configStore.get(getConfigStoreWindow('classic.width')),
-      height: configStore.get(getConfigStoreWindow('classic.height')),
+      x: config.get(getConfigWindow('classic.x')),
+      y: config.get(getConfigWindow('classic.y')),
+      width: config.get(getConfigWindow('classic.width')),
+      height: config.get(getConfigWindow('classic.height')),
       icon: ICON,
       autoHideMenuBar: true,
       minWidth: 880,
@@ -77,7 +77,7 @@ app.on('ready', () => {
   }
 
   function togglePlayerState(_isPlayerMaximized) {
-    const bounds = configStore.get(getConfigStoreWindow(_isPlayerMaximized ? 'floatOnTop' : 'classic'));
+    const bounds = config.get(getConfigWindow(_isPlayerMaximized ? 'floatOnTop' : 'classic'));
 
     isChangingMode = true;
     windows[MAIN_WINDOW].setBounds(bounds, true);
@@ -95,8 +95,8 @@ app.on('ready', () => {
       return;
 
     const bounds = windows[windowName].getBounds();
-    const key = getConfigStoreWindow(isPlayerMaximized ? 'floatOnTop' : 'classic');
-    configStore.set(key, bounds);
+    const key = getConfigWindow(isPlayerMaximized ? 'floatOnTop' : 'classic');
+    config.set(key, bounds);
   }
 
   function onClosed(windowName) {
@@ -108,7 +108,7 @@ app.on('ready', () => {
     sortedDisplaysIds = screen.getAllDisplays().map((display) => display.id).sort().join('-');
     primaryDisplay = screen.getPrimaryDisplay();
 
-    if (!configStore.get(getConfigStoreWindowKey())) {
+    if (!config.get(getConfigWindowKey())) {
       const { width: screenWidth, height: screenHeight } = primaryDisplay.size;
       const appWidth = 0.75 * screenWidth;
       const appHeight = 0.75 * screenHeight;
@@ -128,11 +128,11 @@ app.on('ready', () => {
         },
       };
 
-      configStore.set(getConfigStoreWindowKey(), defaultConfig);
+      config.set(getConfigWindowKey(), defaultConfig);
     }
 
     if (windows[windowName]) {
-      const bounds = configStore.get(getConfigStoreWindow(isPlayerMaximized ? 'floatOnTop' : 'classic'));
+      const bounds = config.get(getConfigWindow(isPlayerMaximized ? 'floatOnTop' : 'classic'));
       windows[windowName].setBounds(bounds, true);
     }
 
@@ -140,12 +140,12 @@ app.on('ready', () => {
       onNumberOfDisplaysChangeHandler(sortedDisplaysIds);
   }
 
-  function getConfigStoreWindowKey() {
+  function getConfigWindowKey() {
     return 'window.' + sortedDisplaysIds;
   }
 
-  function getConfigStoreWindow(param) {
-    return getConfigStoreWindowKey() + '.' + param;
+  function getConfigWindow(param) {
+    return getConfigWindowKey() + '.' + param;
   }
 
   function setOnNumberOfDisplayChangeHandler(handler) {
