@@ -1,7 +1,8 @@
+const { ipcRenderer } = require('electron');
 const Config = require('electron-config');
 
 // eslint-disable-next-line no-undef
-const Socket = io('http://localhost:@@PORT');
+const Socket = ipcRenderer;
 
 const config = new Config('YouWatch');
 let sortedDisplaysIds;

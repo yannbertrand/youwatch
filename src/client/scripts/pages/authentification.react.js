@@ -13,7 +13,7 @@ const AuthentificationPage = React.createClass({
   getInitialState() { return { loading: false }; },
   openAuthWindow() {
     this.setState({ loading: true });
-    Utils.Socket.emit('youtube/auth');
+    Utils.Socket.send('youtube/auth');
   },
   renderError() {
     if (this.props.error) {

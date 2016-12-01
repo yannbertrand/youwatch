@@ -27,7 +27,4 @@ server.start((err) => {
   console.log('Server running at:', server.info.uri);
 });
 
-const io = require('socket.io')(server.listener);
-
 module.exports.hapi = server;
-module.exports.io = io;

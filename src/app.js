@@ -1,6 +1,6 @@
 'use strict';
 
-const { app, shell } = require('electron');
+const { app, shell, ipcMain } = require('electron');
 const youtubeRegex = require('youtube-regex');
 
 const VideoManager = require('./videomanager');
@@ -18,96 +18,96 @@ require('electron-debug')();
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
   Windows.openMainWindow();
-
   VideoManager.refresh();
 
-  server.io.on('connection', (socket) => {
-    let subscriptions = [];
+  let subscriptions = [];
 
-    socket.on('youtube/auth', () => {
-      socket.emit('youtube/waiting');
+  ipcMain.on('handshake', (event) => {
+    server.hapi.route({
+      method: 'GET',
+      path:'/youtube/callback',
+      handler: (request, reply) => {
+        event.sender.send('youtube/waiting');
+        YoutubeApi.getToken(request.query.code, (err, token) => {
+          if (err) {
+            event.sender.send('youtube/callbackerror', err);
+            return;
+          }
 
-      YoutubeApi.getAuthUrl((url) => {
-        socket.emit('youtube/waitingforuser');
-
-        shell.openExternal(url);
-      });
+          event.sender.send('youtube/callback', token);
+          return reply.file(require('path').join('client/authenticated.html'));
+        });
+      },
     });
+  });
 
-    socket.on('subscriptions/list', () => {
-      if (subscriptions.length > 0)
-        return socket.emit('subscriptions/list', subscriptions);
+  ipcMain.on('youtube/auth', (event) => {
+    event.sender.send('youtube/waiting');
 
-      YoutubeApi.getSubscriptions((err, _subscriptions) => {
-        if (err) {
-          console.error(err);
-        } else {
-          subscriptions = _subscriptions;
-          socket.emit('subscriptions/list', subscriptions);
-        }
-      });
+    YoutubeApi.getAuthUrl((url) => {
+      event.sender.send('youtube/waitingforuser');
+
+      shell.openExternal(url);
     });
+  });
 
-    socket.on('player/floatontop', (isPlayerMaximized) => {
-      Windows.togglePlayerState(isPlayerMaximized);
+  ipcMain.on('subscriptions/list', (event) => {
+    if (subscriptions.length > 0)
+      return event.sender.send('subscriptions/list', subscriptions);
+
+    YoutubeApi.getSubscriptions((err, _subscriptions) => {
+      if (err) {
+        console.error(err);
+      } else {
+        subscriptions = _subscriptions;
+        event.sender.send('subscriptions/list', subscriptions);
+      }
     });
+  });
 
-    // Video
-    socket.on('video/start', (id) => {
-      console.log('Video started: ', id);
+  ipcMain.on('player/floatontop', (event, isPlayerMaximized) => {
+    Windows.togglePlayerState(isPlayerMaximized);
+  });
+
+  // Video
+  ipcMain.on('video/start', (event, id) => {
+    console.log('Video started: ', id);
+  });
+
+  ipcMain.on('video/pause', (event, id) => {
+    console.log('Video paused: ', id);
+  });
+
+  ipcMain.on('video/buffer', (event, id) => {
+    console.log('Video buffering: ', id);
+  });
+
+  /* When something is pasted, if it is a YouTube video, play it */
+  ipcMain.on('video/paste', (event, text) => {
+    if (!youtubeRegex().test(text))
+      return;
+
+    const videoId = youtubeRegex().exec(text)[1];
+    YoutubeApi.getVideo(videoId, (err/* , theVideo */) => {
+      if (err) return;
+      // ToDo
     });
+  });
 
-    socket.on('video/pause', (id) => {
-      console.log('Video paused: ', id);
-    });
-
-    socket.on('video/buffer', (id) => {
-      console.log('Video buffering: ', id);
-    });
-
-    /* When something is pasted, if it is a YouTube video, play it */
-    socket.on('video/paste', (text) => {
-      if (!youtubeRegex().test(text))
-        return;
-
-      const videoId = youtubeRegex().exec(text)[1];
-      YoutubeApi.getVideo(videoId, (err/* , theVideo */) => {
-        if (err) return;
-        // ToDo
-      });
-    });
-
-    socket.on('app/authenticate', () => {
-      YoutubeApi.tryStoredAccessToken((noValidAccessToken, token) => {
-        if (noValidAccessToken) {
-          socket.emit('youtube/notauthenticated');
-        } else {
-          socket.emit('youtube/callback', token);
-        }
-      });
+  ipcMain.on('app/authenticate', (event) => {
+    YoutubeApi.tryStoredAccessToken((noValidAccessToken, token) => {
+      if (noValidAccessToken) {
+        event.sender.send('youtube/notauthenticated');
+      } else {
+        event.sender.send('youtube/callback', token);
+      }
     });
 
     Windows.setOnNumberOfDisplayChangeHandler((sortedDisplaysIds) => {
-      socket.emit('number-of-display/update', sortedDisplaysIds);
+      event.sender.send('number-of-display/update', sortedDisplaysIds);
     });
   });
 
-  server.hapi.route({
-    method: 'GET',
-    path:'/youtube/callback',
-    handler: (request, reply) => {
-      server.io.emit('youtube/waiting');
-      YoutubeApi.getToken(request.query.code, (err, token) => {
-        if (err) {
-          server.io.emit('youtube/callbackerror', err);
-          return;
-        }
-
-        server.io.emit('youtube/callback', token);
-        return reply.file(require('path').join('client/authenticated.html'));
-      });
-    },
-  });
 });
 
 // Quit when all windows are closed.
