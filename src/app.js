@@ -65,10 +65,6 @@ app.on('ready', () => {
     });
   });
 
-  ipcMain.on('player/floatontop', (event, isPlayerMaximized) => {
-    Windows.togglePlayerState(isPlayerMaximized);
-  });
-
   // Video
   ipcMain.on('video/start', (event, id) => {
     console.log('Video started: ', id);
