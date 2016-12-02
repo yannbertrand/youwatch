@@ -11,10 +11,10 @@ const ConfigurationPage = React.createClass({
 
     this.setState({ darkTheme });
   },
-  toggleMode() {
-    const mode = Utils.toggleMode();
+  togglePreferredMode() {
+    Utils.togglePreferredMode();
 
-    this.setState({ mode });
+    this.updatePreferredMode();
   },
   changeLayout(event) {
     const layout = event.target.value;
@@ -39,24 +39,19 @@ const ConfigurationPage = React.createClass({
   getInitialState() {
     return {
       showConsole: false,
-      darkTheme : Utils.isDarkThemeActive(),
+      isDarkThemeActive : Utils.isDarkThemeActive(),
       layout: Utils.getActiveLayout(),
-      mode: Utils.getMode(),
+      isFloatOnTopPreferredMode: Utils.isFloatOnTopPreferredMode(),
     };
   },
   componentDidMount() {
-    Utils.Socket.on('number-of-display/update', this.onNumberOfDisplayChange);
+    window.addEventListener('numberOfDisplays.update', this.updatePreferredMode);
   },
-  componentWillUnmout() {
-    Utils.Socket.removeAllListeners('number-of-display/update');
+  componentWillUnmount() {
+    window.removeEventListener('numberOfDisplays.update', this.updatePreferredMode);
   },
-  onNumberOfDisplayChange() {
-    this.setState({
-      showConsole: this.state.showConsole,
-      darkTheme: this.state.darkTheme,
-      layout: this.state.layout,
-      mode: Utils.getMode(),
-    });
+  updatePreferredMode() {
+    this.setState({ isFloatOnTopPreferredMode: Utils.isFloatOnTopPreferredMode() });
   },
   render() {
     return (
@@ -67,7 +62,7 @@ const ConfigurationPage = React.createClass({
             <label className="col-sm-4 col-form-label">Dark Theme</label>
             <div className="col-sm-8 col-form-label">
               <Switch
-                isChecked={this.state.darkTheme}
+                isChecked={this.state.isDarkThemeActive}
                 onChange={this.toggleDarkTheme}
                 size="lg"
                 textOn="I"
@@ -89,14 +84,14 @@ const ConfigurationPage = React.createClass({
             </div>
           </div>
           <div className="form-group row">
-            <div className="col-sm-2 col-form-label">Mode</div>
+            <div className="col-sm-2 col-form-label">Preferred mode</div>
             <label className="col-sm-2 col-form-label">
               <span className="pull-right">Fullscreen</span>
             </label>
             <div className="col-sm-1 col-form-label">
               <Switch
-                isChecked={this.state.mode}
-                onChange={this.toggleMode}
+                isChecked={this.state.isFloatOnTopPreferredMode}
+                onChange={this.togglePreferredMode}
                 color="1"
                 size="lg"
                 shape="square"

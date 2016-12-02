@@ -1,32 +1,58 @@
-const { ipcRenderer } = require('electron');
+const { ipcRenderer, screen } = require('electron');
 const Config = require('electron-config');
 
 // eslint-disable-next-line no-undef
 const Socket = ipcRenderer;
 
 const config = new Config('YouWatch');
-let sortedDisplaysIds;
+const FULLSCREEN = 'fullscreen';
+const FLOAT_ON_TOP = 'float-on-top';
 
-Socket.on('number-of-display/update', onNumberOfDisplayChange);
+let sortedDisplaysIds;
+let preferredMode;
+
+onNumberOfDisplayChange();
+
+screen.removeAllListeners();
+screen.on('display-added', onNumberOfDisplayChange);
+screen.on('display-removed', onNumberOfDisplayChange);
 
 function isDarkThemeActive() {
   return document.body.classList.contains('dark');
 }
 
-function onNumberOfDisplayChange(_sortedDisplaysIds) {
-  sortedDisplaysIds = _sortedDisplaysIds;
-
-  if (!config.get('window.' + sortedDisplaysIds + '.preferedMode'))
-    config.set('window.' + sortedDisplaysIds + '.preferedMode', false);
+function getConfigKey() {
+  return 'window.' + sortedDisplaysIds + '.preferredMode';
 }
 
-function getMode() {
-  return config.get('window.' + sortedDisplaysIds + '.preferedMode');
+function onNumberOfDisplayChange() {
+  sortedDisplaysIds = screen.getAllDisplays().map((display) => display.id).sort().join('-');
+
+  preferredMode = config.get(getConfigKey());
+  if (!preferredMode) {
+    preferredMode = FULLSCREEN;
+    config.set(getConfigKey(), preferredMode);
+  }
+
+  window.dispatchEvent(new CustomEvent('numberOfDisplays.update'));
 }
 
-function toggleMode() {
-  config.set('window.' + sortedDisplaysIds + '.preferedMode', !getMode());
-  return getMode();
+function getPreferredMode() {
+  return preferredMode;
+}
+
+function isFullScreenPreferredMode() {
+  return getPreferredMode() === FULLSCREEN;
+}
+
+function isFloatOnTopPreferredMode() {
+  return getPreferredMode() === FLOAT_ON_TOP;
+}
+
+function togglePreferredMode() {
+  preferredMode = isFullScreenPreferredMode() ? FLOAT_ON_TOP : FULLSCREEN;
+
+  config.set(getConfigKey(), preferredMode);
 }
 
 function getActiveLayout() {
@@ -44,9 +70,11 @@ function castBooleanToString(boolean) {
 
 module.exports = {
   Socket,
+  screen,
   isDarkThemeActive,
   getActiveLayout,
   castBooleanToString,
-  getMode,
-  toggleMode,
+  isFullScreenPreferredMode,
+  isFloatOnTopPreferredMode,
+  togglePreferredMode,
 };

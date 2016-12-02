@@ -65,10 +65,6 @@ app.on('ready', () => {
     });
   });
 
-  ipcMain.on('player/floatontop', (event, isPlayerMaximized) => {
-    Windows.togglePlayerState(isPlayerMaximized);
-  });
-
   // Video
   ipcMain.on('video/start', (event, id) => {
     console.log('Video started: ', id);
@@ -101,10 +97,6 @@ app.on('ready', () => {
       } else {
         event.sender.send('youtube/callback', token);
       }
-    });
-
-    Windows.setOnNumberOfDisplayChangeHandler((sortedDisplaysIds) => {
-      event.sender.send('number-of-display/update', sortedDisplaysIds);
     });
   });
 

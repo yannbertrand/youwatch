@@ -73,8 +73,6 @@ const Player = React.createClass({
   onWebkitFullScreenChange() {
     const isFullScreen = this.isFullScreen();
 
-    Utils.Socket.send('player/floatontop', isFullScreen);
-
     if (isFullScreen) {
       document.body.classList.add('fullscreen');
       this.state.currentWindow.setMinimumSize(160, 90);
@@ -91,8 +89,7 @@ const Player = React.createClass({
     window.addEventListener('player.playNextVideo', this.playNextVideo);
     window.addEventListener('player.replayCurrentVideo', this.replayCurrentVideo);
     window.addEventListener('player.stopReplayCurrentVideo', this.stopReplayCurrentVideo);
-
-    Utils.Socket.on('number-of-display/update', this.updateMode);
+    window.addEventListener('numberOfDisplays.update', this.updatePreferredMode);
 
     document.addEventListener('webkitfullscreenchange', this.onWebkitFullScreenChange);
 
@@ -110,7 +107,7 @@ const Player = React.createClass({
           onStateChange: this.onStateChange,
         },
       }),
-    }, this.updateMode);
+    }, this.updatePreferredMode);
   },
   componentWillUnmount() {
     document.removeEventListener('webkitfullscreenchange', this.onWebkitFullScreenChange);
@@ -118,8 +115,7 @@ const Player = React.createClass({
     window.removeEventListener('player.playNextVideo', this.playNextVideo);
     window.removeEventListener('player.replayCurrentVideo', this.replayCurrentVideo);
     window.removeEventListener('player.stopReplayCurrentVideo', this.stopReplayCurrentVideo);
-
-    Utils.Socket.removeAllListeners('number-of-display/update');
+    window.removeEventListener('numberOfDisplays.update', this.updatePreferredMode);
   },
   playNextVideo() {
     this.removeVideo();
@@ -141,8 +137,8 @@ const Player = React.createClass({
   isVideoEnded() {
     return this.state.player.getCurrentTime() === this.state.player.getDuration();
   },
-  updateMode() {
-    this.state.currentWindow.setFullScreenable(!Utils.getMode());
+  updatePreferredMode() {
+    this.state.currentWindow.setFullScreenable(Utils.isFullScreenPreferredMode());
   },
   render() {
     return <div id="player" />;
