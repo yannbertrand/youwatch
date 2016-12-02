@@ -13,6 +13,10 @@ let preferredMode;
 
 onNumberOfDisplayChange();
 
+screen.removeAllListeners();
+screen.on('display-added', onNumberOfDisplayChange);
+screen.on('display-removed', onNumberOfDisplayChange);
+
 function isDarkThemeActive() {
   return document.body.classList.contains('dark');
 }
@@ -29,6 +33,8 @@ function onNumberOfDisplayChange() {
     preferredMode = FULLSCREEN;
     config.set(getConfigKey(), preferredMode);
   }
+
+  window.dispatchEvent(new CustomEvent('numberOfDisplays.update'));
 }
 
 function getPreferredMode() {

@@ -89,9 +89,7 @@ const Player = React.createClass({
     window.addEventListener('player.playNextVideo', this.playNextVideo);
     window.addEventListener('player.replayCurrentVideo', this.replayCurrentVideo);
     window.addEventListener('player.stopReplayCurrentVideo', this.stopReplayCurrentVideo);
-
-    Utils.screen.on('display-added', this.updatePreferredMode);
-    Utils.screen.on('display-removed', this.updatePreferredMode);
+    window.addEventListener('numberOfDisplays.update', this.updatePreferredMode);
 
     document.addEventListener('webkitfullscreenchange', this.onWebkitFullScreenChange);
 
@@ -117,9 +115,7 @@ const Player = React.createClass({
     window.removeEventListener('player.playNextVideo', this.playNextVideo);
     window.removeEventListener('player.replayCurrentVideo', this.replayCurrentVideo);
     window.removeEventListener('player.stopReplayCurrentVideo', this.stopReplayCurrentVideo);
-
-    Utils.screen.removeAllListeners('display-added');
-    Utils.screen.removeAllListeners('display-removed');
+    window.removeEventListener('numberOfDisplays.update', this.updatePreferredMode);
   },
   playNextVideo() {
     this.removeVideo();

@@ -45,12 +45,10 @@ const ConfigurationPage = React.createClass({
     };
   },
   componentDidMount() {
-    Utils.screen.on('display-added', this.updatePreferredMode);
-    Utils.screen.on('display-removed', this.updatePreferredMode);
+    window.addEventListener('numberOfDisplays.update', this.updatePreferredMode);
   },
-  componentWillUnmout() {
-    Utils.screen.removeAllListeners('display-added');
-    Utils.screen.removeAllListeners('display-removed');
+  componentWillUnmount() {
+    window.removeEventListener('numberOfDisplays.update', this.updatePreferredMode);
   },
   updatePreferredMode() {
     this.setState({ isFloatOnTopPreferredMode: Utils.isFloatOnTopPreferredMode() });
