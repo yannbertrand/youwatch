@@ -102,10 +102,6 @@ app.on('ready', () => {
         event.sender.send('youtube/callback', token);
       }
     });
-
-    Windows.setOnNumberOfDisplayChangeHandler((sortedDisplaysIds) => {
-      event.sender.send('number-of-display/update', sortedDisplaysIds);
-    });
   });
 
 });
