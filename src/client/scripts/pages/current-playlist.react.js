@@ -92,7 +92,8 @@ const Player = React.createClass({
     window.addEventListener('player.replayCurrentVideo', this.replayCurrentVideo);
     window.addEventListener('player.stopReplayCurrentVideo', this.stopReplayCurrentVideo);
 
-    Utils.Socket.on('number-of-display/update', this.updateMode);
+    Utils.screen.on('display-added', this.updatePreferredMode);
+    Utils.screen.on('display-removed', this.updatePreferredMode);
 
     document.addEventListener('webkitfullscreenchange', this.onWebkitFullScreenChange);
 
@@ -110,7 +111,7 @@ const Player = React.createClass({
           onStateChange: this.onStateChange,
         },
       }),
-    }, this.updateMode);
+    }, this.updatePreferredMode);
   },
   componentWillUnmount() {
     document.removeEventListener('webkitfullscreenchange', this.onWebkitFullScreenChange);
@@ -119,7 +120,8 @@ const Player = React.createClass({
     window.removeEventListener('player.replayCurrentVideo', this.replayCurrentVideo);
     window.removeEventListener('player.stopReplayCurrentVideo', this.stopReplayCurrentVideo);
 
-    Utils.Socket.removeAllListeners('number-of-display/update');
+    Utils.screen.removeAllListeners('display-added');
+    Utils.screen.removeAllListeners('display-removed');
   },
   playNextVideo() {
     this.removeVideo();
@@ -141,8 +143,8 @@ const Player = React.createClass({
   isVideoEnded() {
     return this.state.player.getCurrentTime() === this.state.player.getDuration();
   },
-  updateMode() {
-    this.state.currentWindow.setFullScreenable(!Utils.getMode());
+  updatePreferredMode() {
+    this.state.currentWindow.setFullScreenable(Utils.isFullScreenPreferredMode());
   },
   render() {
     return <div id="player" />;
