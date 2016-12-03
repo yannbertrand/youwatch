@@ -1,7 +1,7 @@
 {
   "name": "youwatch",
   "productName": "YouWatch",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "An improved YouTube desktop client",
   "license": "MIT",
   "repository": "YannBertrand/YouWatch",
