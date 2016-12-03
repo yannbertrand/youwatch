@@ -21,7 +21,7 @@ const Video = React.createClass({
   addVideo() {
     if (this.props.id) {
       window.dispatchEvent(new CustomEvent('playlist.addVideo', { detail: { video: this.props } }));
-      Utils.Socket.emit('video/next', this.props);
+      Utils.Socket.send('video/next', this.props);
     }
   },
   markVideoAsWatched() {
@@ -31,7 +31,7 @@ const Video = React.createClass({
   cueVideo() {
     if (this.props.id) {
       window.dispatchEvent(new CustomEvent('playlist.cueVideo', { detail: { video: this.props } }));
-      Utils.Socket.emit('video/cue', this.props);
+      Utils.Socket.send('video/cue', this.props);
     }
   },
   render() {
@@ -98,8 +98,8 @@ const VideoGrid = React.createClass({
 const SubscriptionsPage = React.createClass({
   getInitialState() { return { loading: true, videos: null }; },
   componentDidMount() {
-    Utils.Socket.emit('subscriptions/list');
-    Utils.Socket.on('subscriptions/list', (subscriptions) => {
+    Utils.Socket.send('subscriptions/list');
+    Utils.Socket.on('subscriptions/list', (event, subscriptions) => {
       this.setState({ loading: false, videos: subscriptions });
       window.addEventListener('paste', this.onPaste);
     });
@@ -111,7 +111,7 @@ const SubscriptionsPage = React.createClass({
   onPaste(event) {
     if (!event.clipboardData.getData('text/plain')) return;
 
-    Utils.Socket.emit('video/paste', event.clipboardData.getData('text/plain'));
+    Utils.Socket.send('video/paste', event.clipboardData.getData('text/plain'));
   },
   render() {
     if (this.state.loading) {

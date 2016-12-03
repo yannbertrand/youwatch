@@ -121,6 +121,7 @@ function loadYoutube(_YT) {
 
 window.addEventListener('offline', switchToOfflineMode);
 window.addEventListener('online', tryStoredAccessToken);
+Utils.Socket.send('handshake');
 Utils.Socket.on('youtube/notauthenticated', renderAuthentication);
 Utils.Socket.on('youtube/callbackerror', renderAuthentication);
 Utils.Socket.on('youtube/callback', renderApp);
@@ -134,7 +135,7 @@ if (navigator.onLine) {
 }
 
 function tryStoredAccessToken() {
-  Utils.Socket.emit('app/authenticate');
+  Utils.Socket.send('app/authenticate');
 }
 
 ReactDOM.render(
@@ -142,7 +143,7 @@ ReactDOM.render(
   titlebarElement
 );
 
-function renderAuthentication(error) {
+function renderAuthentication(event, error) {
   ReactDOM.render(
     <AuthentificationPage error={error} />,
     mainElement
