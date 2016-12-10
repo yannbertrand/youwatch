@@ -3,7 +3,7 @@
 const { app, shell, ipcMain } = require('electron');
 const youtubeRegex = require('youtube-regex');
 
-const VideoManager = require('./videomanager');
+const VideoManager = require('./video-manager');
 const YoutubeApi = require('./youtubeapi');
 const Windows = require('./windows');
 const server = require('./server');
