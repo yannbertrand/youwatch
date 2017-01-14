@@ -4,7 +4,10 @@
   "version": "0.4.2",
   "description": "An improved YouTube desktop client",
   "license": "MIT",
-  "repository": "YannBertrand/YouWatch",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yannbertrand/youwatch.git"
+  },
   "main": "dist/app.js",
   "author": {
     "name": "Yann Bertrand",

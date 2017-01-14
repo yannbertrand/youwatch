@@ -92,7 +92,7 @@ const WindowsTitlebar = React.createClass({
           },
           {
             label: 'GitHub repo',
-            click() { remote.shell.openExternal('https://github.com/YannBertrand/YouWatch'); },
+            click() { remote.shell.openExternal('https://github.com/yannbertrand/youwatch'); },
           },
         ],
       },
