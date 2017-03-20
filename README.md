@@ -43,13 +43,14 @@ Use this command to avoid commiting the file:
 `$ git update-index --assume-unchanged src/config.js`
 
 ### Commands
-* Init: `$ npm install`
-* Clean data: `$ npm run clean`
-* Run: `$ npm start`
-* Build OS X: `$ npm run build:osx`
-* Build Linux: `$ npm run build:linux`
-* Build Windows: `$ npm run build:windows`
-* Build all: `$ brew install wine` and `$ npm run build` *(OS X only)*
+* Init: `$ yarn`
+* Clean data: `$ yarn run clean`
+* Run: `$ yarn start`
+* Lint: `$ yarn run test`
+* Build OS X: `$ yarn run build:osx`
+* Build Linux: `$ yarn run build:linux`
+* Build Windows: `$ yarn run build:windows`
+* Build all: `$ brew install wine` and `$ yarn run build` *(OS X only)*
 
 ## License
 MIT © [Yann Bertrand](http://yann-bertrand.fr)
