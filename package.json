@@ -133,7 +133,8 @@
           ]
         }
       ],
-      "jsx-sort-props": "off"
+      "jsx-sort-props": "off",
+      "react/jsx-closing-bracket-location": "off"
     },
     "overrides": [
       {

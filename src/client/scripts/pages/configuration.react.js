@@ -68,7 +68,7 @@ const ConfigurationPage = React.createClass({
                 textOn="I"
                 textOff="O"
                 shape="square"
-                />
+              />
             </div>
           </div>
           <div className="form-group row">
@@ -95,7 +95,7 @@ const ConfigurationPage = React.createClass({
                 color="1"
                 size="lg"
                 shape="square"
-                />
+              />
             </div>
             <label className="col-sm-7 col-form-label">Float-on-top</label>
           </div>

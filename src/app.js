@@ -98,7 +98,6 @@ app.on('ready', () => {
       }
     });
   });
-
 });
 
 // Quit when all windows are closed.

@@ -46,12 +46,16 @@ const Video = React.createClass({
           onClick={this.markVideoAsWatched}
           disabled
           title="Mark as watched"
-          >&times;</button>
+        >
+          &times;
+        </button>
         <button
           className="cue btn btn-secondary btn-sm cue"
           onClick={this.cueVideo}
           title="Cue this video"
-          >+</button>
+        >
+          +
+        </button>
         <header>
           <h5>
             <a onClick={this.addVideo} title={this.props.title}>
@@ -80,7 +84,7 @@ const VideoGrid = React.createClass({
             thumbnail={video.thumbnail}
             title={video.title}
             channel={video.channel}
-            />
+          />
         );
       });
 

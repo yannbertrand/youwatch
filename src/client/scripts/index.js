@@ -59,7 +59,7 @@ const Sidebar = React.createClass({
             icon={this.props.pages[page].icon}
             isCurrent={this.props.currentPage === page}
             changePage={this.props.changePage}
-            />
+          />
         );
       }
     }
@@ -107,7 +107,7 @@ const App = React.createClass({
           pages={this.state.pages}
           currentPage={this.state.currentPage}
           changePage={this.changePage}
-          />
+        />
 
         <div id="content">
           {this.state.pages[this.state.currentPage].page}

@@ -171,8 +171,8 @@ const PlaylistItem = React.createClass({
           className="playlist-item--remove"
           onClick={this.remove}
           title="Remove this video from the list"
-          >
-            &times;
+        >
+          &times;
         </a>
 
         <a className="playlist-item--title" onClick={this.raise} title={this.props.title}>
@@ -201,8 +201,8 @@ const Playlist = React.createClass({
           thumbnail={video.thumbnail}
           title={video.title}
           channel={video.channel}
-          />
-        );
+        />
+      );
     }
 
     return (
