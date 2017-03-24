@@ -134,7 +134,8 @@
         }
       ],
       "jsx-sort-props": "off",
-      "react/jsx-closing-bracket-location": "off"
+      "react/jsx-closing-bracket-location": "off",
+      "promise/no-callback-in-promise": "off"
     },
     "overrides": [
       {
