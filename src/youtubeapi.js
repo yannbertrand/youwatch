@@ -9,7 +9,7 @@ const YouTube = Google.youtube('v3');
 const oauth2Client = new Google.auth.OAuth2(
   CONFIG.CREDENTIALS.CLIENT_ID,
   CONFIG.CREDENTIALS.CLIENT_SECRET,
-  'http://localhost:@@PORT/youtube/callback' // redirect url
+  'http://localhost:@@PORT/youtube/callback' // Redirect url
 );
 
 module.exports = {
@@ -46,22 +46,22 @@ function tryStoredAccessToken(cb) {
   });
 }
 
-// retrieve the auth page url
+// Retrieve the auth page url
 function getAuthUrl(cb) {
-  // generate consent page url
+  // Generate consent page url
   const url = oauth2Client.generateAuthUrl({
     // eslint-disable-next-line camelcase
-    access_type: 'offline', // will return a refresh token
-    // approval_prompt : 'force',
-    scope: 'https://www.googleapis.com/auth/youtube.readonly', // can be a space-delimited string or an array of scopes
+    access_type: 'offline', // Will return a refresh token
+    // Approval_prompt : 'force',
+    scope: 'https://www.googleapis.com/auth/youtube.readonly', // Can be a space-delimited string or an array of scopes
   });
 
   return cb(url);
 }
 
-// retrieve an access token
+// Retrieve an access token
 function getToken(code, cb) {
-  // request access token
+  // Request access token
   oauth2Client.getToken(code, (err, tokens) => {
     if (err)
       return cb(err);

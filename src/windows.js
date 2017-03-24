@@ -55,6 +55,6 @@ function createMainWindow() {
 module.exports.openMainWindow = openMainWindow;
 
 function onClosed(windowName) {
-  // dereference the window
+  // Dereference the window
   windows[windowName] = null;
 }

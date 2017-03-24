@@ -10,7 +10,7 @@ const server = require('./server');
 
 
 
-// adds debug features like hotkeys for triggering dev tools and reload
+// Adds debug features like hotkeys for triggering dev tools and reload
 require('electron-debug')();
 
 // This method will be called when Electron has finished
