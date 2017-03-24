@@ -17,11 +17,11 @@ const titlebarElement = document.getElementById('titlebar-container');
 
 const SidebarItem = React.createClass({
   propTypes: {
-    changePage: React.PropTypes.func,
-    isCurrent: React.PropTypes.bool,
-    icon: React.PropTypes.string,
-    page: React.PropTypes.string,
-    pageName: React.PropTypes.string,
+    changePage: React.PropTypes.func.isRequired,
+    isCurrent: React.PropTypes.bool.isRequired,
+    icon: React.PropTypes.string.isRequired,
+    page: React.PropTypes.string.isRequired,
+    pageName: React.PropTypes.string.isRequired,
   },
   handleClick(event) {
     event.preventDefault();
@@ -43,9 +43,9 @@ const SidebarItem = React.createClass({
 
 const Sidebar = React.createClass({
   propTypes: {
-    changePage: React.PropTypes.func,
-    pages: React.PropTypes.object,
-    currentPage: React.PropTypes.string,
+    changePage: React.PropTypes.func.isRequired,
+    pages: React.PropTypes.object.isRequired,
+    currentPage: React.PropTypes.string.isRequired,
   },
   render() {
     const pages = [];
@@ -77,6 +77,11 @@ const Sidebar = React.createClass({
 const App = React.createClass({
   propTypes: {
     currentPage: React.PropTypes.string,
+  },
+  getDefaultProps() {
+    return {
+      currentPage: 'subscriptions',
+    };
   },
   shouldComponentUpdate(nextProps, nextState) {
     return nextState.currentPage !== this.state.currentPage;

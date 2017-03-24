@@ -5,11 +5,11 @@ const CurrentPlaylist = require('./current-playlist.react');
 
 const Video = React.createClass({
   propTypes: {
-    id: React.PropTypes.string,
-    duration: React.PropTypes.string,
-    title: React.PropTypes.string,
-    channel: React.PropTypes.string,
-    thumbnail: React.PropTypes.string,
+    id: React.PropTypes.string.isRequired,
+    duration: React.PropTypes.string.isRequired,
+    title: React.PropTypes.string.isRequired,
+    channel: React.PropTypes.string.isRequired,
+    thumbnail: React.PropTypes.string.isRequired,
   },
   getInitialState() {
     const isDarkTheme = document.body.classList.contains('dark');
@@ -67,7 +67,7 @@ const Video = React.createClass({
 
 const VideoGrid = React.createClass({
   propTypes: {
-    videos: React.PropTypes.array,
+    videos: React.PropTypes.array.isRequired,
   },
   render() {
     if (this.props.videos.length > 0) {

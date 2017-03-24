@@ -7,6 +7,9 @@ const Utils = require('../utils');
 let isPlaylistPlaying = false;
 
 const Player = React.createClass({
+  propTypes: {
+    playlist: React.PropTypes.array.isRequired,
+  },
   getInitialState() {
     return {
       playlist: [],
@@ -147,9 +150,9 @@ const Player = React.createClass({
 
 const PlaylistItem = React.createClass({
   propTypes: {
-    id: React.PropTypes.string,
-    title: React.PropTypes.string,
-    channel: React.PropTypes.string,
+    id: React.PropTypes.string.isRequired,
+    title: React.PropTypes.string.isRequired,
+    channel: React.PropTypes.string.isRequired,
   },
   raise() {
     if (this.props.id) {
@@ -186,7 +189,7 @@ const PlaylistItem = React.createClass({
 
 const Playlist = React.createClass({
   propTypes: {
-    videos: React.PropTypes.array,
+    videos: React.PropTypes.array.isRequired,
   },
   render() {
     const videos = [];
@@ -212,8 +215,8 @@ const Playlist = React.createClass({
 
 const Controls = React.createClass({
   propTypes: {
-    numberOfPlayedVideos: React.PropTypes.number,
-    numberOfVideos: React.PropTypes.number,
+    numberOfPlayedVideos: React.PropTypes.number.isRequired,
+    numberOfVideos: React.PropTypes.number.isRequired,
   },
   getInitialState() {
     return { isReplayingVideo: false };

@@ -10,6 +10,9 @@ const AuthentificationPage = React.createClass({
       React.PropTypes.array,
     ]),
   },
+  getDefaultProps() {
+    return { error: '' };
+  },
   getInitialState() { return { loading: false }; },
   openAuthWindow() {
     this.setState({ loading: true });

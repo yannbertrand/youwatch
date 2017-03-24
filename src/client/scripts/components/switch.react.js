@@ -14,6 +14,20 @@ const Switch = React.createClass({
     textOff: React.PropTypes.string,
   },
 
+  getDefaultProps() {
+    return {
+      beforeText: '',
+      afterText: '',
+      size: 'lg',
+      color: '1',
+      shape: 'square',
+      isChecked: false,
+      onChange: () => {},
+      textOn: '',
+      textOff: '',
+    };
+  },
+
   render() {
     // Space between switch & labels
     const beforeText = (this.props.beforeText) ? this.props.beforeText + ' ' : '';
