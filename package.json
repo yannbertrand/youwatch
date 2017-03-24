@@ -132,7 +132,8 @@
             ".react$"
           ]
         }
-      ]
+      ],
+      "jsx-sort-props": "off"
     },
     "overrides": [
       {
