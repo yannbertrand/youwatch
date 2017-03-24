@@ -42,7 +42,7 @@ const Video = React.createClass({
         </div>
         <span className="duration">{this.props.duration}</span>
         <button
-          className="mark-watched btn btn-secondary btn-sm cue"
+          className="cue mark-watched btn btn-secondary btn-sm"
           onClick={this.markVideoAsWatched}
           disabled
           title="Mark as watched"
@@ -50,7 +50,7 @@ const Video = React.createClass({
           &times;
         </button>
         <button
-          className="cue btn btn-secondary btn-sm cue"
+          className="cue btn btn-secondary btn-sm"
           onClick={this.cueVideo}
           title="Cue this video"
         >
