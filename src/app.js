@@ -84,8 +84,7 @@ app.on('ready', () => {
       return;
 
     const videoId = youtubeRegex().exec(text)[1];
-    YoutubeApi.getVideo(videoId, (err/* , theVideo */) => {
-      if (err) return;
+    YoutubeApi.getVideo(videoId, (/* err, theVideo */) => {
       // ToDo
     });
   });
