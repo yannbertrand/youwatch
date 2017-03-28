@@ -9,7 +9,7 @@ const ConfigurationPage = React.createClass({
 
     localStorage.setItem('darkTheme', Utils.castBooleanToString(darkTheme));
 
-    this.setState({ darkTheme });
+    this.setState({ isDarkThemeActive: darkTheme });
   },
   togglePreferredMode() {
     Utils.togglePreferredMode();
