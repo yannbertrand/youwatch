@@ -32,7 +32,7 @@
     "hapi": "^15.0.3",
     "inert": "^4.0.2",
     "jquery": "^3.1.1",
-    "lazysizes": "^2.0.2",
+    "lazysizes": "^5.2.2",
     "lodash": "^4.15.0",
     "react": "^15.1.0",
     "react-dom": "^15.1.0",
