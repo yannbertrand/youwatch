@@ -7,9 +7,7 @@
   "repository": "YannBertrand/YouWatch",
   "main": "dist/app.js",
   "author": {
-    "name": "Yann Bertrand",
-    "email": "yann@bertrand.com",
-    "url": "yann-bertrand.fr"
+    "name": "Yann Bertrand"
   },
   "scripts": {
     "start": "node_modules/.bin/gulp",
